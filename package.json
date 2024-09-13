@@ -1,0 +1,27 @@
+{
+  "name": "ourfutsal",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/team5-futsal/ourfutsal.git",
+  "author": "skybanana <112135946+skybanana@users.noreply.github.com>",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon ./src/app.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.19.1",
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.6",
+    "express": "^4.21.0",
+    "express-mysql-session": "^3.0.3",
+    "express-session": "^1.18.0",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
+    "prisma": "^5.19.1"
+  },
+  "devDependencies": {
+    "dotenv": "^16.4.5",
+    "nodemon": "^3.1.4"
+  }
+}
