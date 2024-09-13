@@ -12,3 +12,21 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+model accounts {
+  accountsId Int @id @default(autoincrement())
+  userId String @unique
+  password String
+  createdAt DateTime @default(now())
+  cash Int @default(30000)
+  mmr Int @default(1000)
+}
+
+model Roster {
+  rosterId Int @id @default(autoincrement())
+  userId String
+  accountId Int
+  createdAt DateTime @default(now())
+
+  Account account @relation(fields: [accountId], references: [accountsId])
+}
