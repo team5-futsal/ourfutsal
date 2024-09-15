@@ -23,11 +23,9 @@ body {
     border-radius: 5px;
 }
 
-.accountApi {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+div[type="apiForm"] {
+    text-align: center;
+    margin: 5px 10px 5px 10px;
 }
 
 .apiButtons {
@@ -35,6 +33,7 @@ body {
     flex-direction: row;
     align-items: center;
     justify-content: space-around;
+    margin: 5px 10px 5px 10px;
 }
 
 button[type='apiButton'] {
