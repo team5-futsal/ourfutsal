@@ -12,10 +12,12 @@ export default async function (req, res, next) {
       throw new Error('토큰 타입이 일치하지 않습니다.');
 
     const decodedToken = jwt.verify(token, 'custom-secret-key');
-    const accountId = decodedToken.accountId;
+
+    const userTag = decodedToken.userTag;
 
     const user = await prisma.users.findFirst({
-      where: { accountId: +accountId },
+      where: { userTag: +userTag },
+
     });
     if (!user) {
       res.clearCookie('authorization');
