@@ -16,7 +16,7 @@ export default async function (req, res, next) {
 
     const user = await prisma.users.findFirst({
       where: { userTag: +userTag },
-      
+
     });
     if (!user) {
       res.clearCookie('authorization');

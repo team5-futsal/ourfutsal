@@ -9,6 +9,7 @@ import gearsRouter from './routes/gears.router.js'
 import ProductRouter from './routes/products.router.js';
 import matchingRouter from './routes/matching.router.js'
 import teamRouter from './routes/team.router.js';
+import PlayersRouter from './routes/players.router.js'
 
 
 const app = express();
@@ -17,11 +18,16 @@ const PORT = 3333;
 app.use(express.json());
 app.use(cookieParser());
 
-app.use('/api', [UsersRouter, charactersRouter, itemsRouter, inventoryRouter, matchingRouter, teamRouter, ProductRouter]);
+
+app.use('/api', [UsersRouter, charactersRouter, itemsRouter, inventoryRouter, matchingRouter, teamRouter, ProductRouter,PlayersRouter]);
+
 
 // 에러 핸들링 미들웨어를 등록합니다.
 app.use(ErrorHandlerMiddleware);
 
 app.listen(PORT, () => {
-    console.log(PORT, '포트로 서버가 열렸어요!');
+
+  console.log(PORT, '포트로 서버가 열렸어요!');
 });
+
+
