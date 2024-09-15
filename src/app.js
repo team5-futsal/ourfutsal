@@ -1,11 +1,11 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import ErrorHandlerMiddleware from './middlewares/error-handler.middleware.js'
-import UsersRouter from './routes/users.router.js';
-import ProductRouter from './routes/products.router.js';
+import accountRouter from './routes/account.router.js';
+import productRouter from './routes/products.router.js';
 import matchingRouter from './routes/matching.router.js'
 import teamRouter from './routes/team.router.js';
-import PlayersRouter from './routes/players.router.js'
+import playersRouter from './routes/players.router.js'
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -32,7 +32,7 @@ app.use(cookieParser());
 // // 정적인 파일을 assets 폴더를 바탕으로 서빙을 한다는 구문
 // app.use('/api', express.static('./browser')); // 미들웨어 3
 
-app.use('/api', [UsersRouter, matchingRouter, teamRouter, ProductRouter,PlayersRouter]);
+app.use('/api', [accountRouter, matchingRouter, teamRouter, productRouter,playersRouter]);
 
 
 // 에러 핸들링 미들웨어를 등록합니다.
