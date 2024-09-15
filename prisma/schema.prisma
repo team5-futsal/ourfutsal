@@ -12,3 +12,102 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+model account {
+  accountId Int      @id @default(autoincrement())
+  userId    String   @unique
+  password  String
+  cash      Int      @default(30000)
+  mmr       Int      @default(1000)
+  createdAt DateTime @default(now())
+
+  roster roster[]
+  result results[]
+}
+
+model gameRecords {
+  gameId    Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  result results[]
+}
+
+model results {
+  gameId    Int @id @default(autoincrement())
+  accountId Int
+  result    Int
+
+  gameRecord gameRecords @relation(fields: [gameId], references: [gameId])
+  account    account     @relation(fields: [accountId], references: [accountId])
+}
+
+model product {
+  productId   Int    @id @default(autoincrement())
+  productName String
+  price       Int
+  productInfo String
+
+  purchaseHistory purchaseHistory[]
+  gacha           gacha[]
+}
+
+model gacha {
+  gachaId       Int      @id @default(autoincrement())
+  productId     Int
+  gachaQuantity Int
+  createdAt     DateTime
+
+  product product @relation(fields: [productId], references: [productId])
+}
+
+model purchaseHistory {
+  purchaseId         Int      @id @default(autoincrement())
+  productId          Int
+  purchaseQuantity   Int
+  beforePurchaseCash Int
+  afterPurchaseCash  Int
+  createdAt          DateTime @default(now())
+
+  product product @relation(fields: [productId], references: [productId])
+}
+
+model roster {
+  rosterId     Int      @id @default(autoincrement())
+  accountId    Int
+  playerId     Int
+  isPicked     Boolean  @default(false)
+  enhanceCount Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  player  player  @relation(fields: [playerId], references: [playerId])
+  account account @relation(fields: [accountId], references: [accountId])
+}
+
+model player {
+  playerId       Int    @id @default(autoincrement())
+  positionId     Int
+  playerName     String
+  playerStrength Int
+  PlayerDefense  Int
+  playerStamina  Int
+
+  roster roster[]
+
+  position position @relation(fields: [positionId], references: [positionId])
+}
+
+model position {
+  positionId     Int    @id @default(autoincrement())
+  positionName   String
+  strengthWeight Int
+  defenseWeight  Int
+  staminaWeight  Int
+
+  player player[]
+}
+
+model enhances {
+  enhanceId     Int @id @default(autoincrement())
+  increaseValue Int
+  successRate   Int
+}
