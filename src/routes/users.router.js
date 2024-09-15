@@ -6,6 +6,7 @@ import authMiddleware from '../middlewares/auth.middleware.js';
 import validSchema from '../utils/joi/valid.schema.js';
 import { createAccessToken } from '../utils/tokens/tokens.js';
 
+
 const router = express.Router();
 
 /** 사용자 회원가입 API **/
@@ -45,7 +46,7 @@ router.post('/account/regist', async (req, res, next) => {
     }
 });
 
-/** 로그인 API **/
+/** 사용자 로그인 API **/
 router.post('/account/login', async (req, res, next) => {
     const { userId, password } = req.body;
     const user = await prisma.account.findFirst({ where: { userId } });
