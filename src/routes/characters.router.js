@@ -1,7 +1,6 @@
 import express from 'express';
 import { prisma } from '../utils/prisma/index.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
-import authMiddleware2 from '../middlewares/auth.middleware2.js';
 import validSchema from '../utils/joi/valid.schema.js'
 
 const router = express.Router();
@@ -74,7 +73,7 @@ router.post('/delchars/:charId', authMiddleware, async (req, res, next) => {
 });
 
 /** 캐릭터 조회 API **/
-router.get('/chars/:charId', authMiddleware2, async (req, res, next) => {
+router.get('/chars/:charId', authMiddleware, async (req, res, next) => {
     try{
         const { charId } = req.params;
         const { userTag } = req.user;
