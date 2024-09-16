@@ -134,6 +134,9 @@ router.get('/team/find/:accountId', async (req, res, next) => {
             player: {
                 select: {
                     playerName: true,
+                    playerStrength: true,
+                    PlayerDefense: true,
+                    playerStamina: true,
                 },
             },
         },
@@ -142,14 +145,17 @@ router.get('/team/find/:accountId', async (req, res, next) => {
     const result = findTeam.map(extract => ({
         playerId: extract.playerId,
         playerName: extract.player.playerName,
+        playerStrength: extract.player.playerStrength,
+        PlayerDefense: extract.player.PlayerDefense,
+        playerStamina: extract.player.playerStamina,
     }));
 
     if (!findTeam) {
         return res.status(404).json({ message: ' 해당 유저는 편성중인 선수가 없습니다. ' });
     }
 
-    // 추후 전달 메세지 가공 (사실 모름)
-    return res.status(200).json({ message: result });
+    // 추후 전달 메세지 가공 (사실 잘 모름)
+    return res.status(200).json(result);
 });
 
 // 교체 선수 계획-- 추후 상의 //
