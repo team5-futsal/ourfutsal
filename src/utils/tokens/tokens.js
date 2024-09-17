@@ -7,12 +7,12 @@ import jwt from 'jsonwebtoken';
  * @returns 발급된 액세스 토큰을 반환한다
  */
 export function createAccessToken(id) {
-  const accessToken = jwt.sign(
-    { accountId: +id }, // JWT 데이터
-    process.env.OUR_SECRET_ACCESS_KEY
-  );
+    const accessToken = jwt.sign(
+        { accountId: +id }, // JWT 데이터
+        process.env.OUR_SECRET_ACCESS_KEY,
+    );
 
-  return accessToken;
+    return accessToken;
 }
 
 /**
@@ -21,10 +21,9 @@ export function createAccessToken(id) {
  * @returns 성공 시 Payload를 반환하고, 실패 시 에러와 함께 null을 반환한다.
  */
 export function validateToken(token, secretKey) {
-    try{
-        return jwt.verify(token, secretKey); 
-    } catch(err) {
+    try {
+        return jwt.verify(token, secretKey);
+    } catch (err) {
         return null;
     }
-    
 }

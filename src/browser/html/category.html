@@ -1,22 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>카테고리 별 API 테스트</title>
+    <link rel="stylesheet" href="../styles/category.css">
 </head>
+
 <body>
-    <div class="accountCategory">
-        <h2>계정 API 카테고리</h2>
-        <div class="accountButtons">
-            <button id="getAccounts">Get Accounts</button>
-            <button id="createAccount">Create Account</button>
-            <button id="updateAccount">Update Account</button>
-            <button id="deleteAccount">Delete Account</button>
+    <div class="apiContainer">
+        <div type="apiForm" class="accountApi">
+            <h2>계정 API</h2>
+            <div class="apiButtons">
+                <div>
+                    <button type="apiButton" id="getAccounts">Get Accounts</button>
+                    <button type="apiButton" id="createAccount">Create Account</button>
+                    <button type="apiButton" id="updateAccount">Update Account</button>
+                    <button type="apiButton" id="deleteAccount">Delete Account</button>
+                </div>
+            </div>
+        </div>
+        <div type="apiForm" class="playerApi">
+            <h2>플레이어 API</h2>
+            <div class="apiButtons">
+                <div>
+                    <button type="apiButton" id="getAccounts">Get Accounts</button>
+                    <button type="apiButton" id="createAccount">Create Account</button>
+                    <button type="apiButton" id="updateAccount">Update Account</button>
+                    <button type="apiButton" id="deleteAccount">Delete Account</button>
+                </div>
+            </div>
         </div>
     </div>
-</body>
-</html>
+    <div class="reqResContainer">
+        <div type="apiReqRes" class="apiRequest">
+            <h2>Request</h2>
+            <div class="inputApi">
+                <input type="params" id="reqParams" placeholder="Params를 입력해주세요."/>
+                <input type="params" id="reqBody" placeholder="Body를 입력해주세요."/>
+            </div>
+        </div>
+        <div type="apiReqRes" class="apiResponse">
+            <h2>Response</h2>
+        </div>
+    </div>
 
-// 1. fetch => API 호출, 페이지를 새로 로드
-// 2. ajax => API 호출, 페이지의 일부를 비동기로 업데이트
+</body>
+
+</html>

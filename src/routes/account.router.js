@@ -59,7 +59,7 @@ router.post('/account/login', async (req, res, next) => {
 
     // authotization 헤더에 Bearer 토큰 형식으로 JWT를 저장합니다.
     // res.header('authorization', `Bearer ${accessToken}`);
-    return res.status(200).json({ message: '로그인 성공', accessToken: accessToken});
+    return res.status(200).json({ message: '로그인 성공', accessToken: accessToken });
 });
 
 /** 사용자 조회 API **/
