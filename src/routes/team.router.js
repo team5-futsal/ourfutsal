@@ -1,19 +1,18 @@
 import express from 'express';
 import { prisma } from '../utils/prisma/index.js';
+import authMiddleware from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
 /** 팀 편성 추가 **/
 // JWT 필요
-router.put('/team/add/', async (req, res, next) => {
+router.put('/team/add/', authMiddleware, async (req, res, next) => {
     const { playerId } = req.body;
-    // const { accountId } = req.user; 검증미들웨어 구현예정
-    const accountId = 1;
+    const { accountId } = req.user;
 
     // 현재 팀에 편성된 선수 몇명인지 검색
     const findTeamCount = await prisma.roster.findMany({
         where: {
-            playerId: +playerId,
             accountId: +accountId,
             isPicked: true,
         },
@@ -21,6 +20,19 @@ router.put('/team/add/', async (req, res, next) => {
 
     if (findTeamCount.length >= 3) {
         return res.status(409).json({ message: ' 이미 3명이 편성되었습니다. ' });
+    }
+
+    // 이미 편성된 선수인지 검색
+    const findThisPlayer = await prisma.roster.findFirst({
+        where: {
+            playerId: +playerId,
+            accountId: +accountId,
+            isPicked: true,
+        },
+    });
+
+    if (findThisPlayer) {
+        return res.status(409).json({ message: ' 이미 편성되어있는 선수 입니다. ' });
     }
 
     // 보유중인 해당 선수 검색
@@ -54,10 +66,9 @@ router.put('/team/add/', async (req, res, next) => {
 
 /** 팀 편성 제외 **/
 // JWT 필요
-router.put('/team/exclude', async (req, res, next) => {
+router.put('/team/exclude', authMiddleware, async (req, res, next) => {
     const { playerId } = req.body;
-    // const { accountId } = req.user; 검증미들웨어 구현예정
-    const accountId = 1;
+    const { accountId } = req.user;
 
     // 편성된 선수 검색
     const findTeam = await prisma.roster.findFirst({
@@ -88,9 +99,8 @@ router.put('/team/exclude', async (req, res, next) => {
 
 /** 팀 편성 비우기 **/
 // JWT 필요
-router.put('/team/empty', async (req, res, next) => {
-    // const { accountId } = req.user; 검증미들웨어 구현예정
-    const accountId = 1;
+router.put('/team/empty', authMiddleware, async (req, res, next) => {
+    const { accountId } = req.user;
 
     const findTeam = await prisma.roster.findMany({
         where: {

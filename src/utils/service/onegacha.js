@@ -3,24 +3,23 @@ import { prisma } from '../prisma/index.js';
 // 가차를 돌리자
 
 export default async function (req, res, gachaTry) {
-    // const { accountId } = req.user;
-    const accountId = 3;
+    const { accountId } = req.user;
 
     const gachaPrice = gachaTry * 1000;
 
-    // // 돈 계산 나중에
-    // if (req.user.cach < gachaPrice) {
-    //     throw new Error('notEnoughMoney');
-    // }
+    // 선불 요금제
+    if (req.user.cash < gachaPrice) {
+        throw new Error('notEnoughMoney');
+    }
 
-    // await prisma.account.update({
-    //     data: {
-    //         cash: req.user.cash - gachaPrice,
-    //     },
-    //     where: {
-    //         accountId: +accountId,
-    //     },
-    // });
+    await prisma.account.update({
+        data: {
+            cash: req.user.cash - gachaPrice,
+        },
+        where: {
+            accountId: +accountId,
+        },
+    });
 
     // 전체 선수 대상 = 전체 선수 중 가장 높은 Id 찾기
     const findMaximumPlayerId = await prisma.player.findFirst({
@@ -29,6 +28,7 @@ export default async function (req, res, gachaTry) {
         },
     });
 
+    // create 를 반복문으로 돌렸습니다...
     const manyPlayer = async function aabb(accountId, gachaTry) {
         // 가차 선수 범위
         let answer = [];
@@ -47,13 +47,6 @@ export default async function (req, res, gachaTry) {
         }
         return answer;
     };
-
-    // // 선수 이름 찾아오기
-    // const findName = await prisma.player.findFirst({
-    //     where: {
-    //         playerId: randomPlayer,
-    //     },
-    // });
 
     return manyPlayer(accountId, gachaTry);
 }
