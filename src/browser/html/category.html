@@ -14,10 +14,9 @@
             <h2>계정 API</h2>
             <div class="apiButtons">
                 <div>
-                    <button type="apiButton" id="getAccounts">Get Accounts</button>
-                    <button type="apiButton" id="createAccount">Create Account</button>
-                    <button type="apiButton" id="updateAccount">Update Account</button>
-                    <button type="apiButton" id="deleteAccount">Delete Account</button>
+                    <button type="apiButton" id="getAccounts">계정 조회</button>
+                    <button type="apiButton" id="updateAccount">계정 수정</button>
+                    <button type="apiButton" id="deleteAccount">계정 삭제</button>
                 </div>
             </div>
         </div>
@@ -25,27 +24,28 @@
             <h2>플레이어 API</h2>
             <div class="apiButtons">
                 <div>
-                    <button type="apiButton" id="getAccounts">Get Accounts</button>
-                    <button type="apiButton" id="createAccount">Create Account</button>
-                    <button type="apiButton" id="updateAccount">Update Account</button>
-                    <button type="apiButton" id="deleteAccount">Delete Account</button>
                 </div>
             </div>
         </div>
     </div>
     <div class="reqResContainer">
-        <div type="apiReqRes" class="apiRequest">
+        <div type="apiReqRes" class="apiRequest hidden">
             <h2>Request</h2>
             <div class="inputApi">
-                <input type="params" id="reqParams" placeholder="Params를 입력해주세요."/>
-                <input type="params" id="reqBody" placeholder="Body를 입력해주세요."/>
+                <input type="params" id="reqParams" placeholder="Params를 입력해주세요." />
+                <input type="params" id="reqBody" placeholder="Body를 입력해주세요." />
             </div>
+
         </div>
         <div type="apiReqRes" class="apiResponse">
             <h2>Response</h2>
+            <div class="apiRes">
+                안녕하세요
+            </div>
         </div>
     </div>
 
 </body>
+<script src='../scripts/ui.js' type="module"></script>
 
 </html>
