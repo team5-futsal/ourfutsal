@@ -90,6 +90,18 @@ router.get('/account', authMiddleware, async (req, res, next) => {
     return res.status(200).json({ data: user });
 });
 
+/** 사용자 전체 조회 */
+router.get('/account/all', async (req, res, next) => {
+    const users = await prisma.account.findMany({
+        select: {
+            userId: true,
+            createdAt: true,
+        },
+    });
+
+    return res.status(200).json({ data: users , message: 'asdsad'});
+})
+
 /** 사용자 수정 API */
 router.patch('/account', authMiddleware, async (req, res, next) => {
     const { accountId } = req.user;
