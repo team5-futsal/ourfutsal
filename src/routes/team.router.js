@@ -192,10 +192,6 @@ router.get('/team/find/:accountId', async (req, res, next) => {
         playerStamina: extract.player.playerStamina + `+${findEnhance.increaseValue * extract.enhanceCount}`,
     }));
 
-    if (!findTeam) {
-        return res.status(404).json({ message: ' 해당 유저는 편성중인 선수가 없습니다. ' });
-    }
-
     // 추후 전달 메세지 가공 (사실 잘 모름)
     return res.status(200).json(result);
 });
