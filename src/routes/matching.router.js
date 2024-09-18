@@ -69,9 +69,11 @@ router.post('/custom', async (req, res, next) => {
             where: {
                 accountId: +accountId,
             },
-            orderBy: {
-                mmr: 'desc',
-            },
+            select: {
+                accoutId: true,
+                userId: true,
+                mmr: true
+            }
         });
         if (!isExistUser) {
             return res.status(404).json({ message: '유저 정보가 없습니다.' });
@@ -87,14 +89,14 @@ router.post('/custom', async (req, res, next) => {
             return res.status(412).json({ message: '상대 유저의 선출 인원이 부족합니다.' });
         }
 
-        return res.status(200).json({ data: sortedMMR, message: '랭크 조회 성공' });
+        return res.status(200).json({ user: isExistUser, message: '매칭 성공' });
     } catch (error) {
         next(error);
     }
 });
 
 /** 경쟁전 매칭 API **/
-router.post('/custom', async (req, res, next) => {
+router.post('/match', async (req, res, next) => {
     try {
         // 인증 기능 구현 필요
         const MyaccountId = req.headers;
