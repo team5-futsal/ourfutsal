@@ -11,11 +11,7 @@ router.post('/players', /*미들웨어*/async (req, res) => {
 
 
         // 플레이어 명 중복 확인
-        const isExistPlayer = await prisma.player.findFirst({
-            where: {
-                playerName,
-            },
-        });
+        const isExistPlayer = checkPlayerExists(playerName);
 
         if (isExistPlayer) {
             return res.status(409).json({ message: '이미 존재하는 선수 입니다.' });
