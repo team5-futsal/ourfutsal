@@ -86,6 +86,8 @@ router.get('/players/:playerName', async (req, res) => {
         if (player == null) { // 동등 연산자를 통해 null, undefined 둘다 체크 가능
             return res.status(404).json({ message: '존재하지 않는 선수입니다.' });
         }
+
+        return res.status(200).json({ data: player });
     } catch (error) {
         next(error);
     }
