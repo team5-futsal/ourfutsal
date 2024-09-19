@@ -88,3 +88,10 @@ div[type='apiReqRes'] {
 .hidden  {
     display: none;
 } */
+
+.apiRes {
+    display: flex;
+    flex-direction: col;
+    align-items: center;
+    justify-content: center;
+}

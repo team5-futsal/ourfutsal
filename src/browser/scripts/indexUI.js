@@ -2,7 +2,6 @@
  * 혹은 UI 관련 로직을 수행합니다.
  */
 import { loginAccount } from './api.js';
-import { handleApiButtonClick } from './utils.js';
 
 /** 로그인 버튼 기능 함수 */
 document.getElementById('login-form').addEventListener('submit', function (event) {
