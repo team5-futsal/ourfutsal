@@ -48,3 +48,72 @@ export async function getAccounts() {
         else return alert('500 Server Error');
     });
 }
+
+// 본인의 팀 편성 조회
+export async function getTeam() {
+    return fetch('/api/team/myfind', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    }).then(res => {
+        if (res.status === 200) return res.json();
+        else return alert('500 Server Error');
+    });
+}
+
+// 본인의 팀 편성 제외
+export async function excludeTeam(bodydata) {
+    const body = { playerId: bodydata };
+    return fetch('/api/team/exclude', {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+    }).then(res => {
+        if (res.status === 200) return res.json();
+        else return alert('500 Server Error');
+    });
+}
+
+// 본인의 팀 편성 모두 제외
+export async function excludeTeamAll() {
+    return fetch('/api/team/empty', {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    }).then(res => {
+        if (res.status === 200) return res.json();
+        else return alert('500 Server Error');
+    });
+}
+
+// user 의 팀 편성 조회
+export async function getUserTeam(param) {
+    return fetch(`/api/team/find/${param}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    }).then(res => {
+        if (res.status === 200) return res.json();
+        else return alert('500 Server Error');
+    });
+}
+
+// 본인의 팀 편성 추가
+export async function updateTeam(bodydata) {
+    const body = { playerId: bodydata };
+    return fetch(`/api/team/add/`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+    }).then(res => {
+        if (res.status === 200) return res.json();
+        else return alert('500 Server Error');
+    });
+}
