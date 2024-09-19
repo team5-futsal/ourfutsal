@@ -89,11 +89,18 @@ router.post('/product/:productId', authMiddleware, async (req, res, next) => {
     if (!findProduct) return res.status(404).json({ message: '상품이 존재하지 않습니다' });
     if (findProduct.price * count > cash) return res.status(400).json({ message: '소지금이 부족합니다' });
 
+
+
+
     // 이 부분에서 가챠 로직이 돌아가면 좋겠다 (선수추출 및 선수보관함에 저장)
-    // 가챠 로직은 함수로 만드는게 나을 것 같기도?
+    // 가챠 로직은 함수로? -> 웅상님이 작성해주신 라우터가 있다
+    // 상점 상품 구매와 가챠 구매 라우터를 어떻게 처리할까?🤔 묶을 수 있을까? 함수? 
+
+
+
 
     // 여기는 트랜잭션으로 묶어주자
-    const buyingTransaction = prisma.$transaction(
+    const buyingProductTransaction = prisma.$transaction(
         async tx => {
             const changeBalance = await tx.account.update({
                 where: { accountId: +req.user.accountId },
