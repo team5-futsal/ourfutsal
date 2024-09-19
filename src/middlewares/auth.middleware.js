@@ -3,14 +3,14 @@ import { validateToken } from '../utils/tokens/tokens.js';
 
 /**
  * 인증 미들웨어
- * HTTP와 인증을 하는 방식을 고려하여 수정할 예정 
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
+ * HTTP와 인증을 하는 방식을 고려하여 수정할 예정
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  * @returns
- * 
+ *
  * 1. 로컬 스토리지, 세션 스토리지에 토큰을 담는 것은 XSS 공격에 위험
- * 2. 쿠키에 토큰을 담으면 CSRF 공격에 취약 
+ * 2. 쿠키에 토큰을 담으면 CSRF 공격에 취약
  * 3. 액세스 토큰과 리프레시 토큰은 로그인할 때 새로 발급
  * 4. 인증을 할때 리프레시 토큰이 남아있다면 액세스 토큰을 발급
  * 5. 리프레시 토큰은 액세스 토큰을 재발급하는 용도이기 때문에 쿠키에 담아도 된다고 판단
@@ -22,7 +22,6 @@ export default async function (req, res, next) {
     try {
         const authorization = req.cookies['authorization'];
         if (!authorization) throw new Error('토큰이 존재하지 않습니다.');
-
         const [tokenType, token] = authorization.split(' ');
 
         if (tokenType !== 'Bearer') throw new Error('토큰 타입이 일치하지 않습니다.');
