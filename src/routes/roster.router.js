@@ -32,14 +32,23 @@ router.get('/roster', /*미들웨어*/ async (req, res) => {
 router.delete('/roster/:playerName', /*미들웨어*/ async (req, res) => {
 
     const accountId = 1;
+    const { playerName } = req.params;
     // const { accountId } = req.user; 검증미들웨어 구현예정
+
+    const playerId = await prisma.player.findFirst({
+        where : {
+            playerName : playerName,
+        }
+    });
 
     const isPlayerExists = await prisma.roster.findMany({
         where: {
             accountId: +accountId,
-            playerName: req.params.playerName,
+            playerId: +playerId.playerId,
         },
     });
+
+    console.log(isPlayerExists);
 
     if(isPlayerExists.length === 0) {
         return res.status(404).json({ message: '해당 선수를 보유하고 있지 않습니다.' });
@@ -49,7 +58,8 @@ router.delete('/roster/:playerName', /*미들웨어*/ async (req, res) => {
     await prisma.roster.delete({
         where: {
             accountId: +accountId,
-            playerName: req.params.playerName,
+            playerId: +playerId.playerId,
+            rosterId : isPlayerExists[isPlayerExists.length -1].rosterId,
         },
     });
 
