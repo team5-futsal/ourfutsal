@@ -1,6 +1,4 @@
 /** 공통으로 작동하는 기능입니다. */
-import { getAccountAll, updateAccount } from "./api.js";
-
 
 /** api 버튼을 누르면 Request 창이 토글형식으로 작동하도록 하는 함수 */
 export function handleApiButtonClick(event) {
@@ -12,7 +10,7 @@ export function handleApiButtonClick(event) {
     if (apiRequestDiv.children[0]) {
         apiRequestDiv.removeChild(apiRequestDiv.children[0]);
     }
-    
+
     // 버튼이 없다면 ${clickedButtonName} 이름의 버튼 생성
     // 여기서 새로 생성된 버튼에 동작을 주려면 새로운 변수에 담지 않고, 
     // createElement를 담은 변수에 addEventListener를 넣어줘야 동작함.

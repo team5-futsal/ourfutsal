@@ -9,21 +9,16 @@ export async function loginAccount(body) {
         },
         body: JSON.stringify(body),
     }).then(res => {
-        // 401 코드에 대한 실패 처리
-        if (res.status === 401) {
-            alert('존재하지 않는 아이디이거나 비밀번호가 일치하지 않습니다.');
-        }
-
         // 정상적인 응답 처리
-        else if (res.status === 200) {
+        if (res.status === 200) {
             return res.json();
         }
-
         // 기타 상태 코드에 대한 처리
-        else return alert('500 Server Error');
+        else return false
     });
 }
 
+/** 계정 가입 API 호출 */
 export async function registAccount(body) {
     return fetch('/api/account/regist', {
         method: 'POST',
@@ -39,6 +34,7 @@ export async function registAccount(body) {
     });
 }
 
+/** 모든 계정 조회 API 호출 */
 export async function getAccountAll() {
     return fetch('/api/account/all', {
         method: 'GET',
@@ -51,13 +47,14 @@ export async function getAccountAll() {
     });
 }
 
+/** 계정 상세 조회 API 호출 */
 export async function getAccountInfo() {
-    return fetch('api/account', {
+    return fetch('/api/account', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            // 'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        }
+            'authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
     })
     .then(res => {
         if(res.status === 200) 
@@ -66,18 +63,36 @@ export async function getAccountInfo() {
     })
 }
 
+/** 계정 수정 API 호출 */
 export async function updateAccount(body) {
-    return fetch(`api/account`, {
-        method: 'PATCH',
+    
+    return fetch(`/api/account`, {
+        method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
+            'authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body:JSON.stringify(body)
-        // 쿠키는 자동으로 전달된다.
     })
     .then(res => {
         if(res.status === 201)
             return res.json();
         else return alert('500 Server Error');
     })
+}
+
+/** 계정 삭제 API 호출 */
+export async function deleteAccount() {
+    return fetch(`/api/account`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+   .then(res => {
+    if(res.status === 201)
+        return res.json();
+    else return alert('500 Server Error');
+   })
 }
