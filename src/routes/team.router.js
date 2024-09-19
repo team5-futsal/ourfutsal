@@ -145,7 +145,7 @@ router.put('/team/empty', authMiddleware, async (req, res, next) => {
     return res.status(200).json({ message: ` 모든 선수가 편성 해제되었습니다. ` });
 });
 
-/** 팀 편성 조회**/
+/** 다른 유저의 팀 편성 조회**/
 // JWT 필요없음
 router.get('/team/find/:accountId', async (req, res, next) => {
     const { accountId } = req.params;
@@ -187,12 +187,60 @@ router.get('/team/find/:accountId', async (req, res, next) => {
     const result = findTeam.map(extract => ({
         playerId: extract.playerId,
         playerName: extract.player.playerName + ` +${extract.enhanceCount}`,
+        enhanceCount: extract.enhanceCount,
         playerStrength: extract.player.playerStrength + `+${findEnhance.increaseValue * extract.enhanceCount}`,
         PlayerDefense: extract.player.PlayerDefense + `+${findEnhance.increaseValue * extract.enhanceCount}`,
         playerStamina: extract.player.playerStamina + `+${findEnhance.increaseValue * extract.enhanceCount}`,
     }));
+    // 뭘 전달해야할까
+    return res.status(200).json(result);
+});
 
-    // 추후 전달 메세지 가공 (사실 잘 모름)
+/** 자신의 편성 조회 **/
+// JWT 필요
+router.get('/team/myfind', authMiddleware, async (req, res, next) => {
+    const { accountId } = req.user;
+
+    const findTeam = await prisma.roster.findMany({
+        where: {
+            accountId: +accountId,
+            isPicked: true,
+        },
+        select: {
+            playerId: true,
+            enhanceCount: true,
+            player: {
+                select: {
+                    playerName: true,
+                    playerStrength: true,
+                    PlayerDefense: true,
+                    playerStamina: true,
+                },
+            },
+        },
+    });
+
+    if (findTeam.length === 0) {
+        return res.status(404).json({ message: ' 편성중인 선수가 없습니다. ' });
+    }
+
+    //강화 테이블 조회
+    const findEnhance = await prisma.enhances.findFirst({
+        where: {
+            enhanceId: 1,
+        },
+    });
+
+    // 강화수치 적용 예시
+    const result = findTeam.map(extract => ({
+        playerId: extract.playerId,
+        playerName: extract.player.playerName + ` +${extract.enhanceCount}`,
+        enhanceCount: extract.enhanceCount,
+        playerStrength: extract.player.playerStrength + `+${findEnhance.increaseValue * extract.enhanceCount}`,
+        PlayerDefense: extract.player.PlayerDefense + `+${findEnhance.increaseValue * extract.enhanceCount}`,
+        playerStamina: extract.player.playerStamina + `+${findEnhance.increaseValue * extract.enhanceCount}`,
+    }));
+    // 뭘 전달해야할까
     return res.status(200).json(result);
 });
 
