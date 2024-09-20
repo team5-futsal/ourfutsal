@@ -7,12 +7,15 @@ import {
     getAccountInfo,
     updateAccount,
     deleteAccount,
+    logoutAccount,
     getTeam,
     getUserTeam,
     excludeTeam,
     excludeTeamAll,
     updateTeam,
     getMyPlayer,
+    getPlayerDetail,
+    getPlayers,
 } from './api.js';
 
 // 카테고리에 있는 각 API 버튼에 이벤트 리스너 추가
@@ -53,7 +56,7 @@ function handleSendRequest(event) {
                     const createdAt = res.data[i].createdAt;
 
                     resContext.innerHTML += `
-                    <p class="users">userId: ${userId}, createdAt: ${createdAt}</p>
+                    <p>userId: ${userId}, createdAt: ${createdAt}</p>
                     <br>
                     `;
                 }
@@ -88,6 +91,14 @@ function handleSendRequest(event) {
                 const userId = res.data.userId;
                 alert(`접속한 ${userId}가 정상적으로 삭제되었습니다. 로그인 화면으로 이동합니다.`);
                 // 삭제가 되었으니 페이지를 기본 홈으로 이동
+                window.location.href = 'http://localhost:3333/api';
+                window.localStorage.clear();
+            });
+            break;
+
+        case 'logoutAccountResSendBtn':
+            logoutAccount().then(res => {
+                alert('로그아웃 되었습니다. 로그인 화면으로 이동합니다.');
                 window.location.href = 'http://localhost:3333/api';
                 window.localStorage.clear();
             });
@@ -172,6 +183,24 @@ function handleSendRequest(event) {
                     apiResDiv.textContent = res.message;
                 });
             }
+
+            break;
+        case 'getPlayersResSendBtn':
+            getPlayers().then(res => {
+                const apiResDiv = document.querySelector('.apiRes');
+                const resContext = document.createElement('div');
+
+                for (let i in res.data) {
+                    const playerName = res.data[i].playerName;
+                    const position = res.data[i].positionId;
+
+                    resContext.innerHTML += `
+                <p class="users">선수명 : ${playerName}<br> 포지션 : ${position} </p>
+                <br>
+                `;
+                }
+                apiResDiv.appendChild(resContext);
+            });
             break;
 
         // 내 보유 선수 조회
@@ -230,6 +259,23 @@ function handleSendRequest(event) {
                 apiResDiv.appendChild(resContext);
             });
             break;
+
+        case 'getPlayerDetailResSendBtn':
+            getPlayerDetail(params).then(res => {
+                const player = res.data;
+                const playerName = res.data.playerName;
+                const positionId = res.data.positionId;
+                const playerStrength = res.data.playerStrength;
+                const playerDefense = res.data.PlayerDefense;
+                const playerStamina = res.data.playerStamina;
+                const apiResDiv = document.querySelector('.apiRes');
+                const resContext = document.createElement('div');
+
+                resContext.innerHTML = `
+                <p class="users">선수명 : ${playerName} <br> 포지션 아이디 : ${positionId} <br> 공격력 : ${playerStrength} <br> 수비력 : ${playerDefense} <br> 스테미나 : ${playerStamina}</p>
+                `;
+                apiResDiv.appendChild(resContext);
+            });
 
         // 다른 API 요청을 추가로 처리할 수 있음
         default:

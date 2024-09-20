@@ -4,7 +4,6 @@ import bcrypt from 'bcrypt';
 import authMiddleware from '../middlewares/auth.middleware.js';
 import { createAccessToken } from '../utils/tokens/tokens.js';
 import validSchema from '../utils/joi/valid.schema.js';
-import { UserValidation } from '../utils/validation.js';
 
 const router = express.Router();
 
@@ -15,14 +14,14 @@ router.post('/account/regist', async (req, res, next) => {
         const validateBody = await validSchema.account.validateAsync(req.body);
 
         // 아이디 중복 확인
-        const isExistUser = await prisma.account.findFirst({
+        const user = await prisma.account.findFirst({
             where: {
                 userId:validateBody.userId,
             },
         });
 
-        if (isExistUser) {
-            throw new Error('AlreadyExistUser');
+        if (user) {
+            return res.status(409).json({ errorMessage: '이미 존재하는 아이디입니다.' });
         }
 
         // 사용자 비밀번호를 암호화합니다.
@@ -53,7 +52,7 @@ router.post('/account/login', async (req, res, next) => {
         const user = await prisma.account.findFirst({ where: { userId } });
 
         // 사용자 존재 여부 확인
-        if (!user) throw new Error('AccountNotFound');
+        if (!user) throw new Error('UserNotFound');
         // 입력받은 사용자의 비밀번호와 데이터베이스에 저장된 비밀번호를 비교합니다.
         else if (!(await bcrypt.compare(password, user.password))) throw new Error('InvalidPassword');
 
@@ -73,6 +72,22 @@ router.post('/account/login', async (req, res, next) => {
         next(err);
     }
 });
+
+
+/** 계정 로그아웃 */
+router.get('/account/logout', authMiddleware, async (req, res, next) => {
+    const {accountId} = req.user;
+    const user = await prisma.account.findUnique({
+        where: {accountId: accountId}
+    })
+
+    if(!user) {
+        throw new Error('UserNotFound');
+    }
+
+    // 헤더에 저장된 토큰 삭제
+    return res.status(200).json({message: '로그아웃 되었습니다.'});
+})
 
 
 /** 사용자 조회 API **/
@@ -126,6 +141,7 @@ router.patch('/account', authMiddleware, async (req, res, next) => {
         const { password } = req.body;
 
         console.log(password);
+
 
         const user = await prisma.account.findFirst({ where: { accountId } });
 

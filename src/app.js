@@ -12,32 +12,33 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+export const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = 3333;
 
+app.use(express.json());
+app.use(cookieParser());
+
 // app.use(express.urlencoded({ extended: true })); // 미들웨어 2
 app.use(express.static(path.join(__dirname, 'browser')));
 
-
-// 로그인 메인홈
+// 로그인 페이지
 app.get('/api', (req, res) => {
-    res.sendFile(path.join(__dirname, 'browser/index.html'));
+    res.sendFile(path.join(__dirname, 'browser/html/index.html'));
 });
 
-// API 카테고리 홈
+// API 카테고리 페이지
 app.get('/api/category', (req, res) => {
     res.sendFile(path.join(__dirname, 'browser/html/category.html'));
 });
 
-
-app.use(express.json());
-app.use(cookieParser());
-
+// 회원가입 페이지
+app.get('/api/join',  (req, res) => {
+    res.sendFile(path.join(__dirname, 'browser/html/join.html'));
+});
 
 app.use('/api', [accountRouter, matchingRouter, teamRouter, productRouter, playersRouter, gachaRouter, rosterRouter]);
-
 
 // 에러 핸들링 미들웨어를 등록합니다.
 app.use(ErrorHandlerMiddleware);

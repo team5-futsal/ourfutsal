@@ -22,7 +22,7 @@ router.post(
                     playerName: playerName,
                     positionId: positionId,
                     playerStrength: playerStrength,
-                    playerDefense: playerDefense, // prisma model에서 이 컬럼만 Player가 대문자
+                    playerDefense: playerDefense,
                     playerStamina: playerStamina,
                 },
             });

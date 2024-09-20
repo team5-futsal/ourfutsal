@@ -1,7 +1,5 @@
 /** 공통으로 작동하는 기능입니다. */
 
-import { getTeam, excludeTeam, getUserTeam, updateTeam, excludeTeamAll } from './api.js';
-
 /** api 버튼을 누르면 Request 창이 토글형식으로 작동하도록 하는 함수 */
 export function handleApiButtonClick(event) {
     event.preventDefault(); // 기본 동작 방지
@@ -22,3 +20,4 @@ export function handleApiButtonClick(event) {
     sendRequestBtn.type = 'apiButton';
     apiRequestDiv.appendChild(sendRequestBtn);
 }
+
