@@ -31,36 +31,24 @@ router.get('/roster', authMiddleware, async (req, res) => {
  선수 판매 **/
 router.delete('/roster/sell', authMiddleware, async (req, res) => {
     const { accountId } = req.user;
-    const { playerName } = req.body;
+    const { rosterId } = req.body;
 
-    const playerId = await prisma.player.findFirst({
+    const rosterFind = await prisma.roster.findFirst({
         where: {
-            playerName: playerName,
-        },
-    });
-
-    if (!playerId) {
-        return res.status(404).json({ message: ' 존재하지 않는 선수 입니다' });
-    }
-
-    const isPlayerExists = await prisma.roster.findMany({
-        where: {
+            rosterId: +rosterId,
             accountId: +accountId,
-            playerId: +playerId.playerId,
         },
     });
+
+    if (!rosterFind) {
+        return res.status(404).json({ message: ' 보유하고 있지 않은 선수입니다. ' });
+    }
 
     console.log(isPlayerExists);
 
-    if (isPlayerExists.length === 0) {
-        return res.status(404).json({ message: '해당 선수를 보유하고 있지 않습니다.' });
-    }
-
     await prisma.roster.delete({
         where: {
-            accountId: +accountId,
-            playerId: +playerId.playerId,
-            rosterId: isPlayerExists[isPlayerExists.length - 1].rosterId,
+            rosterId: +rosterId,
         },
     });
 
