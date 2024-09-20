@@ -5,8 +5,8 @@ body {
     justify-content: center;
     height: 100vh;
     background-color: rgb(253, 253, 253);
+    background-image: '';
 }
-
 
 .apiContainer {
     display: flex;
@@ -42,6 +42,7 @@ div[type="apiForm"] {
 button[type='apiButton'] {
     background-color: beige;
     padding: 5px 10px;
+    margin-bottom: 7px;
     border: none;
     border-radius: 5px;
     cursor: pointer;

@@ -7,6 +7,7 @@ import {
     getAccountInfo,
     updateAccount,
     deleteAccount,
+    logoutAccount,
     getTeam,
     getUserTeam,
     excludeTeam,
@@ -52,7 +53,7 @@ function handleSendRequest(event) {
                     const createdAt = res.data[i].createdAt;
 
                     resContext.innerHTML += `
-                    <p class="users">userId: ${userId}, createdAt: ${createdAt}</p>
+                    <p>userId: ${userId}, createdAt: ${createdAt}</p>
                     <br>
                     `;
                 }
@@ -87,6 +88,14 @@ function handleSendRequest(event) {
                 const userId = res.data.userId;
                 alert(`접속한 ${userId}가 정상적으로 삭제되었습니다. 로그인 화면으로 이동합니다.`);
                 // 삭제가 되었으니 페이지를 기본 홈으로 이동
+                window.location.href = 'http://localhost:3333/api';
+                window.localStorage.clear();
+            });
+            break;
+
+        case 'logoutAccountResSendBtn':
+            logoutAccount().then(res => {
+                alert('로그아웃 되었습니다. 로그인 화면으로 이동합니다.');
                 window.location.href = 'http://localhost:3333/api';
                 window.localStorage.clear();
             });
