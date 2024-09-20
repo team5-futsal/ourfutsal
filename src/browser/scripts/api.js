@@ -26,14 +26,18 @@ export async function registAccount(body) {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(body),
+
     }).then(res => {
+
         if (res.status === 409) {
             alert('이미 존재하는 아이디입니다.');
         }
     });
 }
 
+
 /** 모든 계정 조회 API 호출 */
+
 export async function getAccountAll() {
     return fetch('/api/account/all', {
         method: 'GET',
@@ -45,6 +49,7 @@ export async function getAccountAll() {
         else return alert('500 Server Error');
     });
 }
+
 
 /** 계정 상세 조회 API 호출 */
 export async function getAccountInfo() {
@@ -137,11 +142,13 @@ export async function excludeTeamAll() {
 // user 의 팀 편성 조회
 export async function getUserTeam(param) {
     return fetch(`/api/team/find/${param}`, {
+
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
         },
     }).then(res => {
+
         if (res.status === 200) return res.json();
         else return alert('500 Server Error');
     });
@@ -159,6 +166,36 @@ export async function updateTeam(bodydata) {
         body: JSON.stringify(body),
     }).then(res => {
         if (res.status === 200) return res.json();
+        else return alert('500 Server Error');
+    });
+}
+
+/** 선수 목록 API 호출 */
+export async function getPlayers(){
+    return fetch('/api/players', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+
+    }).then(res => {
+        if (res.status === 200)
+            return res.json();
+        else return alert('500 Server Error');
+    });
+
+}
+
+/** 선수 상세 정보 API 호출 */
+export async function getPlayerDetail(playerName){
+    return fetch(`/api/players/${playerName}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    }).then(res => {
+        if (res.status === 200)
+            return res.json();
         else return alert('500 Server Error');
     });
 }

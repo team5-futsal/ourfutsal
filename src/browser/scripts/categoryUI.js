@@ -12,7 +12,10 @@ import {
     excludeTeam,
     excludeTeamAll,
     updateTeam,
+  getPlayerDetail,
+  getPlayers,
 } from './api.js';
+
 
 // 카테고리에 있는 각 API 버튼에 이벤트 리스너 추가
 document.querySelectorAll('[type="apiForm"] button').forEach(button => {
@@ -162,10 +165,47 @@ function handleSendRequest(event) {
                     apiResDiv.textContent = res.message;
                 });
             }
+
+            break;
+        case 'getPlayersResSendBtn' :
+            getPlayers().then(res => {
+
+                const apiResDiv = document.querySelector('.apiRes');
+                const resContext = document.createElement('div');
+
+                for (let i in res.data) {
+                    const playerName = res.data[i].playerName;
+                    const position = res.data[i].positionId;
+
+                    resContext.innerHTML += `
+                <p class="users">선수명 : ${playerName}<br> 포지션 : ${position} </p>
+                <br>
+                `;
+                }
+                apiResDiv.appendChild(resContext);
+            });
             break;
 
+        case 'getPlayerDetailResSendBtn' :
+            getPlayerDetail(params).then(res => {
+                const player = res.data
+                const playerName = res.data.playerName;
+                const positionId = res.data.positionId;
+                const playerStrength = res.data.playerStrength;
+                const playerDefense = res.data.PlayerDefense;
+                const playerStamina = res.data.playerStamina;
+                const apiResDiv = document.querySelector('.apiRes');
+                const resContext = document.createElement('div');
+
+                resContext.innerHTML = `
+                <p class="users">선수명 : ${playerName} <br> 포지션 아이디 : ${positionId} <br> 공격력 : ${playerStrength} <br> 수비력 : ${playerDefense} <br> 스테미나 : ${playerStamina}</p>
+                `;
+                apiResDiv.appendChild(resContext);
+            });
         // 다른 API 요청을 추가로 처리할 수 있음
         default:
             console.log('이 버튼에 해당하는 API 기능이 없습니다');
     }
+
 }
+

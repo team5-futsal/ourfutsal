@@ -23,7 +23,7 @@ router.post('/players', /*미들웨어*/async (req, res) => {
                 playerName: playerName,
                 positionId: positionId,
                 playerStrength: playerStrength,
-                PlayerDefense: playerDefense, // prisma model에서 이 컬럼만 Player가 대문자
+                playerDefense: playerDefense,
                 playerStamina: playerStamina,
             },
         });
@@ -74,7 +74,7 @@ router.get('/players/:playerName', async (req, res) => {
                 positionId: true,
                 playerName: true,
                 playerStrength: true,
-                PlayerDefense: true, // prisma model에서 이 컬럼만 Player가 대문자
+                playerDefense: true, // prisma model에서 이 컬럼만 Player가 대문자
                 playerStamina: true,
             },
         });
@@ -123,7 +123,7 @@ router.put('/players/:playerName', /*미들웨어*/async (req, res) => {
 
         }
         if (newPlayerDefense != null) {
-            updateData.PlayerDefense = newPlayerDefense;
+            updateData.playerDefense = newPlayerDefense;
 
         }
         if (newPlayerStamina != null) {
