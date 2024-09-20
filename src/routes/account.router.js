@@ -142,6 +142,7 @@ router.patch('/account', authMiddleware, async (req, res, next) => {
 
         console.log(password);
 
+
         const user = await prisma.account.findFirst({ where: { accountId } });
 
         // 사용자 존재 여부 확인

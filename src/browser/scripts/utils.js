@@ -20,3 +20,4 @@ export function handleApiButtonClick(event) {
     sendRequestBtn.type = 'apiButton';
     apiRequestDiv.appendChild(sendRequestBtn);
 }
+
