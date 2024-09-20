@@ -48,30 +48,32 @@ router.get('/rank', async (req, res, next) => {
 });
 
 /** 사용자 게임 가능 확인 API **/
-router.post('/custom', async (req, res, next) => {
+router.post('/custom', authMiddleware, async (req, res, next) => {
     try {
-        // 인증 기능 구현 필요
-        const MyaccountId = req.headers;
-        const { accountId } = req.body;
+        const myUserInfo = req.user;
+        const { userId } = req.body;
 
-        const MyactivePlayers = await prisma.roster.count({
+        if(myUserInfo.userId === userId)
+            return res.status(412).json({ message: '자신은 입력할 수 없습니다.' });
+
+        const myActivePlayers = await prisma.roster.count({
             where: {
-                accountId: +MyaccountId,
-                isPicked: 1, // 출전하는 경우
+                accountId: +myUserInfo.accountId,
+                isPicked: true, // 출전하는 경우
             },
         });
         // 선출 3명보다 적으면 안됨.
-        if (MyactivePlayers < 3) {
+        if (myActivePlayers < 3) {
             return res.status(412).json({ message: '선출 인원이 부족합니다.' });
         }
 
         // 유저 정보 조회
         const isExistUser = await prisma.account.findFirst({
             where: {
-                accountId: +accountId,
+                userId: userId,
             },
             select: {
-                accoutId: true,
+                accountId: true,
                 userId: true,
                 mmr: true
             }
@@ -82,8 +84,8 @@ router.post('/custom', async (req, res, next) => {
 
         const activePlayers = await prisma.roster.count({
             where: {
-                accountId: +accountId,
-                isPicked: 1, // 출전하는 경우
+                accountId: +isExistUser.accountId,
+                isPicked: true, // 출전하는 경우
             },
         });
         if (activePlayers < 3) {
@@ -97,25 +99,24 @@ router.post('/custom', async (req, res, next) => {
 });
 
 /** 경쟁전 매칭 API **/
-router.post('/match', async (req, res, next) => {
+router.get('/match', authMiddleware, async (req, res, next) => {
     try {
-        // 인증 기능 구현 필요
-        const MyaccountId = req.headers;
+        const myUserInfo = req.user;
 
         // Roster 선출 명수 확인
-        const MyactivePlayers = await prisma.roster.count({
+        const myActivePlayers = await prisma.roster.count({
             where: {
-                accountId: +MyaccountId,
-                isPicked: 1, // 출전하는 경우
+                accountId: +myUserInfo.accountId,
+                isPicked: true, // 출전하는 경우
             },
         });
         // 선출 3명보다 적으면 안됨.
-        if (MyactivePlayers < 3) {
+        if (myActivePlayers < 3) {
             return res.status(412).json({ message: '선출 인원이 부족합니다.' });
         }
 
         const myInfo = await prisma.account.findFirst({
-            where: { accountId: +MyaccountId },
+            where: { accountId: +myUserInfo.accountId },
             select: {
                 mmr: true,
             },
@@ -125,13 +126,13 @@ router.post('/match', async (req, res, next) => {
         // 근접한 유저를 찾는데 많은 컴퓨팅 파워가 소모됨. 방법을 고려할 필요가 있음.
 
         // 나의 MMR과 다른 유저의 유클리드 거리를 계산
-        const nearestMMR = await prisma.$queryRaw`SELECT power(${myInfo.mmr} - mmr, 2), accountId, userId, mmr FROM account ORDER BY 1`;
+        const nearestMMR = await prisma.$queryRaw`SELECT power(${myInfo.mmr} - mmr, 2) as distance, accountId, userId, mmr FROM account ORDER BY 1`;
 
         for(const user of nearestMMR){
             const activePlayers = await prisma.roster.count({
                 where: {
                     accountId: +user.accountId,
-                    isPicked: 1, // 출전하는 경우
+                    isPicked: true, // 출전하는 경우
                 },
             });
             if (activePlayers < 3) {
