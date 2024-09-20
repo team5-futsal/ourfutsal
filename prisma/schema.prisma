@@ -86,7 +86,7 @@ model roster {
 model player {
   playerId       Int    @id @default(autoincrement())
   positionId     Int
-  playerName     String
+  playerName     String @unique
   playerStrength Int
   PlayerDefense  Int
   playerStamina  Int
