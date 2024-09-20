@@ -50,7 +50,7 @@ router.post('/gacha/buy/:productId', authMiddleware, async (req, res, next) => {
             throw new Error('notEnoughMoney');
         }
 
-        await prisma.account.update({
+        const cashGo = await prisma.account.update({
             data: {
                 cash: req.user.cash - gachaPrice,
             },
@@ -76,7 +76,8 @@ router.post('/gacha/buy/:productId', authMiddleware, async (req, res, next) => {
 
         //잔돈 체크
         const remainingMoney = req.user.cash - findtry.gachaQuantity * 1000;
-        return res.status(201).json({ message: `${resultGacha} 선수를 획득했습니다. 남은 Cash : ${remainingMoney}` });
+
+        return res.status(201).json({ message: `${createManyPlayer} 선수를 획득했습니다. 남은 Cash : ${cashGo.cash}` });
     } catch (error) {
         switch (error.message) {
             case 'notEnoughMoney':

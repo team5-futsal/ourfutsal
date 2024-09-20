@@ -1,23 +1,23 @@
 import express from 'express';
 import AuthMiddleware from '../middlewares/auth.middleware.js';
 import { prisma } from '../utils/prisma/index.js';
+import authMiddleware from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
-/** 보유 선수 조회
- 인증 미들웨어를 통해
- 로그인 여부 확인 및
- 해당 유저인지 체크 **/
-router.get('/roster', /*미들웨어*/ async (req, res) => {
-
-    const accountId = 1;
-    // const { accountId } = req.user; 검증미들웨어 구현예정
+/** 보유 선수 조회 **/
+// 강화수치가 같은 중복 선수는 거름!!!!
+router.get('/roster', authMiddleware, async (req, res) => {
+    const { accountId } = req.user;
 
     const myPlayers = await prisma.roster.findMany({
         where: {
             accountId: +accountId,
         },
-
+        include: {
+            player: true,
+        },
+        distinct: ['playerId', 'enhanceCount'],
     });
 
     if (myPlayers.length === 0) {
@@ -29,17 +29,19 @@ router.get('/roster', /*미들웨어*/ async (req, res) => {
 
 /** playerName을 받아와야할거 같은데
  선수 판매 **/
-router.delete('/roster/:playerName', /*미들웨어*/ async (req, res) => {
-
-    const accountId = 1;
-    const { playerName } = req.params;
-    // const { accountId } = req.user; 검증미들웨어 구현예정
+router.delete('/roster/sell', authMiddleware, async (req, res) => {
+    const { accountId } = req.user;
+    const { playerName } = req.body;
 
     const playerId = await prisma.player.findFirst({
-        where : {
-            playerName : playerName,
-        }
+        where: {
+            playerName: playerName,
+        },
     });
+
+    if (!playerId) {
+        return res.status(404).json({ message: ' 존재하지 않는 선수 입니다' });
+    }
 
     const isPlayerExists = await prisma.roster.findMany({
         where: {
@@ -50,16 +52,15 @@ router.delete('/roster/:playerName', /*미들웨어*/ async (req, res) => {
 
     console.log(isPlayerExists);
 
-    if(isPlayerExists.length === 0) {
+    if (isPlayerExists.length === 0) {
         return res.status(404).json({ message: '해당 선수를 보유하고 있지 않습니다.' });
     }
-
 
     await prisma.roster.delete({
         where: {
             accountId: +accountId,
             playerId: +playerId.playerId,
-            rosterId : isPlayerExists[isPlayerExists.length -1].rosterId,
+            rosterId: isPlayerExists[isPlayerExists.length - 1].rosterId,
         },
     });
 
@@ -67,6 +68,6 @@ router.delete('/roster/:playerName', /*미들웨어*/ async (req, res) => {
         message: '삭제 성공!',
         '남은 동명 선수 수량': isPlayerExists.length - 1,
     });
-})
+});
 
 export default router;

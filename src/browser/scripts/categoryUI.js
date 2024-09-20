@@ -12,6 +12,7 @@ import {
     excludeTeam,
     excludeTeamAll,
     updateTeam,
+    getMyPlayer,
 } from './api.js';
 
 // 카테고리에 있는 각 API 버튼에 이벤트 리스너 추가
@@ -95,32 +96,39 @@ function handleSendRequest(event) {
         // 내 팀 편성 조회
         case 'getTeamResSendBtn':
             getTeam().then(res => {
-                const selectDiv = document.querySelector('.apiRes');
-
-                let content = '';
+                if (res.message) {
+                    resContext.innerHTML = res.message;
+                    apiResDiv.appendChild(resContext);
+                    return;
+                }
 
                 window.excludePlayer = async playerId => {
-                    //확인창 출력
                     if (confirm('이 선수를 편성에서 제외 하시겠습니까? ')) {
                         excludeTeam(playerId);
                         alert('해당 선수가 편성에서 제외되었습니다. ');
-                        getTeam();
                     }
                 };
 
+                window.infoPlayer = async i => {
+                    const div = document.getElementById(`myPlayer('${i}')`);
+                    div.innerHTML = '';
+                    div.innerHTML += `
+                     파워 : ${res[i].playerStrength}&nbsp 
+                     수비력: ${res[i].playerDefense}&nbsp
+                     스태미나: ${res[i].playerStamina}&nbsp
+                     `;
+                };
+
                 for (let i in res) {
-                    content += `<div class="myPlayer('${res[i].playerId}')">${res[i].playerName}     <button class="player" onclick="infoPlayer('${res[i].playerId}')" >상세 조회(미구현)</button>    <button class="player" onclick="excludePlayer('${res[i].playerId}')">편성 제외</button><br><br><br></div>`;
+                    resContext.innerHTML += `
+                    <div>${res[i].playerName} <button class="player" onclick="infoPlayer('${i}')" >상세 조회(미구현)</button>
+                    <button class="player" onclick="excludePlayer('${res[i].playerId}')">편성 제외</button>
+                    <br><div id="myPlayer('${[i]}')"></div>
+                    <br><br></div>
+                    `;
                 }
-
-                // // 상세보기 구현방법을 모르겠습니다
-                // // querySelector 가 안되는 현상
-                // window.infoPlayer = async playerId => {
-                //     const div = document.querySelector(`.myPlayer${playerId}`);
-                //     div.innerHTML = `${JSON.stringify(res)}`;
-                // };
-
-                selectDiv.innerHTML = content;
             });
+            apiResDiv.appendChild(resContext);
             break;
 
         // 다른 유저의 편성 조회
@@ -130,7 +138,9 @@ function handleSendRequest(event) {
 
             getUserTeam(param).then(res => {
                 for (let i in res) {
-                    content += `<div>${res[i].playerName}</div><br><br><br>`;
+                    content += `
+                    ${res[i].playerName}<br><br><br>
+                    `;
                 }
 
                 apiResDiv.innerHTML = content;
@@ -162,6 +172,63 @@ function handleSendRequest(event) {
                     apiResDiv.textContent = res.message;
                 });
             }
+            break;
+
+        // 내 보유 선수 조회
+        case 'getMyPlayerResSendBtn':
+            getMyPlayer().then(res => {
+                window.excludePlayer = async playerId => {
+                    //확인창 출력
+                    if (confirm('이 선수를 편성에서 제외 하시겠습니까? ')) {
+                        excludeTeam(playerId);
+                        alert('해당 선수가 편성에서 제외되었습니다. ');
+
+                        // 어지러운 새로고침
+                        await getMyPlayer().then(res => {
+                            resContext.innerHTML = '';
+                            for (let i in res.data) {
+                                resContext.innerHTML += `
+                               ${res.data[i].isPicked === true ? '▼[편성중]' : ''}
+                               선수명 [${res.data[i].player.playerName} +${res.data[i].enhanceCount}]
+                                ${res.data[i].isPicked === true ? `<button onclick="excludePlayer('${res.data[i].playerId}')">편성제외</button>` : `<button onclick="addPlayer('${res.data[i].rosterId}')">편성추가</button>`}
+                                <br><br>
+                                  `;
+                            }
+                        });
+                    }
+                };
+
+                window.addPlayer = async rosterId => {
+                    //확인창 출력
+                    if (confirm('이 선수를 편성에 추가합니까? ')) {
+                        await updateTeam(rosterId);
+                        alert('해당 선수가 편성 되었습니다. ');
+
+                        // 어지러운 새로고침
+                        await getMyPlayer().then(res => {
+                            resContext.innerHTML = '';
+                            for (let i in res.data) {
+                                resContext.innerHTML += `
+                               ${res.data[i].isPicked === true ? '▼[편성중]' : ''}
+                               선수명 [${res.data[i].player.playerName} +${res.data[i].enhanceCount}]
+                                ${res.data[i].isPicked === true ? `<button onclick="excludePlayer('${res.data[i].playerId}')">편성제외</button>` : `<button onclick="addPlayer('${res.data[i].rosterId}')">편성추가</button>`}
+                                <br><br>
+                                  `;
+                            }
+                        });
+                    }
+                };
+
+                for (let i in res.data) {
+                    resContext.innerHTML += `
+                    ${res.data[i].isPicked === true ? '▼[편성중]' : ''}
+                    선수명 [${res.data[i].player.playerName} +${res.data[i].enhanceCount}]
+                    ${res.data[i].isPicked === true ? `<button onclick="excludePlayer('${res.data[i].playerId}')">편성제외</button>` : `<button onclick="addPlayer('${res.data[i].rosterId}')">편성추가</button>`}
+                    <br><br>
+                    `;
+                }
+                apiResDiv.appendChild(resContext);
+            });
             break;
 
         // 다른 API 요청을 추가로 처리할 수 있음
