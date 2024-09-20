@@ -28,9 +28,17 @@ export async function registAccount(body) {
         body: JSON.stringify(body),
 
     }).then(res => {
-
-        if (res.status === 409) {
+        if(res.status === 201) {
+            alert('회원가입 성공! 로그인 화면으로 이동합니다.');
+            return true;
+        }
+        else if(res.status === 409) {
             alert('이미 존재하는 아이디입니다.');
+            return false;
+        }
+        else {
+            alert('500 Server Error');
+            return false;
         }
     });
 }
@@ -50,8 +58,7 @@ export async function getAccountAll() {
     });
 }
 
-
-/** 계정 상세 조회 API 호출 */
+/** 내 계정 조회 API 호출 */
 export async function getAccountInfo() {
     return fetch('/api/account', {
         method: 'GET',
@@ -93,6 +100,22 @@ export async function deleteAccount() {
         if (res.status === 201) return res.json();
         else return alert('500 Server Error');
     });
+}
+
+/** 계정 로그아웃 API 호출 */
+export async function logoutAccount() {
+    return fetch('/api/account/logout', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+    }).then(res => {
+        if (res.status === 200) {
+            localStorage.removeItem('token');
+            return true;
+        }
+    })
 }
 
 // 본인의 팀 편성 조회
