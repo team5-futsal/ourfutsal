@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import authMiddleware from '../middlewares/auth.middleware.js';
 import { createAccessToken } from '../utils/tokens/tokens.js';
 import validSchema from '../utils/joi/valid.schema.js';
+import { UserValidation } from '../utils/validation.js';
 
 const router = express.Router();
 
@@ -60,14 +61,14 @@ router.post('/account/login', async (req, res, next) => {
         const accessToken = createAccessToken(user.accountId);
 
         // authotization 헤더에 Bearer 토큰 형식으로 JWT를 저장합니다.
-        // res.header('authorization', `Bearer ${accessToken}`);
-        res.cookie('authorization', `Bearer ${accessToken}`, {
-            httpOnly: true,
-            secure: false,
-            sameSite: 'Strict',
-            maxAge: 1000 * 60 * 60 * 24 * 1,
-        });
-        return res.status(200).json({ isLogin: true });
+        res.header('authorization', `Bearer ${accessToken}`);
+        // res.cookie('authorization', `Bearer ${accessToken}`, {
+        //     httpOnly: true,
+        //     secure: false,
+        //     sameSite: 'Strict',
+        //     maxAge: 1000 * 60 * 60 * 24 * 1,
+        // });
+        return res.status(200).json({ isLogin: true, token: accessToken });
     } catch (err) {
         next(err);
     }
@@ -120,8 +121,12 @@ router.get('/account/all', async (req, res, next) => {
 /** 사용자 수정 API */
 router.patch('/account', authMiddleware, async (req, res, next) => {
     try {
+        console.log(req.body);
         const { accountId } = req.user;
-        const { userId, password } = req.body;
+        const { password } = req.body;
+
+        console.log(password);
+
 
         const user = await prisma.account.findFirst({ where: { accountId } });
 
@@ -131,12 +136,11 @@ router.patch('/account', authMiddleware, async (req, res, next) => {
         // else if (!(await bcrypt.compare(password, user.password))) throw new Error('InvalidPassword');
 
         // 사용자가 맞다면 새로 입력한 비밀번호를 암호화합니다.
-        const newHashedPassword = bcrypt.hash(password, 10);
-
+        const newHashedPassword = await bcrypt.hash(password, 10);
         // account 테이블에 있는 사용자를 수정합니다.
         const updatedUser = await prisma.account.update({
-            where: {accountId: accountId},
-            data : {userId, password: newHashedPassword}
+            data : {password: newHashedPassword},
+            where: {accountId: accountId}
         })
 
         return res.status(201).json({message: '사용자의 정보가 변경되었습니다.'})
@@ -155,6 +159,8 @@ router.delete('/account', authMiddleware, async(req,res,next) => {
         const user = await prisma.account.findFirst({
             where: { accountId }
         });
+
+        const userId = user.userId;
         
         if(!user) 
             throw new Error('AccountNotFound');
@@ -163,7 +169,7 @@ router.delete('/account', authMiddleware, async(req,res,next) => {
             where: { accountId }
         })
 
-        return res.status(201).json({ message: '요청한 사용자가 삭제되었습니다.'});
+        return res.status(201).json({ data:{userId, message: '요청한 사용자가 삭제되었습니다.'}});
     }
     catch(err) {
         next(err);
