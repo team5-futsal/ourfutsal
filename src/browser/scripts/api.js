@@ -149,7 +149,7 @@ export async function getUserTeam(param) {
 
 // 본인의 팀 편성 추가
 export async function updateTeam(bodydata) {
-    const body = { playerId: bodydata };
+    const body = { rosterId: bodydata };
     return fetch(`/api/team/add/`, {
         method: 'PUT',
         headers: {
@@ -157,6 +157,20 @@ export async function updateTeam(bodydata) {
             authorization: `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify(body),
+    }).then(res => {
+        if (res.status === 200) return res.json();
+        else return alert('500 Server Error');
+    });
+}
+
+// 본인의 보유 선수 조회
+export async function getMyPlayer(bodydata) {
+    return fetch(`/api/roster`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
     }).then(res => {
         if (res.status === 200) return res.json();
         else return alert('500 Server Error');
