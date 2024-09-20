@@ -8,7 +8,7 @@ const router = express.Router();
 // router.use(authMiddleware);
 
 // 캐시 구매
-router.put('/account/:accountId', async (req, res, next) => {
+router.put('/account/:accountId', authMiddleware, async (req, res, next) => {
     const { accountId } = req.params;
     const { cash } = req.body;
 
@@ -16,8 +16,8 @@ router.put('/account/:accountId', async (req, res, next) => {
     const findAccount = await prisma.account.findFirst({
         where: { accountId: +accountId },
     });
-    // if(!findAccount)
-    //     return res.status(401).json({ message : "유효하지 않은 사용자입니다."})
+    if(!findAccount)
+        return res.status(401).json({ message : "유효하지 않은 사용자입니다."})
     if (cash <= 0) return res.status(400).json({ message: '올바른 금액을 입력해 주세요.' });
     if (cash > Number.MAX_SAFE_INTEGER) return res.status(400).json({ message: '입력 가능한 금액을 초과하였습니다.' });
 
@@ -59,7 +59,7 @@ const purchaseHistoryList = {
 
 // 구매이력조회
 router.get('/product/purchasehistory', async (req, res, next) => {
-    const purchaseHistory = prisma.purchaseHistory.findMany({
+    const purchaseHistory = await prisma.purchaseHistory.findMany({
 
     });
     return res.status(200).json({ message: '조회 완료', data: purchaseHistory });
@@ -154,7 +154,7 @@ router.post('/product/:productId', authMiddleware, async (req, res, next) => {
 
     return res.status(200).json({
         message: `${findProduct.productName} 아이템 ${count}개 구매 성공, 
-            잔액 ${changeBalance.cash}`,
+            잔액 ${req.user.cash}`,
     });
 });
 
