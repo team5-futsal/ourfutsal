@@ -14,7 +14,7 @@ export async function loginAccount(body) {
             return res.json();
         }
         // 기타 상태 코드에 대한 처리
-        else return false
+        else return false;
     });
 }
 
@@ -26,8 +26,7 @@ export async function registAccount(body) {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(body),
-    })
-    .then(res => {
+    }).then(res => {
         if (res.status === 409) {
             alert('이미 존재하는 아이디입니다.');
         }
@@ -53,32 +52,28 @@ export async function getAccountInfo() {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'authorization': `Bearer ${localStorage.getItem('token')}`,
+            authorization: `Bearer ${localStorage.getItem('token')}`,
         },
-    })
-    .then(res => {
-        if(res.status === 200) 
+    }).then(res => {
+        if (res.status === 200)
             return res.json(); // data 객체가 반환될것임.
         else return alert('500 Server Error');
-    })
+    });
 }
 
 /** 계정 수정 API 호출 */
 export async function updateAccount(body) {
-    
     return fetch(`/api/account`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
-            'authorization': `Bearer ${localStorage.getItem('token')}`
+            authorization: `Bearer ${localStorage.getItem('token')}`,
         },
-        body:JSON.stringify(body)
-    })
-    .then(res => {
-        if(res.status === 201)
-            return res.json();
+        body: JSON.stringify(body),
+    }).then(res => {
+        if (res.status === 201) return res.json();
         else return alert('500 Server Error');
-    })
+    });
 }
 
 /** 계정 삭제 API 호출 */
@@ -87,14 +82,12 @@ export async function deleteAccount() {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
-            'authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-    })
-   .then(res => {
-    if(res.status === 201)
-        return res.json();
-    else return alert('500 Server Error');
-   })
+            authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+    }).then(res => {
+        if (res.status === 201) return res.json();
+        else return alert('500 Server Error');
+    });
 }
 
 // 본인의 팀 편성 조회
@@ -103,6 +96,7 @@ export async function getTeam() {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
+            authorization: `Bearer ${localStorage.getItem('token')}`,
         },
     }).then(res => {
         if (res.status === 200) return res.json();
@@ -117,6 +111,7 @@ export async function excludeTeam(bodydata) {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
+            authorization: `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify(body),
     }).then(res => {
@@ -131,6 +126,7 @@ export async function excludeTeamAll() {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
+            authorization: `Bearer ${localStorage.getItem('token')}`,
         },
     }).then(res => {
         if (res.status === 200) return res.json();
@@ -158,6 +154,7 @@ export async function updateTeam(bodydata) {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
+            authorization: `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify(body),
     }).then(res => {

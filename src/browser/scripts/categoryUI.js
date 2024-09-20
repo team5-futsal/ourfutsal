@@ -2,7 +2,17 @@
  * 혹은 UI 관련 로직을 수행합니다.
  */
 import { handleApiButtonClick } from './utils.js';
-import { getAccountAll, getAccountInfo, updateAccount, deleteAccount } from './api.js';
+import {
+    getAccountAll,
+    getAccountInfo,
+    updateAccount,
+    deleteAccount,
+    getTeam,
+    getUserTeam,
+    excludeTeam,
+    excludeTeamAll,
+    updateTeam,
+} from './api.js';
 
 // 카테고리에 있는 각 API 버튼에 이벤트 리스너 추가
 document.querySelectorAll('[type="apiForm"] button').forEach(button => {
@@ -72,14 +82,87 @@ function handleSendRequest(event) {
             });
             break;
 
-            case 'deleteAccountResSendBtn':
-                deleteAccount().then(res => {
-                    const userId = res.data.userId;
-                    alert(`접속한 ${userId}가 정상적으로 삭제되었습니다. 로그인 화면으로 이동합니다.`)
-                    // 삭제가 되었으니 페이지를 기본 홈으로 이동
-                    window.location.href = 'http://localhost:3333/api'
-                    window.localStorage.clear()
-                })
+        case 'deleteAccountResSendBtn':
+            deleteAccount().then(res => {
+                const userId = res.data.userId;
+                alert(`접속한 ${userId}가 정상적으로 삭제되었습니다. 로그인 화면으로 이동합니다.`);
+                // 삭제가 되었으니 페이지를 기본 홈으로 이동
+                window.location.href = 'http://localhost:3333/api';
+                window.localStorage.clear();
+            });
+            break;
+
+        // 내 팀 편성 조회
+        case 'getTeamResSendBtn':
+            getTeam().then(res => {
+                const selectDiv = document.querySelector('.apiRes');
+
+                let content = '';
+
+                window.excludePlayer = async playerId => {
+                    //확인창 출력
+                    if (confirm('이 선수를 편성에서 제외 하시겠습니까? ')) {
+                        excludeTeam(playerId);
+                        alert('해당 선수가 편성에서 제외되었습니다. ');
+                        getTeam();
+                    }
+                };
+
+                for (let i in res) {
+                    content += `<div class="myPlayer('${res[i].playerId}')">${res[i].playerName}     <button class="player" onclick="infoPlayer('${res[i].playerId}')" >상세 조회(미구현)</button>    <button class="player" onclick="excludePlayer('${res[i].playerId}')">편성 제외</button><br><br><br></div>`;
+                }
+
+                // // 상세보기 구현방법을 모르겠습니다
+                // // querySelector 가 안되는 현상
+                // window.infoPlayer = async playerId => {
+                //     const div = document.querySelector(`.myPlayer${playerId}`);
+                //     div.innerHTML = `${JSON.stringify(res)}`;
+                // };
+
+                selectDiv.innerHTML = content;
+            });
+            break;
+
+        // 다른 유저의 편성 조회
+        case 'getUserTeamResSendBtn':
+            let content = '';
+            const param = document.getElementById('reqParams').value;
+
+            getUserTeam(param).then(res => {
+                for (let i in res) {
+                    content += `<div>${res[i].playerName}</div><br><br><br>`;
+                }
+
+                apiResDiv.innerHTML = content;
+            });
+            break;
+
+        // 내 팀 편성 제외
+        case 'excludeTeamResSendBtn':
+            if (confirm(`playerId = ${body} 선수를 편성에서 제외 하시겠습니까? `)) {
+                excludeTeam(body).then(res => {
+                    apiResDiv.textContent = res.message;
+                });
+            }
+            break;
+
+        // 내 팀 편성 모두 제외
+        case 'excludeTeamAllResSendBtn':
+            if (confirm(`모든 선수를 편성에서 제외 하시겠습니까? `)) {
+                excludeTeamAll().then(res => {
+                    apiResDiv.textContent = res.message;
+                });
+            }
+            break;
+
+        // 내 팀 편성 추가
+        case 'updateTeamResSendBtn':
+            if (confirm(`playerId = ${body} 선수를 편성에 추가합니까? `)) {
+                updateTeam(body).then(res => {
+                    apiResDiv.textContent = res.message;
+                });
+            }
+            break;
 
         // 다른 API 요청을 추가로 처리할 수 있음
         default:
