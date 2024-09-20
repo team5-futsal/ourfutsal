@@ -1,5 +1,4 @@
 import { prisma } from '../utils/prisma/index.js';
-import validSchema from './joi/valid.schema.js';
 
 export class UserValidation {
     userId;
@@ -17,70 +16,64 @@ export class UserValidation {
     }
 
     validationUserId = async () => {
-        try {
-            const validationId = await validSchema.account.validateAsync(this.userId);
-        }
-        catch(e) {
+        const regex = /^[a-z0-9]+$/;
+
+        if(!regex.exec(this.userId)) {
             return {
                 success: false,
                 msg: '아이디는 영어 소문자와 숫자만 입력할 수 있습니다.'
             }
         }
+
+        return { success: true };
     }
 
     validatePassword = async () => {
-        try {
-            const validationPassword = await validSchema.account.validateAsync(this.password);
-        
-        }
-        catch(e) {
+
+        if(this.password.length<6 || this.password.length>40) {
             return {
                 success: false,
                 msg: '비밀번호는 6자~40자만 입력할 수 있습니다.'
             }
         }
+
+        return { success: true };
     }
 
     isExistUser = async () => {
-        try{
-            const isExistUser = await prisma.account.findFirst({
-                where: {
-                    userId:this.userId,
-                },
-            });
-        }
-        catch(e) {
-            console.log(e);
+        const isExistUser = await prisma.account.findFirst({
+            where: {
+                userId:this.userId,
+            },
+        });
+
+        if(isExistUser) {
             return {
                 success: false,
                 msg: '이미 존재하는 아이디입니다.'
             }
         }
+
+        return { success: true };
     }
 
     validation = async () => {
-        try {
-            this.validationRules.forEach((rule) => rule());
-            
+        const results = await Promise.all(this.validationRules.map(rule=>rule()));
+
+        for(const result of results) {
+            if(!result.success) {
+                return {
+                    success: false,
+                    msg: result.msg
+                }
+            }
+        }
+        
+        if(results.success) {
             return {
                 success: true,
                 msg: '유효합니다.'
             }
-        } catch (e) {
-            if (e instanceof ValidationError) {
-                return {
-                    success: false,
-                    msg: e.message
-                }
-            }
-            else {
-                return {
-                    success: false,
-                    msg: '서버 에러'
-                }
-            }
         }
-
-        
     }
 }

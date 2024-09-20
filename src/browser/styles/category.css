@@ -7,6 +7,7 @@ body {
     background-color: rgb(253, 253, 253);
 }
 
+
 .apiContainer {
     display: flex;
     flex-direction: column;
@@ -23,10 +24,12 @@ body {
     border-radius: 5px;
 }
 
+
 div[type="apiForm"] {
     text-align: center;
     margin: 5px 10px 5px 10px;
 }
+
 
 .apiButtons {
     display: flex;
@@ -88,3 +91,10 @@ div[type='apiReqRes'] {
 .hidden  {
     display: none;
 } */
+
+.apiRes {
+    display: flex;
+    flex-direction: col;
+    align-items: center;
+    justify-content: center;
+}
