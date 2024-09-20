@@ -2,6 +2,7 @@ import express from 'express';
 import { prisma } from '../utils/prisma/index.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
 import { Prisma } from '@prisma/client';
+import gacha from '../utils/gacha/gacha.js';
 
 const router = express.Router();
 // router.use(authMiddleware);
@@ -45,7 +46,24 @@ router.post('/product', async (req, res, next) => {
     return res.status(201).json({ message: '상품 생성 완료', data: makeProduct });
 });
 
-// 상점 상품 전체/세부조회 시 겹치는 데이터 추출
+
+const purchaseHistoryList = {
+    purchaseId : true,
+    productId: true,
+    purchaseQuantity: true,
+    beforePurchaseCash: true,
+    afterPurchaseCash: true,
+    createdAt: true,
+};
+
+// 구매이력조회
+router.get('/product/purchasehistory', async (req, res, next) => {
+    const purchaseHistory = prisma.purchaseHistory.findMany({
+
+    });
+    return res.status(200).json({ message: '조회 완료', data: purchaseHistory });
+});
+
 const productList = {
     productId: true,
     productName: true,
@@ -65,7 +83,9 @@ router.get('/product', async (req, res, next) => {
 router.get('/product/:productId', async (req, res, next) => {
     const { productId } = req.params;
 
-    const productSpecific = await prisma.product.findUnique({
+    if (!productId) return res.status(404).json({ message: '해당 상품이 존재하지 않습니다' });
+
+    const productSpecific = await prisma.product.findFirst({
         where: { productId: +productId },
         select: {
             ...productList,
@@ -89,15 +109,25 @@ router.post('/product/:productId', authMiddleware, async (req, res, next) => {
     if (!findProduct) return res.status(404).json({ message: '상품이 존재하지 않습니다' });
     if (findProduct.price * count > cash) return res.status(400).json({ message: '소지금이 부족합니다' });
 
-
-
-
     // 이 부분에서 가챠 로직이 돌아가면 좋겠다 (선수추출 및 선수보관함에 저장)
     // 가챠 로직은 함수로? -> 웅상님이 작성해주신 라우터가 있다
-    // 상점 상품 구매와 가챠 구매 라우터를 어떻게 처리할까?🤔 묶을 수 있을까? 함수? 
+    // -> 웅상님 라우터도 별도의 함수를 라우터 안에서 실행시키는 식이다
+    // 상점 상품 구매와 가챠 구매 라우터를 어떻게 처리할까?🤔 묶을 수 있을까? 함수?
 
+    // 이 상품아이디가 가챠상품인지 가챠테이블에서 찾기
+    const findInGacha = await prisma.gacha.findFirst({
+        where: { productId: +productId },
+    });
 
-
+    // 가챠가 맞으면 함수 실행
+    if (findInGacha) {
+        try {
+            const doGacha = await gacha(req, res, next);
+            return res.status(201).json({ message: `${doGacha} 선수를 획득했습니다!. 남은 재화는 ${cash}` });
+        } catch (e) {
+            next(e);
+        }
+    }
 
     // 여기는 트랜잭션으로 묶어주자
     const buyingProductTransaction = prisma.$transaction(
