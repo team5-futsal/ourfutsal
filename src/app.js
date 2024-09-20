@@ -6,7 +6,8 @@ import productRouter from './routes/products.router.js';
 import matchingRouter from './routes/matching.router.js';
 import teamRouter from './routes/team.router.js';
 import playersRouter from './routes/players.router.js';
-
+import gachaRouter from './routes/gacha.router.js';
+import rosterRouter from './routes/roster.router.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -19,6 +20,7 @@ const PORT = 3333;
 // app.use(express.urlencoded({ extended: true })); // 미들웨어 2
 app.use(express.static(path.join(__dirname, 'browser')));
 
+
 // 로그인 메인홈
 app.get('/api', (req, res) => {
     res.sendFile(path.join(__dirname, 'browser/index.html'));
@@ -27,12 +29,15 @@ app.get('/api', (req, res) => {
 // API 카테고리 홈
 app.get('/api/category', (req, res) => {
     res.sendFile(path.join(__dirname, 'browser/html/category.html'));
-})
+});
+
 
 app.use(express.json());
 app.use(cookieParser());
 
-app.use('/api', [accountRouter, matchingRouter, teamRouter, productRouter, playersRouter]);
+
+app.use('/api', [accountRouter, matchingRouter, teamRouter, productRouter, playersRouter, gachaRouter, rosterRouter]);
+
 
 // 에러 핸들링 미들웨어를 등록합니다.
 app.use(ErrorHandlerMiddleware);

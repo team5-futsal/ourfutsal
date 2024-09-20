@@ -64,6 +64,7 @@ router.get('/players', async (req, res) => {
 router.get('/players/:playerName', async (req, res) => {
     try {
         const { playerName } = req.params;
+        console.log(playerName);
         const player = await prisma.player.findFirst({
             where: {
                 playerName: playerName,
@@ -81,6 +82,8 @@ router.get('/players/:playerName', async (req, res) => {
         if (player == null) { // 동등 연산자를 통해 null, undefined 둘다 체크 가능
             return res.status(404).json({ message: '존재하지 않는 선수입니다.' });
         }
+
+        return res.status(200).json({ data: player });
     } catch (error) {
         next(error);
     }
@@ -104,32 +107,27 @@ router.put('/players/:playerName', /*미들웨어*/async (req, res) => {
         }
 
       const  updateData = {
-            "playerId" : player.playerId,
-            "positionId" : newPositionId,
-            "playerName" : newPlayerName,
-            "playerStrength" : newPlayerStrength,
-            "PlayerDefense" : newPlayerDefense,
-            "playerStamina" : newPlayerStamina,
-        }
-
-        if(newPositionId == null){
-            updateData.positionId = player.positionId;
 
         }
-        if (newPlayerName == null) {
-            updateData.playerName = player.playerName;
+
+        if(newPositionId != null){
+            updateData.positionId = newPositionId;
 
         }
-        if (newPlayerStrength == null) {
-            updateData.playerStrength = player.playerStrength;
+        if (newPlayerName != null) {
+            updateData.playerName = newPlayerName;
 
         }
-        if (newPlayerDefense == null) {
-            updateData.PlayerDefense = player.playerDefense;
+        if (newPlayerStrength != null) {
+            updateData.playerStrength = newPlayerStrength;
 
         }
-        if (newPlayerStamina == null) {
-            updateData.playerStamina = player.playerStamina;
+        if (newPlayerDefense != null) {
+            updateData.PlayerDefense = newPlayerDefense;
+
+        }
+        if (newPlayerStamina != null) {
+            updateData.playerStamina = newPlayerStamina;
 
         }
 
