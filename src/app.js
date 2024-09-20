@@ -6,6 +6,7 @@ import productRouter from './routes/products.router.js';
 import matchingRouter from './routes/matching.router.js';
 import teamRouter from './routes/team.router.js';
 import playersRouter from './routes/players.router.js';
+import gachaRouter from './routes/gacha.router.js';
 import rosterRouter from './routes/roster.router.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -29,7 +30,7 @@ app.get('/api', (req, res) => {
 // API 카테고리 홈
 app.get('/api/category', (req, res) => {
     res.sendFile(path.join(__dirname, 'browser/html/category.html'));
-})
+});
 
 
 app.use(express.json());
@@ -39,7 +40,7 @@ app.use(cookieParser());
 // app.use('/api', express.static('./browser')); // 미들웨어 3
 
 
-app.use('/api', [accountRouter, matchingRouter, teamRouter, productRouter, playersRouter, rosterRouter]);
+app.use('/api', [accountRouter, matchingRouter, teamRouter, productRouter, playersRouter, gachaRouter, rosterRouter]);
 
 
 // 에러 핸들링 미들웨어를 등록합니다.
