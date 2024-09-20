@@ -81,3 +81,32 @@ export async function updateAccount(body) {
         else return alert('500 Server Error');
     })
 }
+/** 선수 목록 API 호출 */
+export async function getPlayers(){
+    return fetch('/api/players', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+
+    }).then(res => {
+        if (res.status === 200)
+            return res.json();
+        else return alert('500 Server Error');
+    });
+
+}
+
+/** 선수 상세 정보 API 호출 */
+export async function getPlayerDetail(playerName){
+    return fetch(`/api/players/${playerName}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    }).then(res => {
+        if (res.status === 200)
+            return res.json();
+        else return alert('500 Server Error');
+    });
+}
