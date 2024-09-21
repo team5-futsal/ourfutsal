@@ -1,5 +1,35 @@
 // fetch API 기능에 대한 함수들이 모여있습니다.
 
+const fetchAPI = (method, url, body = null, isAuthorization) => {
+    const reqObj = {};
+    const headers = { 'Content-Type': 'application/json' };
+
+    if (isAuthorization) {
+        const Authorization = `Bearer ${localStorage.getItem('token')}`;
+        headers['authorization'] = Authorization;
+    }
+    if (body !== null) {
+        reqObj[body] = body;
+    }
+    reqObj['method'] = method;
+    reqObj['headers'] = headers;
+
+    return fetch(url, reqObj);
+};
+
+const httpRequest = (method, url, body, isAuthorization = false) => {
+    switch (method) {
+        case 'GET':
+            return fetchAPI(method, url, null, isAuthorization);
+        case 'PUT':
+            return fetchAPI(method, url, body, isAuthorization);
+        case 'DELETE':
+            return fetchAPI(method, url, body, isAuthorization);
+        case 'POST':
+            return fetchAPI(method, url, body, isAuthorization);
+    }
+};
+
 /** 계정 로그인 API 호출 */
 export async function loginAccount(body) {
     return fetch('/api/account/login', {
@@ -26,35 +56,29 @@ export async function registAccount(body) {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(body),
-
     }).then(res => {
-        if(res.status === 201) {
+        if (res.status === 201) {
             alert('회원가입 성공! 로그인 화면으로 이동합니다.');
             return true;
-        }
-        else if(res.status === 409) {
+        } else if (res.status === 409) {
             alert('이미 존재하는 아이디입니다.');
             return false;
-        }
-        else {
+        } else {
             alert('500 Server Error');
             return false;
         }
     });
 }
 
-
 /** 모든 계정 조회 API 호출 */
 
 export async function getAccountAll() {
-    return fetch('/api/account/all', {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    }).then(res => {
+    return httpRequest('GET', '/api/account/all', null, false).then(res => {
         if (res.status === 200) return res.json();
-        else return alert('500 Server Error');
+        else {
+            alert('500 Server Error');
+            return null;
+        }
     });
 }
 
@@ -75,16 +99,17 @@ export async function getAccountInfo() {
 
 /** 계정 수정 API 호출 */
 export async function updateAccount(body) {
-    return fetch(`/api/account`, {
+    console.log(body);
+    return fetch('/api/account', {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
             authorization: `Bearer ${localStorage.getItem('token')}`,
         },
-        body: JSON.stringify(body),
+        body: body,
     }).then(res => {
-        if (res.status === 201) return res.json();
-        else return alert('500 Server Error');
+        if (res.status === 201) return true;
+        else return false;
     });
 }
 
@@ -115,7 +140,7 @@ export async function logoutAccount() {
             localStorage.removeItem('token');
             return true;
         }
-    })
+    });
 }
 
 // 본인의 팀 편성 조회
@@ -165,13 +190,11 @@ export async function excludeTeamAll() {
 // user 의 팀 편성 조회
 export async function getUserTeam(param) {
     return fetch(`/api/team/find/${param}`, {
-
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
         },
     }).then(res => {
-
         if (res.status === 200) return res.json();
         else return alert('500 Server Error');
     });
@@ -194,31 +217,27 @@ export async function updateTeam(bodydata) {
 }
 
 /** 선수 목록 API 호출 */
-export async function getPlayers(){
+export async function getPlayers() {
     return fetch('/api/players', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
         },
-
     }).then(res => {
-        if (res.status === 200)
-            return res.json();
+        if (res.status === 200) return res.json();
         else return alert('500 Server Error');
     });
-
 }
 
 /** 선수 상세 정보 API 호출 */
-export async function getPlayerDetail(playerName){
+export async function getPlayerDetail(playerName) {
     return fetch(`/api/players/${playerName}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
         },
     }).then(res => {
-        if (res.status === 200)
-            return res.json();
+        if (res.status === 200) return res.json();
         else return alert('500 Server Error');
     });
 }

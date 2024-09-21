@@ -23,6 +23,7 @@ model account {
 
   roster roster[]
   result results[]
+  tokenStorage tokenStorage[]
 }
 
 model gameRecords {
@@ -55,7 +56,7 @@ model gacha {
   gachaId       Int      @id @default(autoincrement())
   productId     Int
   gachaQuantity Int
-  createdAt     DateTime
+  createdAt     DateTime @default(now())
 
   product product @relation(fields: [productId], references: [productId])
 }
@@ -110,4 +111,13 @@ model enhances {
   enhanceId     Int @id @default(autoincrement())
   increaseValue Int
   successRate   Int
+}
+
+model tokenStorage {
+  tokenId Int @id @default(autoincrement())
+  accountId Int
+  createdAt DateTime @default(now())
+  expiredAt DateTime
+  
+  account account @relation(fields: [accountId], references: [accountId])
 }
