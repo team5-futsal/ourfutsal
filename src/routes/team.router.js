@@ -151,9 +151,6 @@ router.get('/team/find/:accountId', async (req, res, next) => {
             player: {
                 select: {
                     playerName: true,
-                    playerStrength: true,
-                    playerDefense: true,
-                    playerStamina: true,
                 },
             },
         },
@@ -163,24 +160,8 @@ router.get('/team/find/:accountId', async (req, res, next) => {
         return res.status(404).json({ message: ' 해당 유저는 편성중인 선수가 없습니다. ' });
     }
 
-    //강화 테이블 조회
-    const findEnhance = await prisma.enhances.findFirst({
-        where: {
-            enhanceId: 1,
-        },
-    });
-
-    // 강화수치 적용 예시
-    const result = findTeam.map(extract => ({
-        playerId: extract.playerId,
-        playerName: extract.player.playerName + ` +${extract.enhanceCount}`,
-        enhanceCount: extract.enhanceCount,
-        playerStrength: extract.player.playerStrength + `+${findEnhance.increaseValue * extract.enhanceCount}`,
-        playerDefense: extract.player.playerDefense + `+${findEnhance.increaseValue * extract.enhanceCount}`,
-        playerStamina: extract.player.playerStamina + `+${findEnhance.increaseValue * extract.enhanceCount}`,
-    }));
     // 뭘 전달해야할까
-    return res.status(200).json(result);
+    return res.status(200).json(findTeam);
 });
 
 /** 자신의 편성 조회 **/
@@ -227,7 +208,7 @@ router.get('/team/myfind', authMiddleware, async (req, res, next) => {
         playerDefense: extract.player.playerDefense + `+${findEnhance.increaseValue * extract.enhanceCount}`,
         playerStamina: extract.player.playerStamina + `+${findEnhance.increaseValue * extract.enhanceCount}`,
     }));
-
+    /////
     return res.status(200).json(result);
 });
 
