@@ -16,6 +16,7 @@ import {
     getMyPlayer,
     getPlayerDetail,
     getPlayers,
+    sellMyPlayer,
 } from './api.js';
 
 // 카테고리에 있는 각 API 버튼에 이벤트 리스너 추가
@@ -132,7 +133,7 @@ function handleSendRequest(event) {
 
                 for (let i in res) {
                     resContext.innerHTML += `
-                    <div>${res[i].playerName} <button class="player" onclick="infoPlayer('${i}')" >상세 조회(미구현)</button>
+                    <div>${res[i].playerName} <button class="player" onclick="infoPlayer('${i}')" >능력치 조회</button>
                     <button class="player" onclick="excludePlayer('${res[i].playerId}')">편성 제외</button>
                     <br><div id="myPlayer('${[i]}')"></div>
                     <br><br></div>
@@ -178,9 +179,9 @@ function handleSendRequest(event) {
 
         // 내 팀 편성 추가
         case 'updateTeamResSendBtn':
-            if (confirm(`playerId = ${body} 선수를 편성에 추가합니까? `)) {
+            if (confirm(`rosterId = ${body} 선수를 편성에 추가합니까? `)) {
                 updateTeam(body).then(res => {
-                    apiResDiv.textContent = res.message;
+                    apiResDiv.innerHTML = `${res.data.player.playerName} 선수를 편성에 추가했습니다. `;
                 });
             }
 
@@ -218,8 +219,10 @@ function handleSendRequest(event) {
                             for (let i in res.data) {
                                 resContext.innerHTML += `
                                ${res.data[i].isPicked === true ? '▼[편성중]' : ''}
-                               선수명 [${res.data[i].player.playerName} +${res.data[i].enhanceCount}]
+                               선수명 [${res.data[i].playerName} +${res.data[i].enhanceCount}]
+                               보유 수량 : [${res.data[i].playerQuantity}]
                                 ${res.data[i].isPicked === true ? `<button onclick="excludePlayer('${res.data[i].playerId}')">편성제외</button>` : `<button onclick="addPlayer('${res.data[i].rosterId}')">편성추가</button>`}
+                                 ${res.data[i].isPicked === true ? '' : `<button onclick="sellPlayer('${res.data[i].rosterId}')">선수 판매</button>`}
                                 <br><br>
                                   `;
                             }
@@ -239,8 +242,33 @@ function handleSendRequest(event) {
                             for (let i in res.data) {
                                 resContext.innerHTML += `
                                ${res.data[i].isPicked === true ? '▼[편성중]' : ''}
-                               선수명 [${res.data[i].player.playerName} +${res.data[i].enhanceCount}]
+                               선수명 [${res.data[i].playerName} +${res.data[i].enhanceCount}]
+                               보유 수량 : [${res.data[i].playerQuantity}]
                                 ${res.data[i].isPicked === true ? `<button onclick="excludePlayer('${res.data[i].playerId}')">편성제외</button>` : `<button onclick="addPlayer('${res.data[i].rosterId}')">편성추가</button>`}
+                                ${res.data[i].isPicked === true ? '' : `<button onclick="sellPlayer('${res.data[i].rosterId}')">선수 판매</button>`}
+                                <br><br>
+                                  `;
+                            }
+                        });
+                    }
+                };
+
+                window.sellPlayer = async rosterId => {
+                    //확인창 출력
+                    if (confirm('이 선수를 판매 하시겠습니까? ')) {
+                        sellMyPlayer(rosterId);
+                        alert('해당 선수가 판매되었습니다. ');
+
+                        // 어지러운 새로고침
+                        await getMyPlayer().then(res => {
+                            resContext.innerHTML = '';
+                            for (let i in res.data) {
+                                resContext.innerHTML += `
+                               ${res.data[i].isPicked === true ? '▼[편성중]' : ''}
+                               선수명 [${res.data[i].playerName} +${res.data[i].enhanceCount}]
+                               보유 수량 : [${res.data[i].playerQuantity}]
+                                ${res.data[i].isPicked === true ? `<button onclick="excludePlayer('${res.data[i].playerId}')">편성제외</button>` : `<button onclick="addPlayer('${res.data[i].rosterId}')">편성추가</button>`}
+                                 ${res.data[i].isPicked === true ? '' : `<button onclick="sellPlayer('${res.data[i].rosterId}')">선수 판매</button>`}
                                 <br><br>
                                   `;
                             }
@@ -251,13 +279,24 @@ function handleSendRequest(event) {
                 for (let i in res.data) {
                     resContext.innerHTML += `
                     ${res.data[i].isPicked === true ? '▼[편성중]' : ''}
-                    선수명 [${res.data[i].player.playerName} +${res.data[i].enhanceCount}]
+                    선수명 [${res.data[i].playerName} +${res.data[i].enhanceCount}]
+                    보유 수량 : [${res.data[i].playerQuantity}]
                     ${res.data[i].isPicked === true ? `<button onclick="excludePlayer('${res.data[i].playerId}')">편성제외</button>` : `<button onclick="addPlayer('${res.data[i].rosterId}')">편성추가</button>`}
+                     ${res.data[i].isPicked === true ? '' : `<button onclick="sellPlayer('${res.data[i].rosterId}')">선수 판매</button>`}
                     <br><br>
                     `;
                 }
                 apiResDiv.appendChild(resContext);
             });
+            break;
+
+        // 보유 선수 판매
+        case 'sellMyPlayerResSendBtn':
+            if (confirm(`rosterId = ${body} 선수를 판매합니까? `)) {
+                sellMyPlayer(body).then(res => {
+                    apiResDiv.innerHTML = res.message;
+                });
+            }
             break;
 
         case 'getPlayerDetailResSendBtn':

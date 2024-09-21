@@ -32,6 +32,10 @@ router.put('/team/add/', authMiddleware, async (req, res, next) => {
         },
     });
 
+    if (!findThisPlayer) {
+        return res.status(409).json({ message: ' 보유하고 있지 않은 선수입니다. ' });
+    }
+
     // 중복 선수 검색
     const findSameId = await prisma.roster.findFirst({
         where: {
@@ -40,10 +44,6 @@ router.put('/team/add/', authMiddleware, async (req, res, next) => {
             isPicked: true,
         },
     });
-
-    if (!findThisPlayer) {
-        return res.status(409).json({ message: ' 보유하고 있지 않은 선수입니다. ' });
-    }
 
     if (findSameId) {
         return res.status(409).json({ message: ' 동일한 선수는 편성할 수 없습니다. ' });

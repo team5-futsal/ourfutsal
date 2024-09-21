@@ -59,25 +59,14 @@ router.post('/gacha/buy/:productId', authMiddleware, async (req, res, next) => {
             },
         });
 
-        // 전체 선수 대상 = 전체 선수 중 가장 높은 Id 찾기
-        const findMaximumPlayerId = await prisma.player.findFirst({
-            orderBy: {
-                playerId: 'desc',
-            },
-        });
-
         //랜덤 선수 로또
-        const resultGacha = gacha(findtry.gachaQuantity, findMaximumPlayerId.playerId, accountId);
-
+        const resultGacha = await gacha(findtry.gachaQuantity, accountId);
         // 위에서 뽑은 결과로 createMany
         const createManyPlayer = await prisma.roster.createMany({
             data: resultGacha,
         });
 
-        //잔돈 체크
-        const remainingMoney = req.user.cash - findtry.gachaQuantity * 1000;
-
-        return res.status(201).json({ message: `${createManyPlayer} 선수를 획득했습니다. 남은 Cash : ${cashGo.cash}` });
+        return res.status(201).json({ message: `${resultGacha} 선수를 획득했습니다. 남은 Cash : ${cashGo.cash}` });
     } catch (error) {
         switch (error.message) {
             case 'notEnoughMoney':

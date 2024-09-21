@@ -201,6 +201,22 @@ export async function getMyPlayer(bodydata) {
     });
 }
 
+// 본인의 보유 선수 판매
+export async function sellMyPlayer(bodydata) {
+    const body = { rosterId: bodydata };
+    return fetch(`/api/roster/sell`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(body),
+    }).then(res => {
+        if (res.status === 201) return res.json();
+        else return alert('500 Server Error');
+    });
+}
+
 /** 선수 목록 API 호출 */
 export async function getPlayers() {
     return fetch('/api/players', {

@@ -55,7 +55,7 @@ model gacha {
   gachaId       Int      @id @default(autoincrement())
   productId     Int
   gachaQuantity Int
-  createdAt     DateTime
+  createdAt     DateTime @default(now())
 
   product product @relation(fields: [productId], references: [productId])
 }

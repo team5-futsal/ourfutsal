@@ -6,29 +6,51 @@ import authMiddleware from '../middlewares/auth.middleware.js';
 const router = express.Router();
 
 /** 보유 선수 조회 **/
-// 강화수치가 같은 중복 선수는 거름!!!!
+// 강화수치가 같은 중복 선수는 거름!!
 router.get('/roster', authMiddleware, async (req, res) => {
     const { accountId } = req.user;
 
-    const myPlayers = await prisma.roster.findMany({
-        where: {
-            accountId: +accountId,
-        },
-        include: {
-            player: true,
-        },
-        distinct: ['playerId', 'enhanceCount'],
-    });
+    // 각 중복선수 카운트
+    const countPlayer = await prisma.$queryRaw`
+      SELECT
+        roster.rosterId,
+        roster.playerId,
+        roster.isPicked,
+        roster.enhanceCount,
+        player.positionId,
+        player.playerName,
+        player.playerStrength,
+        player.playerDefense,
+        player.playerStamina,
+        COUNT(*) as playerQuantity
+      FROM roster
+      JOIN player ON roster.playerId = player.playerId
+      WHERE roster.accountId = ${+accountId}
+      GROUP BY roster.playerId, roster.enhanceCount
+      ORDER BY roster.playerId ASC, roster.enhanceCount ASC, roster.isPicked ASC;
+    `;
 
-    if (myPlayers.length === 0) {
+    if (countPlayer.length === 0) {
         return res.status(404).json({ message: '보유한 선수가 없습니다.' });
     }
 
-    return res.status(200).json({ data: myPlayers });
+    const result = countPlayer.map(asc => ({
+        playerQuantity: parseInt(asc.playerQuantity),
+        rosterId: asc.rosterId,
+        playerId: asc.playerId,
+        playerName: asc.playerName,
+        isPicked: Boolean(asc.isPicked),
+        enhanceCount: asc.enhanceCount,
+        playerStrength: asc.playerStrength,
+        playerDefense: asc.playerDefense,
+        playerStamina: asc.playerStamina,
+    }));
+    console.log(result);
+
+    return res.status(200).json({ data: result });
 });
 
-/** playerName을 받아와야할거 같은데
- 선수 판매 **/
+/** 선수 판매 **/
 router.delete('/roster/sell', authMiddleware, async (req, res) => {
     const { accountId } = req.user;
     const { rosterId } = req.body;
@@ -38,13 +60,22 @@ router.delete('/roster/sell', authMiddleware, async (req, res) => {
             rosterId: +rosterId,
             accountId: +accountId,
         },
+        select: {
+            player: {
+                select: {
+                    playerName: true,
+                },
+            },
+        },
     });
 
     if (!rosterFind) {
         return res.status(404).json({ message: ' 보유하고 있지 않은 선수입니다. ' });
     }
 
-    console.log(isPlayerExists);
+    if (rosterFind.isPicked === true) {
+        return res.status(409).json({ message: ' 편성중인 선수는 판매할 수 없습니다. ' });
+    }
 
     await prisma.roster.delete({
         where: {
@@ -52,9 +83,17 @@ router.delete('/roster/sell', authMiddleware, async (req, res) => {
         },
     });
 
-    return res.status(200).json({
-        message: '삭제 성공!',
-        '남은 동명 선수 수량': isPlayerExists.length - 1,
+    const getCash = await prisma.account.update({
+        data: {
+            cash: req.user.cash + 300,
+        },
+        where: {
+            accountId: +accountId,
+        },
+    });
+
+    return res.status(201).json({
+        message: `${rosterFind.player.playerName} 선수를 300Cash에 판매했습니다. 소지금 : ${getCash.cash}`,
     });
 });
 
