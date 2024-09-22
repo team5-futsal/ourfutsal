@@ -13,24 +13,32 @@ import {
     excludeTeam,
     excludeTeamAll,
     updateTeam,
-  getPlayerDetail,
-  getPlayers,
+    getPlayerDetail,
+    getPlayers,
 } from './api.js';
 
-
-// 카테고리에 있는 각 API 버튼에 이벤트 리스너 추가
-document.querySelectorAll('[type="apiForm"] button').forEach(button => {
-    button.addEventListener('click', handleApiButtonClick);
-});
-
-document.body.addEventListener('click', function (event) {
-    // 클릭된 요소의 ID가 'ResSendBtn'으로 끝나는지 확인
-    if (event.target && event.target.id.endsWith('ResSendBtn')) {
-        const apiResDiv = document.getElementById('apiRes');
-        apiResDiv.children.textContext = '';
-        // sendRequest 버튼이 클릭된 경우 처리
-        handleSendRequest(event);
+// 카테고리 html이 로드되고 js가 로드되었을 때 실행하도록 함.
+// 1. 생성된 accessToken을 받아오기 위해 선언함.
+window.addEventListener('DOMContentLoaded', () => {
+    if (getAccessToken !== null) {
+        setAccessToken(localStorage.getItem('accessToken'));
+        localStorage.clear();
     }
+
+    // 카테고리에 있는 각 API 버튼에 이벤트 리스너 추가
+    document.querySelectorAll('[type="apiForm"] button').forEach(button => {
+        button.addEventListener('click', handleApiButtonClick);
+    });
+
+    document.body.addEventListener('click', function (event) {
+        // 클릭된 요소의 ID가 'ResSendBtn'으로 끝나는지 확인
+        if (event.target && event.target.id.endsWith('ResSendBtn')) {
+            const apiResDiv = document.getElementById('apiRes');
+            apiResDiv.children.textContext = '';
+            // sendRequest 버튼이 클릭된 경우 처리
+            handleSendRequest(event);
+        }
+    });
 });
 
 function handleSendRequest(event) {
@@ -46,6 +54,7 @@ function handleSendRequest(event) {
 
     const params = document.getElementById('reqParams').value;
     const body = document.getElementById('reqBody').value;
+    const fineBody = JSON.parse(body);
 
     // 버튼 ID에 따라 API 요청을 구분
     switch (sendRequestBtn.id) {
@@ -65,23 +74,25 @@ function handleSendRequest(event) {
             break;
 
         case 'updateAccountResSendBtn':
-            updateAccount(body).then(res => {
-                alert(`접속한 유저의 비밀번호가 수정되었습니다. 로그인 화면으로 이동합니다.`);
-                // window.location.href = 'http://localhost:3333/api'
-                // window.localStorage.clear()
+            updateAccount(fineBody).then(res => {
+                if (res) {
+                    alert(`접속한 유저의 비밀번호가 수정되었습니다. 로그인 화면으로 이동합니다.`);
+                    window.location.href = 'http://localhost:3333/api';
+                    window.localStorage.clear();
+                } else {
+                    alert('500 SERVER ERROR');
+                }
             });
             break;
 
         case 'getAccountResSendBtn':
             getAccountInfo().then(res => {
-                const userId = res.data.userId;
-                const createdAt = res.data.createdAt;
-
-                resContext.innerHTML += `
-                    <p class="users">userId: ${userId}, createdAt: ${createdAt}</p>
+                for (const [key, value] of Object.entries(res.user)) {
+                    resContext.innerHTML += `
+                    <p class="users">${key}: ${value}</p>
                     <br>
                     `;
-
+                }
                 apiResDiv.appendChild(resContext);
             });
             break;
@@ -92,15 +103,15 @@ function handleSendRequest(event) {
                 alert(`접속한 ${userId}가 정상적으로 삭제되었습니다. 로그인 화면으로 이동합니다.`);
                 // 삭제가 되었으니 페이지를 기본 홈으로 이동
                 window.location.href = 'http://localhost:3333/api';
-                window.localStorage.clear();
             });
             break;
 
         case 'logoutAccountResSendBtn':
             logoutAccount().then(res => {
-                alert('로그아웃 되었습니다. 로그인 화면으로 이동합니다.');
-                window.location.href = 'http://localhost:3333/api';
-                window.localStorage.clear();
+                if (res) {
+                    alert('로그아웃 되었습니다. 로그인 화면으로 이동합니다.');
+                    window.location.href = 'http://localhost:3333/api';
+                }
             });
             break;
 
@@ -110,7 +121,6 @@ function handleSendRequest(event) {
                 const selectDiv = document.querySelector('.apiRes');
 
                 let content = '';
-
                 window.excludePlayer = async playerId => {
                     //확인창 출력
                     if (confirm('이 선수를 편성에서 제외 하시겠습니까? ')) {
@@ -176,9 +186,8 @@ function handleSendRequest(event) {
             }
 
             break;
-        case 'getPlayersResSendBtn' :
+        case 'getPlayersResSendBtn':
             getPlayers().then(res => {
-
                 const apiResDiv = document.querySelector('.apiRes');
                 const resContext = document.createElement('div');
 
@@ -195,9 +204,9 @@ function handleSendRequest(event) {
             });
             break;
 
-        case 'getPlayerDetailResSendBtn' :
+        case 'getPlayerDetailResSendBtn':
             getPlayerDetail(params).then(res => {
-                const player = res.data
+                const player = res.data;
                 const playerName = res.data.playerName;
                 const positionId = res.data.positionId;
                 const playerStrength = res.data.playerStrength;
@@ -215,6 +224,4 @@ function handleSendRequest(event) {
         default:
             console.log('이 버튼에 해당하는 API 기능이 없습니다');
     }
-
 }
-

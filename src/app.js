@@ -8,6 +8,7 @@ import teamRouter from './routes/team.router.js';
 import playersRouter from './routes/players.router.js';
 import gachaRouter from './routes/gacha.router.js';
 import rosterRouter from './routes/roster.router.js';
+import tokenRouter from './routes/token.router.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -34,11 +35,20 @@ app.get('/api/category', (req, res) => {
 });
 
 // 회원가입 페이지
-app.get('/api/join',  (req, res) => {
+app.get('/api/join', (req, res) => {
     res.sendFile(path.join(__dirname, 'browser/html/join.html'));
 });
 
-app.use('/api', [accountRouter, matchingRouter, teamRouter, productRouter, playersRouter, gachaRouter, rosterRouter]);
+app.use('/api', [
+    accountRouter,
+    matchingRouter,
+    teamRouter,
+    productRouter,
+    playersRouter,
+    gachaRouter,
+    rosterRouter,
+    tokenRouter,
+]);
 
 // 에러 핸들링 미들웨어를 등록합니다.
 app.use(ErrorHandlerMiddleware);

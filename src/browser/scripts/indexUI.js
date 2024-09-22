@@ -14,14 +14,13 @@ window.addEventListener('DOMContentLoaded', function () {
         const password = document.getElementById('password').value;
 
         const body = { userId, password };
-
-        loginAccount(body).then(res => {
-            if (!res) {
-                alert('아이디 혹은 비밀번호가 일치하지 않습니다.');
-                return;
-            } else {
-                localStorage.setItem('token', res.token);
+        loginAccount(body).then(data => {
+            if (data.isLogin === true) {
+                localStorage.setItem('accessToken', data.accessToken);
                 window.location.href = `http://localhost:3333/api/category`;
+                
+            } else {
+                // location.reload(true);
             }
         });
     });
