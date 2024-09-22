@@ -31,7 +31,6 @@ router.get('/roster', authMiddleware, async (req, res) => {
       ORDER BY  roster.isPicked DESC, roster.playerId ASC, roster.enhanceCount DESC;
 
     `;
-    console.log(countPlayer);
 
     if (countPlayer.length === 0) {
         return res.status(404).json({ message: '보유한 선수가 없습니다.' });
@@ -124,13 +123,11 @@ router.put('/roster/enhance', authMiddleware, async (req, res, next) => {
     const { accountId } = req.user;
     const enhanceCost = 1000;
     try {
-        // 확률 가져오기
         const enhanceTry = await prisma.enhances.findFirst({
             where: { enhanceId: 1 },
         });
 
         const randomGoGo = Math.floor(Math.random() * 100 + 1);
-
         const findPlayer = await prisma.roster.findFirst({
             where: {
                 rosterId: +rosterId,
@@ -189,7 +186,7 @@ router.put('/roster/enhance', authMiddleware, async (req, res, next) => {
                     },
                 });
 
-                if (randomGoGo > successRate.successRate) {
+                if (randomGoGo > enhanceTry.successRate) {
                     const goEnhance = await tx.roster.update({
                         data: {
                             enhanceCount: findPlayer.enhanceCount + 1,
@@ -198,19 +195,17 @@ router.put('/roster/enhance', authMiddleware, async (req, res, next) => {
                             rosterId: findPlayer.rosterId,
                         },
                     });
+                    return res.status(201).json({ message: `강화 성공 ! 잔돈${payCash.cash} ` });
+                } else {
+                    return res.status(201).json({ message: `강화 실패 ! ` });
                 }
-                return payCash;
             },
             {
                 isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
             },
         );
 
-        if (randomGoGo > successRate.successRate) {
-            return res.status(201).json({ message: `강화 성공 ! 잔돈${result.cash} ` });
-        } else {
-            return res.status(201).json({ message: `강화 실패 ! ` });
-        }
+        return result;
     } catch (error) {
         return res.status(409).json({ message: error.message });
     }
