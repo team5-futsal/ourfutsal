@@ -39,7 +39,7 @@ model results {
   result    Int
 
   gameRecord gameRecords @relation(fields: [gameId], references: [gameId])
-  account    account     @relation(fields: [accountId], references: [accountId])
+  account    account     @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
 }
 
 model product {
@@ -81,7 +81,7 @@ model roster {
   createdAt    DateTime @default(now())
 
   player  player  @relation(fields: [playerId], references: [playerId])
-  account account @relation(fields: [accountId], references: [accountId])
+  account account @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
 }
 
 model player {
@@ -116,8 +116,9 @@ model enhances {
 model tokenStorage {
   tokenId Int @id @default(autoincrement())
   accountId Int
-  createdAt DateTime @default(now())
-  expiredAt DateTime
+  token String 
+  createdAt Int
+  expiredAt Int
   
-  account account @relation(fields: [accountId], references: [accountId])
+  account account @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
 }
