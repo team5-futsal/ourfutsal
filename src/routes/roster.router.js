@@ -7,7 +7,7 @@ import authMiddleware from '../middlewares/auth.middleware.js';
 const router = express.Router();
 
 /** 보유 선수 조회 **/
-// 강화수치가 같은 중복 선수는 거름!!
+// 강화수치가 같은 중복 선수는 그룹화 후 카운트
 router.get('/roster', authMiddleware, async (req, res) => {
     const { accountId } = req.user;
 
@@ -117,7 +117,7 @@ router.delete('/roster/sell', authMiddleware, async (req, res) => {
 });
 
 // 선수 강화 API 작동가능
-// 시간이 촉박하여 최적화 하지 못했습니다.
+// 시간이 촉박하여 최적화 부족
 router.put('/roster/enhance', authMiddleware, async (req, res, next) => {
     const { rosterId } = req.body;
     const { accountId } = req.user;
