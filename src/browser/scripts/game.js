@@ -281,9 +281,9 @@ while (turn < 45) {
         }
     }
 
-    // console.log(probs)
+    // console.log(probs) // 확률 확인
     const result = action[decide.act](choices[decide.act])
-    // console.log(players.map(p=>`${p.team}${p.name} p:${p.position} sp:${p.curSp}`))
+    // console.log(players.map(p=>`${p.team}${p.name} p:${p.position} sp:${p.curSp}`)) // 선수 상태 확인
     gameLog.push({players:players, act:decide.act, result: result})
     turn++;
 }

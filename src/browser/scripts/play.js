@@ -4,10 +4,11 @@ let ctx = canvas.getContext('2d');
 const ballImage = document.getElementById("source");
 
 class drawPlayer {
-    constructor(ctx) {
+    constructor(ctx, name) {
         this.width = 40;
         this.height = 40;
         this.ctx = ctx
+        this.name = name
     }
 
     draw(x,y, radius, color) {
@@ -19,7 +20,7 @@ class drawPlayer {
 
         this.ctx.font = "30px malgun gothic"
         this.ctx.fillStyle = 'white';
-        this.ctx.fillText("name", x-radius, y, 500)
+        this.ctx.fillText(this.name, x-radius, y, 500)
     }
 
     drawSp(x,y,radius){
@@ -44,7 +45,7 @@ class drawBall {
     }
 }
 
-const player = new drawPlayer(ctx)
+const player = new drawPlayer(ctx, "손흥민")
 const ball = new drawBall(ctx, ballImage)
 
 const heightUnit = canvas.height/3<<0
