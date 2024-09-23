@@ -18,6 +18,7 @@ import {
     sellMyPlayer,
     enhancePlayer,
     searchTeam,
+    buyGacha,
 } from './api.js';
 
 // 카테고리 html이 로드되고 js가 로드되었을 때 실행하도록 함.
@@ -269,6 +270,22 @@ function handleSendRequest(event) {
                     apiResDiv.innerHTML = res.message;
                 });
             }
+            break;
+
+        case 'enhancePlayerResSendBtn':
+            if (confirm(`rosterId = ${body} 선수를 강화합니까? `)) {
+                enhancePlayer(body).then(res => {
+                    apiResDiv.innerHTML = res.message;
+                });
+            }
+            break;
+
+        // 선수 구매 가차
+        case 'buyGachaResSendBtn':
+            buyGacha(params).then(res => {
+                apiResDiv.innerHTML = res.message;
+            });
+
             break;
 
         case 'enhancePlayerResSendBtn':

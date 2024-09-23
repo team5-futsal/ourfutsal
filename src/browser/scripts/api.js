@@ -2,7 +2,7 @@
 
 import { refreshAccessToken } from '../services/generate.js';
 
-const fetchAPI = (method, url, body, isAuthorization) => {
+const fetchAPI = (method, url, body = null, isAuthorization = false) => {
     console.log(`${url} 요청중...`);
     return new Promise((resolve, reject) => {
         const reqObj = {};
@@ -35,7 +35,10 @@ const fetchAPI = (method, url, body, isAuthorization) => {
                     return fetch(url, reqObj);
                 })
                 .then(res => resolve(res))
-                .catch(error => reject(error));
+                .catch(error => {
+                    console.log(error);
+                    reject(error);
+                });
         } else {
             if (body !== null) {
                 reqObj['body'] = JSON.stringify(body);
@@ -145,7 +148,7 @@ export async function searchTeam(accountId) {
 
 // 본인의 팀 편성 제외
 export async function excludeTeam(bodydata) {
-    const body = { playerId: bodydata };
+    const body = JSON.parse(bodydata);
     const res = await fetchAPI('PUT', '/api/team/exclude', body, true);
     if (res.status === 200) return res.json();
     else return alert('500 Server Error');
@@ -176,16 +179,46 @@ export async function getMyPlayer() {
 // 본인의 보유 선수 판매
 export async function sellMyPlayer(bodydata) {
     const body = { rosterId: bodydata };
-    const res = await fetchAPI('DELETE', `/api/roster/sell`, body, true);
-    if (res.status === 201) return res.json();
-    else return alert('500 Server Error');
+    return fetch(`/api/roster/sell`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(body),
+    }).then(res => {
+        if (res.status === 201) return res.json();
+        else return alert('500 Server Error');
+    });
 }
 
 // 보유 선수 강화
 export async function enhancePlayer(bodydata) {
     const body = { rosterId: bodydata };
-    const res = await fetchAPI('PUT', `/api/roster/enhance`, body, true);
-    if (res.status === 201) return res;
+    return fetch(`/api/roster/enhance`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(body),
+    }).then(res => {
+        if (res.status === 201) return res;
+        else return alert('500 Server Error');
+    });
+}
+
+// 선수 가챠 구매
+export async function buyGacha(gacha) {
+    const res = await fetchAPI('POST', `/api/gacha/buy/${gacha}`, null, true);
+    if (res.status === 201) return res.json();
+    else return alert('500 Server Error');
+}
+
+// 캐쉬 충전하기 미완성미완성미완성미완성미완성미완성미완성미완성미완성
+export async function buyCash(money) {
+    const res = await fetchAPI('PUT', `/api/account/${money}`, null, true);
+    if (res.status === 201) return res.json();
     else return alert('500 Server Error');
 }
 
