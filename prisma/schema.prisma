@@ -59,7 +59,7 @@ model gacha {
 model purchaseHistory {
   purchaseId       Int      @id @default(autoincrement())
   productId        Int
-  purchaseQuantity Int
+  purchaseQuantity Int?
   changedCash      Int
   purchasedAt      DateTime @default(now())
 
