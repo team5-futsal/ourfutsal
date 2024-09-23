@@ -179,33 +179,17 @@ export async function getMyPlayer() {
 // 본인의 보유 선수 판매
 export async function sellMyPlayer(bodydata) {
     const body = { rosterId: bodydata };
-    return fetch(`/api/roster/sell`, {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-            authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify(body),
-    }).then(res => {
-        if (res.status === 201) return res.json();
-        else return alert('500 Server Error');
-    });
+    const res = await fetchAPI('DELETE', `/api/roster/sell`, body, true);
+    if (res.status === 201) return res.json();
+    else return alert('500 Server Error');
 }
 
 // 보유 선수 강화
 export async function enhancePlayer(bodydata) {
     const body = { rosterId: bodydata };
-    return fetch(`/api/roster/enhance`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify(body),
-    }).then(res => {
-        if (res.status === 201) return res;
-        else return alert('500 Server Error');
-    });
+    const res = await fetchAPI('PUT', '/api/roster/enhance', body, true);
+    if (res.status === 201) return res;
+    else return alert('500 Server Error');
 }
 
 // 선수 가챠 구매
