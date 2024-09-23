@@ -1,6 +1,7 @@
 import express from 'express';
 import { prisma } from '../utils/prisma/index.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
+import { validateToken } from '../utils/tokens/tokens.js';
 
 const router = express.Router();
 
@@ -115,6 +116,10 @@ router.put('/team/empty', authMiddleware, async (req, res, next) => {
         },
     });
 
+    if (findTeam.length === 0) {
+        return res.status(404).json({ message: ' 팀에 편성중인 선수가 없습니다. ' });
+    }
+
     await prisma.roster.updateMany({
         data: {
             isPicked: false,
@@ -125,50 +130,28 @@ router.put('/team/empty', authMiddleware, async (req, res, next) => {
         },
     });
 
-    if (findTeam.length === 0) {
-        return res.status(404).json({ message: ' 팀에 편성중인 선수가 없습니다. ' });
-    }
-
     return res.status(200).json({ message: ` 모든 선수가 편성 해제되었습니다. ` });
 });
 
-/** 다른 유저의 팀 편성 조회**/
-// JWT 필요없음
-router.get('/team/find/:accountId', async (req, res, next) => {
-    const { accountId } = req.params;
+// 편성 조회하기 VER 2
+// param으로 accountId를 받아서 대상 편성조회
+// 0 조회시, 자신 조회
+router.get('/team/search/:accountId', authMiddleware, async (req, res, next) => {
+    let { accountId } = req.params;
+    let myTeamSearch = false;
+
+    if (req.user.accountId === +accountId || +accountId === 0) {
+        myTeamSearch = true;
+        accountId = req.user.accountId;
+    }
 
     if (!accountId) {
         return res.status(404).json({ message: ' 존재하지 않는 유저 입니다. ' });
     }
-    const findTeam = await prisma.roster.findMany({
-        where: {
-            accountId: +accountId,
-            isPicked: true,
-        },
-        select: {
-            playerId: true,
-            enhanceCount: true,
-            player: {
-                select: {
-                    playerName: true,
-                },
-            },
-        },
-    });
 
-    if (findTeam.length === 0) {
-        return res.status(404).json({ message: ' 해당 유저는 편성중인 선수가 없습니다. ' });
+    if (+accountId === 0) {
+        return res.status(404).json({ message: ' 로그인 후 이용해주세요.' });
     }
-
-    // 뭘 전달해야할까
-    return res.status(200).json(findTeam);
-});
-
-/** 자신의 편성 조회 **/
-// JWT 필요
-router.get('/team/myfind', authMiddleware, async (req, res, next) => {
-    const { accountId } = req.user;
-
     const findTeam = await prisma.roster.findMany({
         where: {
             accountId: +accountId,
@@ -180,9 +163,9 @@ router.get('/team/myfind', authMiddleware, async (req, res, next) => {
             player: {
                 select: {
                     playerName: true,
-                    playerStrength: true,
-                    playerDefense: true,
-                    playerStamina: true,
+                    playerStrength: myTeamSearch === true ? true : false,
+                    playerDefense: myTeamSearch === true ? true : false,
+                    playerStamina: myTeamSearch === true ? true : false,
                 },
             },
         },
@@ -199,18 +182,105 @@ router.get('/team/myfind', authMiddleware, async (req, res, next) => {
         },
     });
 
-    // 강화수치 적용 예시
-    const result = findTeam.map(extract => ({
-        playerId: extract.playerId,
-        playerName: extract.player.playerName + ` +${extract.enhanceCount}`,
-        enhanceCount: extract.enhanceCount,
-        playerStrength: extract.player.playerStrength + `+${findEnhance.increaseValue * extract.enhanceCount}`,
-        playerDefense: extract.player.playerDefense + `+${findEnhance.increaseValue * extract.enhanceCount}`,
-        playerStamina: extract.player.playerStamina + `+${findEnhance.increaseValue * extract.enhanceCount}`,
-    }));
-    /////
+    //리팩토링 필요
+    let result;
+    if (myTeamSearch === true) {
+        result = findTeam.map(extract => ({
+            playerId: extract.playerId,
+            playerName: extract.player.playerName + ` +${extract.enhanceCount}`,
+            enhanceCount: extract.enhanceCount,
+            playerStrength: extract.player.playerStrength + `+${findEnhance.increaseValue * extract.enhanceCount}`,
+            playerDefense: extract.player.playerDefense + `+${findEnhance.increaseValue * extract.enhanceCount}`,
+            playerStamina: extract.player.playerStamina + `+${findEnhance.increaseValue * extract.enhanceCount}`,
+        }));
+    } else {
+        result = findTeam.map(extract => ({
+            playerId: extract.playerId,
+            playerName: extract.player.playerName + ` +${extract.enhanceCount}`,
+        }));
+    }
     return res.status(200).json(result);
 });
+
+// /** 다른 유저의 팀 편성 조회**/
+// // JWT 필요없음
+// router.get('/team/find/:accountId', async (req, res, next) => {
+//     const { accountId } = req.params;
+
+//     if (!accountId) {
+//         return res.status(404).json({ message: ' 존재하지 않는 유저 입니다. ' });
+//     }
+//     const findTeam = await prisma.roster.findMany({
+//         where: {
+//             accountId: +accountId,
+//             isPicked: true,
+//         },
+//         select: {
+//             playerId: true,
+//             enhanceCount: true,
+//             player: {
+//                 select: {
+//                     playerName: true,
+//                 },
+//             },
+//         },
+//     });
+
+//     if (findTeam.length === 0) {
+//         return res.status(404).json({ message: ' 해당 유저는 편성중인 선수가 없습니다. ' });
+//     }
+
+//     // 뭘 전달해야할까
+//     return res.status(200).json(findTeam);
+// });
+
+// /** 자신의 편성 조회 **/
+// // JWT 필요
+// router.get('/team/myfind', authMiddleware, async (req, res, next) => {
+//     const { accountId } = req.user;
+
+//     const findTeam = await prisma.roster.findMany({
+//         where: {
+//             accountId: +accountId,
+//             isPicked: true,
+//         },
+//         select: {
+//             playerId: true,
+//             enhanceCount: true,
+//             player: {
+//                 select: {
+//                     playerName: true,
+//                     playerStrength: true,
+//                     playerDefense: true,
+//                     playerStamina: true,
+//                 },
+//             },
+//         },
+//     });
+
+//     if (findTeam.length === 0) {
+//         return res.status(404).json({ message: ' 편성중인 선수가 없습니다.' });
+//     }
+
+//     //강화 테이블 조회
+//     const findEnhance = await prisma.enhances.findFirst({
+//         where: {
+//             enhanceId: 1,
+//         },
+//     });
+
+//     // 강화수치 적용 예시
+//     const result = findTeam.map(extract => ({
+//         playerId: extract.playerId,
+//         playerName: extract.player.playerName + ` +${extract.enhanceCount}`,
+//         enhanceCount: extract.enhanceCount,
+//         playerStrength: extract.player.playerStrength + `+${findEnhance.increaseValue * extract.enhanceCount}`,
+//         playerDefense: extract.player.playerDefense + `+${findEnhance.increaseValue * extract.enhanceCount}`,
+//         playerStamina: extract.player.playerStamina + `+${findEnhance.increaseValue * extract.enhanceCount}`,
+//     }));
+//     /////
+//     return res.status(200).json(result);
+// });
 
 // 교체 선수 계획-- 추후 상의 //
 
