@@ -1,8 +1,8 @@
-import { prisma } from './src/utils/prisma/index.js';
+import { prisma } from '../../../src/utils/prisma/index.js';
 
-// 노잼게임 초안의 초안
+// 일반게임- 사용자 설정 게임
 
-// 로드 게임
+// 로드
 export default async function (pp, op) {
     const playerId = pp;
     const opponentPlayerId = op;
@@ -37,23 +37,24 @@ export default async function (pp, op) {
     });
 
     const playerPower = await prisma.$queryRaw`
-SELECT SUM(playerStrength+playerDefense+playerStamina+(enhanceCount*${enhanceValue.increaseValue})) as pp
+SELECT SUM(playerStrength+playerDefense+playerStamina+(enhanceCount*${enhanceValue.increaseValue})) as playerSum
 FROM roster as rs inner join  player as pl on rs.playerId = pl.playerId  
 where rs.accountId = ${pp} and rs.isPicked = 1;
 `;
 
     const opponentPower = await prisma.$queryRaw`
-SELECT SUM(playerStrength+playerDefense+playerStamina+(enhanceCount*10)) as op
+SELECT SUM(playerStrength+playerDefense+playerStamina+(enhanceCount*${enhanceValue.increaseValue})) as opponentSum
 FROM roster as rs inner join  player as pl on rs.playerId = pl.playerId  
 where rs.accountId = ${op} and rs.isPicked = 1
 `;
 
-    const playerTotal = +playerPower[0].pp;
-    const opponentTotal = +opponentPower[0].op;
+    const playerTotal = +playerPower[0].playerSum;
+    const opponentTotal = +opponentPower[0].opponentSum;
 
     console.log(playerTotal);
     console.log(opponentTotal);
 
+    // 경기 결과
     const roulette = Math.random() * (playerTotal + opponentTotal);
     console.log(roulette);
 

@@ -86,8 +86,40 @@ router.post('/gacha/buy', authMiddleware, async (req, res, next) => {
 });
 
 // 상품 구매 api 예시 (웅상)
-router.post('/gacha/buy', authMiddleware, async (req, res, next) => {
+router.post('/gacha/buy/:gachaTry', authMiddleware, async (req, res, next) => {
     try {
+        const { gachaTry } = req.params;
+
+        const { accountId } = req.user;
+
+        // // 해당 상품 찾기
+        // const findtry = await prisma.gacha.findFirst({
+        //     where: {
+        //         productId: +productId,
+        //     },
+        // });
+
+        // if (!findtry) {
+        //     return res.status(401).json({ message: ' 없는 상품 번호 입니다. ' });
+        // }
+
+        const gachaPrice = gachaTry * 1000;
+
+        console.log(gachaTry);
+        // 선불 요금제
+        if (req.user.cash < +gachaPrice) {
+            throw new Error('notEnoughMoney');
+        }
+
+        const cashGo = await prisma.account.update({
+            data: {
+                cash: req.user.cash - gachaPrice,
+            },
+            where: {
+                accountId: +accountId,
+            },
+        });
+
         //랜덤 선수 로또
         const resultGacha = await gacha(gachaTry, accountId);
 
