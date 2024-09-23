@@ -116,15 +116,39 @@ export async function logoutAccount() {
 
 // 본인의 팀 편성 조회
 export async function getTeam() {
-    return fetch('/api/team/myfind', {
+    return fetch('/api/team/search/0', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
             authorization: `Bearer ${localStorage.getItem('token')}`,
         },
     }).then(res => {
-        if (res.status === 200) return res.json();
-        else return alert('500 Server Error');
+        if (res.status === 200) {
+            return res.json();
+        } else if (res.status === 404) {
+            return res.json();
+        } else {
+            return alert('500 Server Error');
+        }
+    });
+}
+
+// 팀 편성 조회하기 ver2
+export async function searchTeam(accountId) {
+    return fetch(`/api/team/search/${accountId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+    }).then(res => {
+        if (res.status === 200) {
+            return res.json();
+        } else if (res.status === 404) {
+            return res.json();
+        } else {
+            return alert('500 Server Error');
+        }
     });
 }
 
@@ -151,19 +175,6 @@ export async function excludeTeamAll() {
         headers: {
             'Content-Type': 'application/json',
             authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-    }).then(res => {
-        if (res.status === 200) return res.json();
-        else return alert('500 Server Error');
-    });
-}
-
-// user 의 팀 편성 조회
-export async function getUserTeam(param) {
-    return fetch(`/api/team/find/${param}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
         },
     }).then(res => {
         if (res.status === 200) return res.json();
