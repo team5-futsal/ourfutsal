@@ -95,23 +95,18 @@ for (let i = 0; i < 3; i++) {
 
 //코인 토스
 //선수에게 공 지급
-// Random utill
-function Random(n) {
-    return Math.floor(Math.random() * n)
-}
-
 if (Math.random() < 0.5) {
     player1[2].hasBall = true;
-    const startTeam = true;
 } else {
     player2[2].hasBall = true;
-    const startTeam = false;
 }
+
 //init
 const players = [...player1, ...player2]
 const fieldSize = 100;
 const score = [0,0];
 const initPosion = players.map(p=>p.position)
+const gameLog = []
 
 const spConsume = {
     pass:5,
@@ -168,83 +163,95 @@ const dribble = (host) => {
     return { prob: 1 - def.prob, host: host, defebder: def.defender }
 }
 
-function lostBall(){
-    players.forEach(p=> p.hasBall = false)
-}
-
-function positionReset(){
-    players.forEach((p,i)=>p.position = initPosion[i])
-}
-
-function foward(host, long){
-    const direction = host.team==1 ? 1 : -1
-    host.position += long * direction
-    // players.filter(p=>p.team == host.team).position += long * direction
+const utils = {
+    lostBall: ()=>{players.forEach(p=> p.hasBall = false)},
+    positionReset: ()=>{players.forEach((p,i)=>p.position = initPosion[i])},
+    foward: (host, long)=>{
+        const direction = host.team==1 ? 1 : -1
+        host.position += long * direction
+        // players.filter(p=>p.team == host.team).position += long * direction
+    },
+    Random: (n) =>{return Math.floor(Math.random() * n)}
 }
 
 const action = {
     shoot:(shoot)=>{
+        let result = 0;
         if(shoot.host){
             shoot.host.curSp -= spConsume.shoot //스테미나 소모
         } 
-        lostBall() // 공 초기화
+        utils.lostBall() // 공 초기화
+        if(players.find(p => p.hasBall))
+        utils.positionReset() // 포지션 초기화
 
         if(Math.random() < shoot.prob){ // 성공 판정
             score[shoot.host.team-1] += 1
             players.filter(p=> p.team != shoot.host.team)[0].hasBall = true
-            console.log(`team${shoot.host.team} 득점 성공 score-${score[0]}:${score[1]}`)
+            result = `team${shoot.host.team} 득점 성공 score-${score[0]}:${score[1]}`
         } else if(shoot.defender){
-            console.log(`team${shoot.defender.team} ${shoot.defender.name} 수비 성공`)
+            result = `team${shoot.defender.team} ${shoot.defender.name} 수비 성공`
             shoot.defender.curSp -= spConsume.defence
             shoot.defender.hasBall = true //공 이동
-        } else 
-            console.log(`team${shoot.host.team} 득점 실패 score-${score[0]}:${score[1]}`)
+        } else {
+            result = `team${shoot.host.team} 득점 실패 score-${score[0]}:${score[1]}`
             players.filter(p=> p.team != shoot.host.team)[0].hasBall = true
+        }
+
+        console.log(result)
+        return {result:result}
     },
     pass:(pass)=>{
-        lostBall()
+        let result = 0;
+        utils.lostBall()
         if(pass.teamMember)
             pass.teamMember.curSp -= spConsume.pass //스테미나 소모
         
         if(Math.random() < pass.prob){
             if(pass.teamMember){
-                console.log(`team${pass.host.team} ${pass.host.name} 패스 성공`)
+                result = `team${pass.host.team} ${pass.host.name} 패스 성공`
                 pass.teamMember.hasBall = true
-                foward(pass.teamMember, 10)
+                utils.foward(pass.teamMember, 10)
             } else {
-                console.log(`team${pass.host.team} ${pass.host.name} 패스 실책`)
+                result = `team${pass.host.team} ${pass.host.name} 패스 실책`
                 players.filter(p=> p.team != pass.host.team)[0].hasBall = true
             } //스테미나가 부족해 실행 못한 경우'
         } else if(pass.defender){
-            console.log(`team${pass.defender.team} ${pass.defender.name} 수비 성공`)
+            result = `team${pass.defender.team} ${pass.defender.name} 수비 성공`
             pass.defender.curSp -= spConsume.defence
             pass.defender.hasBall = true //공 이동
         } else{
-            console.log(`team${pass.host.team} ${pass.host.name} 패스 실책`)
+            result = `team${pass.host.team} ${pass.host.name} 패스 실책`
             players.filter(p=> p.team != pass.host.team)[0].hasBall = true
         }
+
+        console.log(result)
+        return {result:result}
     },
     dribble:(dribble)=>{
-        lostBall()
+        let result = "";
+        utils.lostBall()
         if(dribble.host)
             dribble.host.curSp -= spConsume.dribble //스테미나 소모
         if(Math.random() < dribble.prob){
             if(dribble.host){
-                console.log(`${dribble.host.name} 드리블 성공`)
+                result = `team${dribble.host.team} ${dribble.host.name} 드리블 성공`
                 dribble.host.hasBall = true
-                foward(dribble.host, 30)
+                utils.foward(dribble.host, 30)
             } else {
-                console.log(`${dribble.host.name} 드리블 실패`)
+                result = `team${dribble.host.team} ${dribble.host.name} 드리블 실패`
                 players.filter(p=> p.team != dribble.host.team)[0].hasBall = true
             } //스테미나가 부족해 실행 못한 경우'
         } else if(dribble.defender){
-            console.log(`team${dribble.defender.team} ${dribble.defender.name} 수비 성공`)
+            result = `team${dribble.defender.team} ${dribble.defender.name} 수비 성공`
             dribble.defender.curSp -= spConsume.defence
             dribble.defender.hasBall = true //공 이동
         } else{
-            console.log(`${dribble.host.name} 드리블 실책`)
+            result = `team${dribble.host.team} ${dribble.host.name} 드리블 실책`
             players.filter(p=> p.team != dribble.host.team)[0].hasBall = true
         }
+
+        console.log(result)
+        return {result:result}
     }
 }
 
@@ -275,15 +282,20 @@ while (turn < 45) {
     }
 
     // console.log(probs)
-    action[decide.act](choices[decide.act])
+    const result = action[decide.act](choices[decide.act])
     // console.log(players.map(p=>`${p.team}${p.name} p:${p.position} sp:${p.curSp}`))
+    gameLog.push({players:players, act:decide.act, result: result})
     turn++;
 }
 //턴 끝
 //후반전 반복
 //승패 판정
-if(score[0]!=score[1])
-    console.log(`team${score.indexOf(Math.max(...score))+1} 승리 score-${score[0]}:${score[1]}`)
-else
-    console.log(`team${score.indexOf(Math.max(...score))+1} 무승부 score-${score[0]}:${score[1]}`)
-//MMR 점수 지급
+const win = score.indexOf(Math.max(...score))
+const lose = +!win 
+if(score[0]!=score[1]){
+    console.log(`team${win+1} 승리 score-${score[0]}:${score[1]}`)
+    gameLog.push({win:win, lose:lose, mmr:100}) //MMR 점수 지급
+} else {
+    console.log(`team${win+1} 무승부 score-${score[0]}:${score[1]}`)
+    gameLog.push({win:-1, lose:-1, mmr:0}) //MMR 점수 지급
+}
