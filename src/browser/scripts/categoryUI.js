@@ -18,6 +18,7 @@ import {
     sellMyPlayer,
     enhancePlayer,
     searchTeam,
+    buyGacha,
 } from './api.js';
 
 // 카테고리 html이 로드되고 js가 로드되었을 때 실행하도록 함.
@@ -57,7 +58,6 @@ function handleSendRequest(event) {
 
     const params = document.getElementById('reqParams').value;
     const body = document.getElementById('reqBody').value;
-    const fineBody = JSON.parse(body);
 
     // 버튼 ID에 따라 API 요청을 구분
     switch (sendRequestBtn.id) {
@@ -133,7 +133,6 @@ function handleSendRequest(event) {
                     <br><div id="myPlayer('${[i]}')"></div>
                     <br><br></div>
                     `;
-
                     }
 
                     window.infoPlayer = async i => {
@@ -271,6 +270,22 @@ function handleSendRequest(event) {
                     apiResDiv.innerHTML = res.message;
                 });
             }
+            break;
+
+        case 'enhancePlayerResSendBtn':
+            if (confirm(`rosterId = ${body} 선수를 강화합니까? `)) {
+                enhancePlayer(body).then(res => {
+                    apiResDiv.innerHTML = res.message;
+                });
+            }
+            break;
+
+        // 선수 구매 가차
+        case 'buyGachaResSendBtn':
+            buyGacha(params).then(res => {
+                apiResDiv.innerHTML = res.message;
+            });
+
             break;
 
         case 'enhancePlayerResSendBtn':

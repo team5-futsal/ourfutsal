@@ -163,9 +163,9 @@ router.get('/team/search/:accountId', authMiddleware, async (req, res, next) => 
             player: {
                 select: {
                     playerName: true,
-                    playerStrength: myTeamSearch === true ? true : false,
-                    playerDefense: myTeamSearch === true ? true : false,
-                    playerStamina: myTeamSearch === true ? true : false,
+                    playerStrength: myTeamSearch === true,
+                    playerDefense: myTeamSearch === true,
+                    playerStamina: myTeamSearch === true,
                 },
             },
         },
@@ -182,22 +182,17 @@ router.get('/team/search/:accountId', authMiddleware, async (req, res, next) => 
         },
     });
 
-    //리팩토링 필요
-    let result;
-    if (myTeamSearch === true) {
-        result = findTeam.map(extract => ({
-            playerId: extract.playerId,
-            playerName: extract.player.playerName + ` +${extract.enhanceCount}`,
-            enhanceCount: extract.enhanceCount,
-            playerStrength: extract.player.playerStrength + `+${findEnhance.increaseValue * extract.enhanceCount}`,
-            playerDefense: extract.player.playerDefense + `+${findEnhance.increaseValue * extract.enhanceCount}`,
-            playerStamina: extract.player.playerStamina + `+${findEnhance.increaseValue * extract.enhanceCount}`,
-        }));
-    } else {
-        result = findTeam.map(extract => ({
-            playerId: extract.playerId,
-            playerName: extract.player.playerName + ` +${extract.enhanceCount}`,
-        }));
+    let result = findTeam.map(extract => ({
+        playerId: extract.playerId,
+        playerName: extract.player.playerName + ` +${extract.enhanceCount}`,
+        enhanceCount: extract.enhanceCount,
+        playerStrength: extract.player.playerStrength + `+${findEnhance.increaseValue * extract.enhanceCount}`,
+        playerDefense: extract.player.playerDefense + `+${findEnhance.increaseValue * extract.enhanceCount}`,
+        playerStamina: extract.player.playerStamina + `+${findEnhance.increaseValue * extract.enhanceCount}`,
+    }));
+
+    if (myTeamSearch === false) {
+        result = findTeam.map(({ playerStrength, playerDefense, playerStamina, ...res }) => res);
     }
     return res.status(200).json(result);
 });
