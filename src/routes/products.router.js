@@ -3,7 +3,6 @@ import { prisma } from '../utils/prisma/index.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
 import { Prisma } from '@prisma/client';
 import gacha from '../utils/gacha/gacha.js';
-// import { gachaLogic } from '../utils/gacha/gacha.js'
 
 const router = express.Router();
 // router.use(authMiddleware);
@@ -98,24 +97,27 @@ router.get('/product/:productId', async (req, res, next) => {
 router.post('/product/:productId', authMiddleware, async (req, res, next) => {
     const { productId } = req.params;
     const { count } = req.body;
-    const { cash } = req.user;
+    const { accountId, cash } = req.user;
 
-    //상점 상품 있는지 찾기 -> 이때 가챠의 여부까지 다 나와야 한다
+    //상점 상품 있는지 찾기 -> 이때 가챠의 여부까지 다 나오기 위해 include true
     const findProduct = await prisma.product.findUnique({
         where: { productId: +productId },
-        // gacha : {
-
-        // }
+        include : {
+            gacha : true,
+        }
     });
+
+    console.log('findProduct는?', findProduct)
+    console.log('findProduct에 gachaQuantity 있나?', findProduct.gacha[0].gachaQuantity)
+
     if (!findProduct) return res.status(404).json({ message: '상품이 존재하지 않습니다' });
     if (findProduct.price * count > cash) return res.status(400).json({ message: '소지금이 부족합니다' });
 
-    // 구매 후 잔액변동 및 구매이력 생성 로직부터 -> 선불!
-    
+    // 구매 후 잔액변동 및 구매이력 생성 로직부터 실행 - 선불제
     const buyingTransaction = await prisma.$transaction(
         async tx => {
             const changeBalance = await tx.account.update({
-                where: { accountId: +req.user.accountId },
+                where: { accountId: +accountId },
                 data: { cash: cash - findProduct.price * count },
             });
             const makePurchaseHistory = await tx.purchaseHistory.create({
@@ -133,15 +135,11 @@ router.post('/product/:productId', authMiddleware, async (req, res, next) => {
         },
     );
 
-    // 이 상품아이디가 가챠상품인지 가챠테이블에서 찾기
-    const findInGacha = await prisma.gacha.findFirst({
-        where: { productId: +productId },
-    });
-
-    // 가챠가 맞으면 함수 실행
-    if (findInGacha) {
+    // 가챠테이블의 Quantity가 존재하면 (가챠가 맞으면) 함수 실행
+    if (findProduct.gacha[0].gachaQuantity) {
         try {
-            const doGacha = await gacha(req, res, next);
+            const doGacha = await gacha(accountId, findProduct.gacha[0].gachaQuantity);
+            console.log('doGacha는: ', doGacha)
             return res.status(201).json({ message: `${doGacha} 선수 획득했습니다.잔액 ${buyingTransaction[0].cash}` });
         } catch (e) {
             next(e);
