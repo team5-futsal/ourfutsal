@@ -18,15 +18,28 @@ router.put('/account/:accountId', authMiddleware, async (req, res, next) => {
     if (cash <= 0) return res.status(400).json({ message: '올바른 금액을 입력해 주세요.' });
     if (cash > Number.MAX_SAFE_INTEGER) return res.status(400).json({ message: '입력 가능한 금액을 초과하였습니다.' });
 
-    const chargeCash = await prisma.account.update({
-        where: { accountId: +accountId },
-        data: {
-            cash: findAccount.cash + cash,
+    const cashTransaction = await prisma.$transaction(
+        async tx => {
+            const chargeCash = await tx.account.update({
+                where: { accountId: +accountId },
+                data: {
+                    cash: findAccount.cash + cash,
+                },
+            });
+            const purchaseHistory = await tx.purchaseHistory.create({
+                data: {
+                    accountId: +accountId,
+                    changedCash: +cash,
+                },
+            });
+            return [chargeCash, purchaseHistory];
         },
-    });
+        {
+            isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
+        },
+    );
 
-    console.log('chargeCash.data: ', chargeCash.cash);
-    return res.status(200).json({ message: '잔액 충전 성공', cash: chargeCash.cash });
+    return res.status(200).json({ message: '잔액 충전 성공', cash: cashTransaction[0].cash });
 });
 
 // 상품 생성
@@ -97,11 +110,8 @@ router.post('/product/:productId', authMiddleware, async (req, res, next) => {
     const { count } = req.body;
     const { accountId, cash } = req.user;
 
-    //상점 상품 있는지 찾기 -> 이때 가챠의 여부까지 다 나오기 위해 include true
     const findProduct = await prisma.product.findUnique({
         where: { productId: +productId },
-        include : {
-        }
     });
 
     if (!findProduct) return res.status(404).json({ message: '상품이 존재하지 않습니다' });
@@ -116,7 +126,6 @@ router.post('/product/:productId', authMiddleware, async (req, res, next) => {
             });
             const makePurchaseHistory = await tx.purchaseHistory.create({
                 data: {
-                    productId: +productId,
                     purchaseQuantity: count,
                     changedCash: -findProduct.price * count,
                 },
