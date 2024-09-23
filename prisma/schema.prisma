@@ -21,8 +21,8 @@ model account {
   mmr       Int      @default(1000)
   createdAt DateTime @default(now())
 
-  roster roster[]
-  result results[]
+  roster       roster[]
+  result       results[]
   tokenStorage tokenStorage[]
 }
 
@@ -43,31 +43,27 @@ model results {
 }
 
 model product {
-  productId   Int    @id @default(autoincrement())
+  productId   Int     @id @default(autoincrement())
   productName String
   price       Int
-  productInfo String
+  productInfo String?
 
   purchaseHistory purchaseHistory[]
-  gacha           gacha[]
 }
 
 model gacha {
-  gachaId       Int      @id @default(autoincrement())
-  productId     Int
-  gachaQuantity Int
-  createdAt     DateTime @default(now())
-
-  product product @relation(fields: [productId], references: [productId])
+  gachaId    Int @id @default(autoincrement())
+  gachaName String
+  gachaPrice Int
 }
 
 model purchaseHistory {
-  purchaseId         Int      @id @default(autoincrement())
-  productId          Int
-  purchaseQuantity   Int
-  beforePurchaseCash Int
-  afterPurchaseCash  Int
-  createdAt          DateTime @default(now())
+  purchaseId       Int      @id @default(autoincrement())
+  accountId        Int
+  productId        Int
+  purchaseQuantity Int?
+  changedCash      Int
+  purchasedAt      DateTime @default(now())
 
   product product @relation(fields: [productId], references: [productId])
 }
@@ -114,11 +110,11 @@ model enhances {
 }
 
 model tokenStorage {
-  tokenId Int @id @default(autoincrement())
+  tokenId   Int    @id @default(autoincrement())
   accountId Int
-  token String 
+  token     String
   createdAt Int
   expiredAt Int
-  
+
   account account @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
 }
