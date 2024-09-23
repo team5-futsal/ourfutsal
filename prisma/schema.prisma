@@ -43,10 +43,10 @@ model results {
 }
 
 model product {
-  productId   Int    @id @default(autoincrement())
+  productId   Int     @id @default(autoincrement())
   productName String
   price       Int
-  productInfo String
+  productInfo String?
 
   purchaseHistory purchaseHistory[]
 }
@@ -58,6 +58,7 @@ model gacha {
 
 model purchaseHistory {
   purchaseId       Int      @id @default(autoincrement())
+  accountId        Int
   productId        Int
   purchaseQuantity Int?
   changedCash      Int
