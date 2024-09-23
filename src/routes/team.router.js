@@ -167,6 +167,7 @@ router.get('/team/find/:accountId', async (req, res, next) => {
                     playerStrength: true,
                     PlayerDefense: true,
                     playerStamina: true,
+                    positionId : true
                 },
             },
         },
