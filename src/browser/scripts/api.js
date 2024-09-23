@@ -148,7 +148,7 @@ export async function searchTeam(accountId) {
 
 // 본인의 팀 편성 제외
 export async function excludeTeam(bodydata) {
-    const body = JSON.parse(bodydata);
+    const body = { playerId: bodydata };
     const res = await fetchAPI('PUT', '/api/team/exclude', body, true);
     if (res.status === 200) return res.json();
     else return alert('500 Server Error');
