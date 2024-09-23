@@ -117,7 +117,7 @@ router.delete('/roster/sell', authMiddleware, async (req, res) => {
 });
 
 // 선수 강화 API 작동가능
-// 시간이 촉박하여 최적화 하지 못했습니다.
+// 시간이 촉박하여 최적화가 미흡합니다.
 router.put('/roster/enhance', authMiddleware, async (req, res, next) => {
     const { rosterId } = req.body;
     const { accountId } = req.user;
@@ -129,7 +129,6 @@ router.put('/roster/enhance', authMiddleware, async (req, res, next) => {
             where: { enhanceId: 1 },
         });
 
-        const randomGoGo = Math.floor(Math.random() * 100 + 1);
         const findPlayer = await prisma.roster.findFirst({
             where: {
                 rosterId: +rosterId,
@@ -176,6 +175,7 @@ router.put('/roster/enhance', authMiddleware, async (req, res, next) => {
             return res.status(409).json({ message: ' 강화 재료가 부족합니다. (동일 강화, 동일 선수 2장 소모) ' });
         }
 
+        const randomGoGo = Math.floor(Math.random() * 100 + 1);
         const result = await prisma.$transaction(
             async tx => {
                 const payCash = await tx.account.update({

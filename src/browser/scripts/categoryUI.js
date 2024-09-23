@@ -57,7 +57,6 @@ function handleSendRequest(event) {
 
     const params = document.getElementById('reqParams').value;
     const body = document.getElementById('reqBody').value;
-    const fineBody = JSON.parse(body);
 
     // 버튼 ID에 따라 API 요청을 구분
     switch (sendRequestBtn.id) {
@@ -133,7 +132,6 @@ function handleSendRequest(event) {
                     <br><div id="myPlayer('${[i]}')"></div>
                     <br><br></div>
                     `;
-
                     }
 
                     window.infoPlayer = async i => {
