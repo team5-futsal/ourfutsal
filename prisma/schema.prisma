@@ -47,8 +47,6 @@ model product {
   productName String
   price       Int
   productInfo String?
-
-  purchaseHistory purchaseHistory[]
 }
 
 model gacha {
@@ -60,12 +58,9 @@ model gacha {
 model purchaseHistory {
   purchaseId       Int      @id @default(autoincrement())
   accountId        Int
-  productId        Int
   purchaseQuantity Int?
   changedCash      Int
   purchasedAt      DateTime @default(now())
-
-  product product @relation(fields: [productId], references: [productId])
 }
 
 model roster {
