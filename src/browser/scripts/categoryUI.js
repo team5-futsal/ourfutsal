@@ -9,7 +9,6 @@ import {
     deleteAccount,
     logoutAccount,
     getTeam,
-    getUserTeam,
     excludeTeam,
     excludeTeamAll,
     updateTeam,
@@ -18,6 +17,7 @@ import {
     getPlayers,
     sellMyPlayer,
     enhancePlayer,
+    searchTeam,
 } from './api.js';
 
 // 카테고리에 있는 각 API 버튼에 이벤트 리스너 추가
@@ -108,55 +108,55 @@ function handleSendRequest(event) {
 
         // 내 팀 편성 조회
         case 'getTeamResSendBtn':
-            getTeam().then(res => {
+            const showMyTeam = function (res) {
+                console.log(res);
                 if (res.message) {
                     resContext.innerHTML = res.message;
-                    apiResDiv.appendChild(resContext);
-                    return;
-                }
-
-                window.excludePlayer = async playerId => {
-                    if (confirm('이 선수를 편성에서 제외 하시겠습니까? ')) {
-                        excludeTeam(playerId);
-                        alert('해당 선수가 편성에서 제외되었습니다. ');
-                    }
-                };
-
-                window.infoPlayer = async i => {
-                    const div = document.getElementById(`myPlayer('${i}')`);
-                    div.innerHTML = '';
-                    div.innerHTML += `
-                     파워 : ${res[i].playerStrength}&nbsp 
-                     수비력: ${res[i].playerDefense}&nbsp
-                     스태미나: ${res[i].playerStamina}&nbsp
-                     `;
-                };
-
-                for (let i in res) {
-                    resContext.innerHTML += `
+                } else {
+                    resContext.innerHTML = '';
+                    for (let i in res) {
+                        resContext.innerHTML += `
                     <div>${res[i].playerName} <button class="player" onclick="infoPlayer('${i}')" >능력치 조회</button>
                     <button class="player" onclick="excludePlayer('${res[i].playerId}')">편성 제외</button>
                     <br><div id="myPlayer('${[i]}')"></div>
                     <br><br></div>
                     `;
+                    }
+
+                    window.infoPlayer = async i => {
+                        const div = document.getElementById(`myPlayer('${i}')`);
+                        div.innerHTML = `
+                     파워 : ${res[i].playerStrength}&nbsp 
+                     수비력: ${res[i].playerDefense}&nbsp
+                     스태미나: ${res[i].playerStamina}&nbsp
+                     `;
+                    };
                 }
-            });
+            };
+            window.excludePlayer = async playerId => {
+                if (confirm('이 선수를 편성에서 제외 하시겠습니까? ')) {
+                    excludeTeam(playerId);
+                    alert('해당 선수가 편성에서 제외되었습니다. ');
+                }
+                getTeam().then(async res => showMyTeam(res));
+            };
+
+            getTeam().then(async res => showMyTeam(res));
             apiResDiv.appendChild(resContext);
             break;
 
         // 다른 유저의 편성 조회
         case 'getUserTeamResSendBtn':
-            let content = '';
-            const param = document.getElementById('reqParams').value;
-
-            getUserTeam(param).then(res => {
-                for (let i in res) {
-                    content += `
-                    +${res[i].enhanceCount} ${res[i].player.playerName}<br><br><br>
+            searchTeam(params).then(res => {
+                if (res.message) {
+                    apiResDiv.innerHTML = `${res.message}`;
+                } else {
+                    for (let i in res) {
+                        apiResDiv.innerHTML += `
+                    ${res[i].playerName}<br><br><br>
                     `;
+                    }
                 }
-
-                apiResDiv.innerHTML = content;
             });
             break;
 
@@ -235,7 +235,7 @@ function handleSendRequest(event) {
             window.sellPlayer = async rosterId => {
                 if (confirm(' 이 선수를 판매 하시겠습니까? ')) {
                     await sellMyPlayer(rosterId);
-                    alert('해당 선수가 판매되었습니다. ');
+                    alert('해당 선수가 판매되었습니다. +300Cash ');
                     getMyPlayer().then(async res => myPlayers(res));
                 }
             };
