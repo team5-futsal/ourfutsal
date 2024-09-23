@@ -57,7 +57,6 @@ function handleSendRequest(event) {
 
     const params = document.getElementById('reqParams').value;
     const body = document.getElementById('reqBody').value;
-    const fineBody = JSON.parse(body);
 
     // 버튼 ID에 따라 API 요청을 구분
     switch (sendRequestBtn.id) {
@@ -77,7 +76,7 @@ function handleSendRequest(event) {
             break;
 
         case 'updateAccountResSendBtn':
-            updateAccount(fineBody).then(res => {
+            updateAccount(JSON.parse(body)).then(res => {
                 if (res) {
                     alert(`접속한 유저의 비밀번호가 수정되었습니다. 로그인 화면으로 이동합니다.`);
                     window.location.href = 'http://localhost:3333/api';
@@ -133,7 +132,6 @@ function handleSendRequest(event) {
                     <br><div id="myPlayer('${[i]}')"></div>
                     <br><br></div>
                     `;
-
                     }
 
                     window.infoPlayer = async i => {
@@ -297,6 +295,10 @@ function handleSendRequest(event) {
                 `;
                 apiResDiv.appendChild(resContext);
             });
+            break;
+
+        case 'gameStartBtn':
+            break;
 
         // 다른 API 요청을 추가로 처리할 수 있음
         default:

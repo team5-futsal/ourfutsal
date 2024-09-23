@@ -47,7 +47,6 @@ router.post('/account/regist', async (req, res, next) => {
 /** 사용자 로그인 API **/
 router.post('/account/login', async (req, res, next) => {
     try {
-        console.log(req.body);
         const { userId, password } = req.body;
         const user = await prisma.account.findFirst({ where: { userId } });
 
@@ -75,7 +74,7 @@ router.post('/account/login', async (req, res, next) => {
             // 리프레시토큰의 만료기한을 가져온다.
             const expiredDate = validateToken(refreshToken, process.env.OUR_SECRET_REFRESH_KEY).exp;
 
-            await prisma.tokenStorage.create({
+            const refreshTokenFromStorage = await prisma.tokenStorage.create({
                 data: {
                     accountId: user.accountId,
                     token: refreshToken,
@@ -84,22 +83,24 @@ router.post('/account/login', async (req, res, next) => {
                 },
             });
             // refreshToken을 쿠키에 저장하여 사용
-            // 근데 만약... 쿠키가 만료되지 않았는데 삭제되었다면 어떡하지?
-            // => 재로그인을 요청할 예정
+            const timediff = refreshTokenFromStorage.expiredAt - refreshTokenFromStorage.createdAt
+
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
                 secure: true,
                 sameSite: 'Strict',
-                maxAge: 1000 * 60 * 10, // 현재 3분 설정
+                maxAge: (refreshTokenFromStorage.expiredAt - refreshTokenFromStorage.createdAt)*1000,
             });
             console.log('리프레시토큰 만료로 재발급합니다.');
-        } else {
+        } 
+        else if (isExistsRefresh) {
             // refreshToken이 아직 유효할때 그대로 쿠키로 저장
+            console.log('account.router --- 리프레시 토큰 유효하여 기존 쿠키 유지');
             res.cookie('refreshToken', curRefreshToken.token, {
                 httpOnly: true,
                 secure: true,
                 sameSite: 'Strict',
-                maxAge: 1000 * 60 * 10, // 현재 3분 설정
+                maxAge: (curRefreshToken.expiredAt-Math.floor((new Date().getTime() + 1) / 1000))*1000, // 만료시간으로부터 남은시간 계산
             });
             console.log('리프레시토큰 유효합니다.');
         }

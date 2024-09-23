@@ -1,9 +1,5 @@
 import express from 'express';
-import { prisma } from '../utils/prisma/index.js';
-import bcrypt from 'bcrypt';
-import authMiddleware from '../middlewares/auth.middleware.js';
-import { createAccessToken, createRefreshToken, validateToken, getExistRefreshToken } from '../utils/tokens/tokens.js';
-import validSchema from '../utils/joi/valid.schema.js';
+import { createAccessToken, validateToken } from '../utils/tokens/tokens.js';
 
 const router = express.Router();
 
@@ -44,7 +40,6 @@ router.post('/refreshToken', (req, res) => {
             // res.header('authorization', `Bearer ${newAccessToken}`);
             return res.json({isCreate:true, newAccessToken});
         } catch {
-            console.log('토큰이 유효하지 않음.');
             return res.status(401).json({errorMessage:'리프레시가 만료되었거나 유효하지 않습니다.'})
         }
     } else {

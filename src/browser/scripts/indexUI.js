@@ -20,7 +20,7 @@ window.addEventListener('DOMContentLoaded', function () {
                 window.location.href = `http://localhost:3333/api/category`;
                 
             } else {
-                // location.reload(true);
+                location.reload(true);
             }
         });
     });

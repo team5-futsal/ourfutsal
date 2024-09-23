@@ -73,7 +73,7 @@ export class UserValidation {
     };
 }
 
-export async function getUser(accountId) {
+export async function getUser(accountId=null) {
     return await prisma.account.findUnique({
         where: { accountId: accountId },
     });
