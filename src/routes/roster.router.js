@@ -116,11 +116,13 @@ router.delete('/roster/sell', authMiddleware, async (req, res) => {
     }
 });
 
-// 선수 강화 API 구현중
+// 선수 강화 API 작동가능
 // 시간이 촉박하여 최적화 하지 못했습니다.
 router.put('/roster/enhance', authMiddleware, async (req, res, next) => {
     const { rosterId } = req.body;
     const { accountId } = req.user;
+
+    // 인핸스 코스트도 enhance 테이블에 있어야할것 같습니다
     const enhanceCost = 1000;
     try {
         const enhanceTry = await prisma.enhances.findFirst({
@@ -135,6 +137,13 @@ router.put('/roster/enhance', authMiddleware, async (req, res, next) => {
             },
             orderBy: {
                 rosterId: 'asc',
+            },
+            include: {
+                player: {
+                    select: {
+                        playerName: true,
+                    },
+                },
             },
         });
 
@@ -195,7 +204,9 @@ router.put('/roster/enhance', authMiddleware, async (req, res, next) => {
                             rosterId: findPlayer.rosterId,
                         },
                     });
-                    return res.status(201).json({ message: `강화 성공 ! 잔돈${payCash.cash} ` });
+                    return res.status(201).json({
+                        message: ` + ${goEnhance.enhanceCount} ${findPlayer.player.playerName}으로 강화 성공 !! 잔돈${payCash.cash} `,
+                    });
                 } else {
                     return res.status(201).json({ message: `강화 실패 ! ` });
                 }
