@@ -1,11 +1,13 @@
 //선수 정보 획득
 class player {
-    constructor(team, name, str, def, sp, position) {
+    constructor(team, name, pNum, str, def, sp, position) {
         this.team = team;
         this.name = name;
+        this.pNum = pNum; // playerNumber
         this.str = str;
         this.def = def;
-        this.sp = sp;
+        this.maxSp = sp;
+        this.curSp = sp;
         this.position = position;
         this.hasBall = false;
         this.distance = 0;
@@ -36,8 +38,7 @@ const player1Roster = [
         "playerStrength": "88+10",
         "PlayerDefense": "85+10",
         "playerStamina": "74+10"
-    }
-]
+    }]
 
 const player2Roster = [
     {
@@ -63,34 +64,34 @@ const player2Roster = [
         "playerStrength": "50+0",
         "PlayerDefense": "20+0",
         "playerStamina": "30+0"
-    }
-]
+    }]
 
 //초기 선수 위치 설정
 const player1 = new Array(3)
-for(let i=0; i<3; i++){
+for (let i = 0; i < 3; i++) {
     player1[i] = new player(
         1,
-        player1Roster[i].playerName, 
-        player1Roster[i].playerStrength.split('+').reduce((acc,cur)=>(+acc)+(+cur)), 
-        player1Roster[i].PlayerDefense.split('+').reduce((acc,cur)=>(+acc)+(+cur)), 
-        player1Roster[i].playerStamina.split('+').reduce((acc,cur)=>(+acc)+(+cur)),
-        i*16
+        player1Roster[i].playerName,
+        i,
+        player1Roster[i].playerStrength.split('+').reduce((acc, cur) => (+acc) + (+cur)),
+        player1Roster[i].PlayerDefense.split('+').reduce((acc, cur) => (+acc) + (+cur)),
+        player1Roster[i].playerStamina.split('+').reduce((acc, cur) => (+acc) + (+cur)),
+        i * 16
     )
 }
 
 const player2 = new Array(3)
-for(let i=0; i<3; i++){
+for (let i = 0; i < 3; i++) {
     player2[i] = new player(
         2,
-        player2Roster[i].playerName, 
-        player2Roster[i].playerStrength.split('+').reduce((acc,cur)=>(+acc)+(+cur)), 
-        player2Roster[i].PlayerDefense.split('+').reduce((acc,cur)=>(+acc)+(+cur)), 
-        player2Roster[i].playerStamina.split('+').reduce((acc,cur)=>(+acc)+(+cur)),
-        100-i*16
+        player2Roster[i].playerName,
+        i,
+        player2Roster[i].playerStrength.split('+').reduce((acc, cur) => (+acc) + (+cur)),
+        player2Roster[i].PlayerDefense.split('+').reduce((acc, cur) => (+acc) + (+cur)),
+        player2Roster[i].playerStamina.split('+').reduce((acc, cur) => (+acc) + (+cur)),
+        100 - i * 16
     )
 }
-
 
 //코인 토스
 //선수에게 공 지급
@@ -99,7 +100,7 @@ function Random(n) {
     return Math.floor(Math.random() * n)
 }
 
-if(Math.random() < 0.5){
+if (Math.random() < 0.5) {
     player1[2].hasBall = true;
     const startTeam = true;
 } else {
@@ -110,37 +111,102 @@ const players = [...player1, ...player2]
 
 //턴 진행
 //공 소지자 찾기
-let hostIndex = players.findIndex(p=>p.hasBall)
-while(players[hostIndex].hasBall && false){
-    players.forEach(p=>{
+const host = players.find(p => p.hasBall)
+
+//공 소지자와의 각 플레이어들의 거리를 입력
+players.forEach(p => {
+    p.distance = Math.abs(host.position - p.position)
+})
+
+// 각 행동의 확률 계산
+const choices = { shoot: shoot(host), pass: pass(host), dribble: dribble(host) }
+const probs = []
+const decide = {act:"shoot", prob:0}
+
+// 가장 확률이 높은 행동을 선택
+for (const [key, value] of Object.entries(choices)){
+    if(decide.prob < value.prob){
+        decide.act = key
+        decide.prob = value.prob
+    }
+}
+
+console.log(decide)
+
+
+while (host.hasBall && false) {
+    players.forEach(p => {
         p.distance = Math.abs(players[hostIndex].position - p.position)
     })
 }
 
-function shoot(host){
+function shoot(host) {
     let goalPosition = 100;
-    if(host.team==2) goalPosition = 0;
-    const goalDistance = 100-Math.abs(goalPosition - host.position)
-    const goal = (goalDistance? goalDistance: 1)/100
-    const def = defence(host)
+    if (host.team == 2) goalPosition = 0;
+    const goalDistance = 95 - Math.abs(goalPosition - host.position)
+    const goal = (goalDistance <= 0 ? 0 : goalDistance / 100)
+    const def = defence(host);
+    const kickPower = host.str / 1000;
 
-
-    return Math.random()< goal*def ? true : false
-}   
-
-function pass(){
-
+    return { prob: goal - def.prob + kickPower, host: host, defender: def.defender }
 }
 
-function dribble(){
+function pass(host) {
+    const spConsume = 5
 
+    const teamMembers = players.filter(p => p.team == host.team && p.name != host.name)
+    const nearest = Math.min(...teamMembers.map(d => d.distance))
+    const teamMember = teamMembers.find(d => d.distance <= nearest)
+
+    if (teamMember.curSp < spConsume)
+        return 0
+
+    let passChance = 150 - teamMember.distance
+    passChance = passChance <= 0 ? 0 : passChance / 100
+    const def = defence(teamMember);
+
+    return { prob: passChance - def.prob, host: teamMember, defebder: def.defender }
 }
 
-function defence(host){
-    const defenders = players.filter(p=>p.team != host.team).map((p,i)=> [p.distance,i])
-    nearest = defenders.findIndex(d=> d == Math.min(...defenders))
+function dribble() {
+    const spConsume = 10
+
+    if (host.curSp < spConsume)
+        return 0
+
+    const def = defence(host);
+
+    return { prob: 0.95 - def.prob, host: host, defebder: def.defender }
 }
 
+function defence(host) {
+    const spConsume = 5
+
+    const defenders = players.filter(p => p.team != host.team)
+    const nearest = Math.min(...defenders.map(d => d.distance))
+    const defender = defenders.find(d => d.distance <= nearest)
+
+    if (defender.curSp < spConsume)
+        return 0
+
+    let defChance = 50 - defender.distance
+    defChance = defChance <= 0 ? 0 : defChance / 100
+
+    return { prob: defChance + defender.def / 1000, defender: defender }
+}
+
+const action = {
+    shoot:{
+        //스테미나 소모
+        //공 이동
+        //위치 이동
+    },
+    pass:{
+    },
+    dribble:{
+
+    }
+}
 //턴 끝
 //후반전 반복
 //승패 판정
