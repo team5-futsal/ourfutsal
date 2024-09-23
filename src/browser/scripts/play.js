@@ -18,3 +18,8 @@ export class player {
 const dino = new player()
 dino.draw()
 
+//https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/lineTo
+//https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/stroke
+//https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D
+//https://developer.mozilla.org/ko/docs/Web/API/Window/requestAnimationFrame
+
