@@ -27,26 +27,28 @@ router.post('/gacha/buy', authMiddleware, async (req, res, next) => {
 });
 
 // 상품 구매 api 예시 (웅상)
-router.post('/gacha/buy/:productId', authMiddleware, async (req, res, next) => {
+router.post('/gacha/buy/:gachaTry', authMiddleware, async (req, res, next) => {
     try {
-        const { productId } = req.params;
+        const { gachaTry } = req.params;
 
         const { accountId } = req.user;
 
-        // 해당 상품 찾기
-        const findtry = await prisma.gacha.findFirst({
-            where: {
-                productId: +productId,
-            },
-        });
+        // // 해당 상품 찾기
+        // const findtry = await prisma.gacha.findFirst({
+        //     where: {
+        //         productId: +productId,
+        //     },
+        // });
 
-        if (!findtry) {
-            return res.status(401).json({ message: ' 없는 상품 번호 입니다. ' });
-        }
+        // if (!findtry) {
+        //     return res.status(401).json({ message: ' 없는 상품 번호 입니다. ' });
+        // }
 
-        const gachaPrice = findtry.gachaQuantity * 1000;
+        const gachaPrice = gachaTry * 1000;
+
+        console.log(gachaTry);
         // 선불 요금제
-        if (req.user.cash < gachaPrice) {
+        if (req.user.cash < +gachaPrice) {
             throw new Error('notEnoughMoney');
         }
 
@@ -60,13 +62,18 @@ router.post('/gacha/buy/:productId', authMiddleware, async (req, res, next) => {
         });
 
         //랜덤 선수 로또
-        const resultGacha = await gacha(findtry.gachaQuantity, accountId);
+        const resultGacha = await gacha(gachaTry, accountId);
+
+        const createGacha = resultGacha.map(({ playerName, ...rest }) => rest);
+        const findName = resultGacha.map(({ playerName }) => playerName);
+        console.log(findName);
+
         // 위에서 뽑은 결과로 createMany
-        const createManyPlayer = await prisma.roster.createMany({
-            data: resultGacha,
+        await prisma.roster.createMany({
+            data: createGacha,
         });
 
-        return res.status(201).json({ message: `${resultGacha} 선수를 획득했습니다. 남은 Cash : ${cashGo.cash}` });
+        return res.status(201).json({ message: `${findName} 선수를 획득했습니다. 남은 Cash : ${cashGo.cash}` });
     } catch (error) {
         switch (error.message) {
             case 'notEnoughMoney':
