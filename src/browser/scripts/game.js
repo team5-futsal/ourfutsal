@@ -194,7 +194,7 @@ const action = {
             players.filter(p=> p.team != shoot.host.team)[0].hasBall = true
             console.log(`team${shoot.host.team} 득점 성공 score-${score[0]}:${score[1]}`)
         } else if(shoot.defender){
-            console.log(`team${pass.defender.team} ${pass.defender.name} 수비 성공`)
+            console.log(`team${shoot.defender.team} ${shoot.defender.name} 수비 성공`)
             shoot.defender.curSp -= spConsume.defence
             shoot.defender.hasBall = true //공 이동
         } else 
@@ -203,10 +203,12 @@ const action = {
     },
     pass:(pass)=>{
         lostBall()
+        if(pass.teamMember)
+            pass.teamMember.curSp -= spConsume.pass //스테미나 소모
+        
         if(Math.random() < pass.prob){
             if(pass.teamMember){
                 console.log(`team${pass.host.team} ${pass.host.name} 패스 성공`)
-                pass.teamMember.curSp -= spConsume.pass //스테미나 소모
                 pass.teamMember.hasBall = true
                 foward(pass.teamMember, 10)
             } else {
@@ -224,10 +226,11 @@ const action = {
     },
     dribble:(dribble)=>{
         lostBall()
+        if(dribble.host)
+            dribble.host.curSp -= spConsume.dribble //스테미나 소모
         if(Math.random() < dribble.prob){
             if(dribble.host){
                 console.log(`${dribble.host.name} 드리블 성공`)
-                dribble.host.curSp -= spConsume.dribble //스테미나 소모
                 dribble.host.hasBall = true
                 foward(dribble.host, 30)
             } else {
@@ -235,7 +238,7 @@ const action = {
                 players.filter(p=> p.team != dribble.host.team)[0].hasBall = true
             } //스테미나가 부족해 실행 못한 경우'
         } else if(dribble.defender){
-            console.log(`team${pass.defender.team} ${pass.defender.name} 수비 성공`)
+            console.log(`team${dribble.defender.team} ${dribble.defender.name} 수비 성공`)
             dribble.defender.curSp -= spConsume.defence
             dribble.defender.hasBall = true //공 이동
         } else{
@@ -271,7 +274,7 @@ while (turn < 45) {
         }
     }
 
-    console.log(probs)
+    // console.log(probs)
     action[decide.act](choices[decide.act])
     // console.log(players.map(p=>`${p.team}${p.name} p:${p.position} sp:${p.curSp}`))
     turn++;
