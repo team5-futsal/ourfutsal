@@ -2,10 +2,8 @@ import express from 'express';
 import { prisma } from '../utils/prisma/index.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
 import { Prisma } from '@prisma/client';
-import gacha from '../utils/gacha/gacha.js';
 
 const router = express.Router();
-// router.use(authMiddleware);
 
 // 캐시 구매
 router.put('/account/:accountId', authMiddleware, async (req, res, next) => {
@@ -103,12 +101,8 @@ router.post('/product/:productId', authMiddleware, async (req, res, next) => {
     const findProduct = await prisma.product.findUnique({
         where: { productId: +productId },
         include : {
-            gacha : true,
         }
     });
-
-    console.log('findProduct는?', findProduct)
-    console.log('findProduct에 gachaQuantity 있나?', findProduct.gacha[0].gachaQuantity)
 
     if (!findProduct) return res.status(404).json({ message: '상품이 존재하지 않습니다' });
     if (findProduct.price * count > cash) return res.status(400).json({ message: '소지금이 부족합니다' });
@@ -124,8 +118,7 @@ router.post('/product/:productId', authMiddleware, async (req, res, next) => {
                 data: {
                     productId: +productId,
                     purchaseQuantity: count,
-                    beforePurchaseCash: cash,
-                    afterPurchaseCash: -findProduct.price * count,
+                    changedCash: -findProduct.price * count,
                 },
             });
             return [changeBalance, makePurchaseHistory];
@@ -134,17 +127,6 @@ router.post('/product/:productId', authMiddleware, async (req, res, next) => {
             isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
         },
     );
-
-    // 가챠테이블의 Quantity가 존재하면 (가챠가 맞으면) 함수 실행
-    if (findProduct.gacha[0].gachaQuantity) {
-        try {
-            const doGacha = await gacha(accountId, findProduct.gacha[0].gachaQuantity);
-            console.log('doGacha는: ', doGacha)
-            return res.status(201).json({ message: `${doGacha} 선수 획득했습니다.잔액 ${buyingTransaction[0].cash}` });
-        } catch (e) {
-            next(e);
-        }
-    }
 
     return res.status(200).json({
         message: `${findProduct.productName} 아이템 ${count}개 구매 성공, 잔액 ${buyingTransaction[0].cash}`,
