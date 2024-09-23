@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <!-- <script type="application/javascript">
+        function draw() {
+            var canvas = document.getElementById("canvas");
+
+            var ctx = canvas.getContext("2d");
+
+            ctx.fillStyle = "rgb(200,0,0)";
+            ctx.fillRect(10, 10, 50, 50);
+
+            ctx.fillStyle = "rgba(0, 0, 200, 0.5)";
+            ctx.fillRect(30, 30, 50, 50);
+        }
+    </script> -->
+    <script src="../scripts/play.js" type="module"></script>
+</head>
+<!-- //Requestanimation frame  https://developer.mozilla.org/ko/docs/Web/API/Window/requestAnimationFrame -->
+<!-- https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D -->
+<body onload="const dino = new player(); dino.draw()">
+<body>
+    <canvas id="canvas"></canvas>
+</body>
+
+</html>
