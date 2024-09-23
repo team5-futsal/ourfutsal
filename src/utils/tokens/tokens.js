@@ -1,3 +1,4 @@
+import {prisma} from '../prisma/index.js';
 import jwt from 'jsonwebtoken';
 // 토큰에 관련된 함수가 정의된 파일
 
@@ -10,10 +11,20 @@ export function createAccessToken(id) {
     const accessToken = jwt.sign(
         { accountId: +id }, // JWT 데이터
         process.env.OUR_SECRET_ACCESS_KEY,
-        {expiresIn: '1d'}
+        {expiresIn: '10s'}
     );
 
     return accessToken;
+}
+
+export function createRefreshToken(id) {
+    const refreshToken = jwt.sign(
+        { accountId: +id }, // JWT 데이터
+        process.env.OUR_SECRET_REFRESH_KEY,
+        {expiresIn: process.env.REFRESH_EXPIRESIN}
+    );
+
+    return refreshToken;
 }
 
 /**
@@ -27,4 +38,18 @@ export function validateToken(token, secretKey) {
     } catch (err) {
         return null;
     }
+}
+
+export async function getExistRefreshToken(id) {
+    const currentTimeToCompareToken = Math.floor((new Date().getTime() + 1) / 1000);
+    const refreshToken = await prisma.tokenStorage.findFirst({
+        where: {
+            accountId: id,
+            expiredAt: {
+                gt:currentTimeToCompareToken
+            }
+        }
+    })
+
+    return refreshToken;
 }
