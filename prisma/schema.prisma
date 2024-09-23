@@ -53,6 +53,7 @@ model product {
 
 model gacha {
   gachaId    Int @id @default(autoincrement())
+  gachaName String
   gachaPrice Int
 }
 
