@@ -23,6 +23,7 @@ import {
     buyGacha,
     runCustomGame,
     matchGame,
+    getRank
 } from './api.js';
 import { playGame } from './play.js';
 
@@ -379,6 +380,13 @@ function handleSendRequest(event) {
                 apiResDiv.innerHTML = res.message;
                 apiResDiv.appendChild(resContext);
             })
+            break;
+
+        // Rank 조회
+        case 'getRankResSendBtn':
+            getRank().then(res => {
+                apiResDiv.textContent = JSON.stringify(res.data);
+            });
             break;
 
         // 다른 API 요청을 추가로 처리할 수 있음

@@ -92,14 +92,13 @@ export const playGame = (/*player1Roster, player2Roster*/) => {
             let spBar = radius*2;
             curSp == maxSp ? spBar = radius*2 : spBar = spUnit*curSp
             
-            // 스테미나 바
-            this.ctx.fillStyle = 'rgb(255 255 0)';
-            this.ctx.fillRect(x, y+radius, radius*2, 10);
             // 바 테두리
             this.ctx.strokeStype = 'rgb(0 0 0)';
             this.ctx.lineWidth = 10;
             this.ctx.strokeRect(x, y+radius, spBar, 10);
-            
+            // 스테미나 바
+            this.ctx.fillStyle = 'rgb(255 255 0)';
+            this.ctx.fillRect(x, y+radius, radius*2, 10);
         }
     }
 
