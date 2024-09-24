@@ -14,58 +14,6 @@ class player {
     }
 }
 
-const player1Roster = [
-    {
-        "playerId": 4,
-        "playerName": "ddd +2",
-        "enhanceCount": 2,
-        "playerStrength": "10+20",
-        "PlayerDefense": "10+20",
-        "playerStamina": "10+20"
-    },
-    {
-        "playerId": 6,
-        "playerName": "웨인루니 +1",
-        "enhanceCount": 1,
-        "playerStrength": "50+10",
-        "PlayerDefense": "20+10",
-        "playerStamina": "30+10"
-    },
-    {
-        "playerId": 5,
-        "playerName": "기성용 +1",
-        "enhanceCount": 1,
-        "playerStrength": "88+10",
-        "PlayerDefense": "85+10",
-        "playerStamina": "74+10"
-    }]
-
-const player2Roster = [
-    {
-        "playerId": 5,
-        "playerName": "기성용 +0",
-        "enhanceCount": 0,
-        "playerStrength": "88+0",
-        "PlayerDefense": "85+0",
-        "playerStamina": "74+0"
-    },
-    {
-        "playerId": 7,
-        "playerName": "박지성 +0",
-        "enhanceCount": 0,
-        "playerStrength": "40+0",
-        "PlayerDefense": "15+0",
-        "playerStamina": "40+0"
-    },
-    {
-        "playerId": 6,
-        "playerName": "웨인루니 +0",
-        "enhanceCount": 0,
-        "playerStrength": "50+0",
-        "PlayerDefense": "20+0",
-        "playerStamina": "30+0"
-    }]
-
 export function game(player1Roster, player2Roster) {
     //초기 선수 위치 설정
     const player1 = new Array(3)
@@ -257,7 +205,8 @@ export function game(player1Roster, player2Roster) {
     }
 
     let turn = 0;
-    gameLog.push({ players: players, act: 'ready', result: '경기 시작' })
+    let deeplayers = JSON.parse(JSON.stringify(players));
+    gameLog.push({ players: deeplayers, act: 'ready', result: '경기 시작' })
     while (turn < 45) {
         //턴 진행
         //공 소지자 찾기
@@ -285,7 +234,8 @@ export function game(player1Roster, player2Roster) {
         // console.log(probs) // 확률 확인
         const result = action[decide.act](choices[decide.act])
         // console.log(players.map(p=>`${p.team}${p.name} p:${p.position} sp:${p.curSp}`)) // 선수 상태 확인
-        gameLog.push({ players: players, act: decide.act, result: result })
+        deeplayers = JSON.parse(JSON.stringify(players));
+        gameLog.push({ players: deeplayers, act: decide.act, result: result })
         turn++;
     }
     //턴 끝

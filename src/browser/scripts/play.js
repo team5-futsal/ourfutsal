@@ -56,7 +56,6 @@ const gameLog = game(player1Roster, player2Roster)
 
 const canvas = document.getElementById('canvas');
 let ctx = canvas.getContext('2d');
-
 const ballImage = document.getElementById("source");
 
 class drawPlayer {
@@ -112,17 +111,24 @@ const color = ['blue', 'red']
 
 
 for(const t of gameLog){
-    // const cwu = Math.round(canvas.width/100) // canvas width Unit
-    const cwu = 1
+    const cwu = canvas.width/100 // canvas width Unit
     for(const p of t.players){
-        drawPlayers.draw(p.position * cwu, yPosition[p.pNum], radius, color[p.team-1], p.name)
-        drawPlayers.drawSp(p.position * cwu, yPosition[p.pNum], radius)
+        const x = p.position*cwu<<0
+        const y = yPosition[p.pNum]
+
+        const pX = x + radius * (p.team-1 ? -1 : 1)
+        drawPlayers.draw(pX, y, radius, color[p.team-1], p.name)
+        
+        const spBarX = p.team-1 ? x - radius*2 : x
+        drawPlayers.drawSp(spBarX, y, radius)
+
+        if(p.hasBall){
+            ball.draw(spBarX, y)
+        }
     }
-
-    const host = t.players.find(p => p.hasBall)
-    ball.draw(host.position, yPosition[host.pNum])
-
+    
     console.log(t)
+    console.log(t.result)
     break;
 }
 
