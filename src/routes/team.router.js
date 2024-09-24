@@ -176,23 +176,22 @@ router.get('/team/search/:accountId', authMiddleware, async (req, res, next) => 
     }
 
     //강화 테이블 조회
-    const findEnhance = await prisma.enhances.findFirst({
-        where: {
-            enhanceId: 1,
+    const findEnhance = await prisma.enhances.findMany({
+        select: {
+            increaseValue: true,
         },
     });
 
     let result = findTeam.map(extract => ({
         playerId: extract.playerId,
         playerName: extract.player.playerName + ` +${extract.enhanceCount}`,
-        enhanceCount: extract.enhanceCount,
-        playerStrength: extract.player.playerStrength + `+${findEnhance.increaseValue * extract.enhanceCount}`,
-        playerDefense: extract.player.playerDefense + `+${findEnhance.increaseValue * extract.enhanceCount}`,
-        playerStamina: extract.player.playerStamina + `+${findEnhance.increaseValue * extract.enhanceCount}`,
+        playerStrength: extract.player.playerStrength + `+(${findEnhance[extract.enhanceCount].increaseValue})`,
+        playerDefense: extract.player.playerDefense + `+(${findEnhance[extract.enhanceCount].increaseValue})`,
+        playerStamina: extract.player.playerStamina + `+(${findEnhance[extract.enhanceCount].increaseValue})`,
     }));
 
     if (myTeamSearch === false) {
-        result = findTeam.map(({ playerStrength, playerDefense, playerStamina, ...res }) => res);
+        result = result.map(({ playerStrength, playerDefense, playerStamina, ...res }) => res);
     }
     return res.status(200).json(result);
 });

@@ -363,6 +363,7 @@ function handleSendRequest(event) {
                         runCustomGame(runCustomBody).then(async res => {
                             if (res) {
                                 doDisplay(false);
+
                                 playGame();
                                 // const data = [res.myTeamInfo, res.targetInfo, res.enhanceInfo].map(info => {
                                 //     if (typeof info === 'object') {
