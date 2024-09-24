@@ -143,8 +143,9 @@ router.post('/match/team', authMiddleware, async (req, res, next) => {
             else {
                 player2.push(jsonData);
             }
-            
         });
+
+        
 
         return res.status(200).json({player1, player2});
     } catch {
