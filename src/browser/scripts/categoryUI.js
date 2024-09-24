@@ -20,8 +20,9 @@ import {
     searchTeam,
     createPlayer,
     updatePlayerInfo,
-    runCustomGame,
-    matchGame,
+    runGame,
+    matchCustomGame,
+    matchRankGame,
     makeGacha,
     buyGacha,
     makeProduct,
@@ -45,7 +46,7 @@ window.addEventListener('DOMContentLoaded', () => {
         button.addEventListener('click', handleApiButtonClick);
     });
 
-    document.body.addEventListener('click', function(event) {
+    document.body.addEventListener('click', function (event) {
         // 클릭된 요소의 ID가 'ResSendBtn'으로 끝나는지 확인
         if (event.target && event.target.id.endsWith('ResSendBtn')) {
             const apiResDiv = document.getElementById('apiRes');
@@ -230,11 +231,10 @@ function handleSendRequest(event) {
 
         // 내 보유 선수 조회
         case 'getMyPlayerResSendBtn':
-
-        async function myPlayers(res) {
-            resContext.innerHTML = '';
-            res.data.forEach(player => {
-                resContext.innerHTML += `
+            async function myPlayers(res) {
+                resContext.innerHTML = '';
+                res.data.forEach(player => {
+                    resContext.innerHTML += `
                         ${player.isPicked === true ? '▼' : ''}
                         선수명 [${player.playerName}]
                         ${player.isPicked === true ? `[편성중]` : `보유 수량 : [${player.playerQuantity}]`}
@@ -243,8 +243,8 @@ function handleSendRequest(event) {
                         <button onclick="enhancePlayer('${player.rosterId}')">선수 강화</button>
                         <br><br>
                         `;
-            });
-        }
+                });
+            }
 
             window.excludePlayer = async playerId => {
                 await excludeTeam(playerId);
@@ -354,17 +354,54 @@ function handleSendRequest(event) {
             // 매칭 성공 여부 확인하고... 성공했으면 게임에 필요한 데이터를 불러와야한다..
             const matchBody = { accountId: body };
             const runCustomBody = { targetAccountId: body };
-            matchGame(matchBody).then(res => {
+            matchCustomGame(matchBody).then(res => {
                 if (res.errorMessage) {
                     resContext.innerHTML += `<p>${res.errorMessage}</p>`;
                     apiResDiv.appendChild(resContext);
                 } else {
-                    runCustomGame(runCustomBody).then(async res => {
+                    runGame(runCustomBody).then(res => {
                         if (res) {
                             doDisplay(false);
                             // 가져온 res 데이터로 인게임에서 사용
-                            playGame(res.player1, res.player2);
-                            
+                            const result = playGame(res.player1, res.player2);
+
+                            // 승부를 한 유저의 아이디를 저장한다.
+                            const winner = result.win;
+                            if (winner === 0) {
+                                console.log('Player1 승!')
+                            } else if (winner === 1) {
+                                console.log('Player2 승!')
+                            } else console.log('무승부입니다!');
+                        } else if (!res) alert('매칭 데이터를 불러오는 중 실패하였습니다. 매칭을 취소합니다.');
+                    });
+                }
+            });
+            break;
+
+        case 'runRankGameResSendBtn':
+            // 매칭 성공 여부 확인하고... 성공했으면 게임에 필요한 데이터를 불러와야한다..
+            matchRankGame().then(res => {
+                if (res.errorMessage) {
+                    resContext.innerHTML += `<p>${res.errorMessage}</p>`;
+                    apiResDiv.appendChild(resContext);
+                } else {
+                    const runRankBody = { targetAccountId: `${res.nearestMMRUser[0].accountId}` };
+                    runGame(runRankBody).then(res => {
+                        if (res) {
+                            doDisplay(false);
+                            // 가져온 res 데이터로 인게임에서 사용
+                            const result = playGame(res.player1, res.player2);
+
+                            // 승부를 한 유저의 아이디를 저장한다.
+                            const player2 = res.matchUsers.targetUserId;
+                            const winner = result.win;
+                            const jsonData = { opponentId: player2, outcome: winner };
+                            console.log(winner);
+                            if (winner === 0) {
+                                calculatorMmr(jsonData);
+                            } else if (winner === 1) {
+                                calculatorMmr(jsonData);
+                            } else console.log('무승부입니다!');
                         } else if (!res) alert('매칭 데이터를 불러오는 중 실패하였습니다. 매칭을 취소합니다.');
                     });
                 }
@@ -403,15 +440,13 @@ function handleSendRequest(event) {
             calculatorMmr(body).then(res => {
                 apiResDiv.innerHTML += res.message;
                 apiResDiv.appendChild(resContext);
-
-            })
+            });
             break;
 
         // Rank 조회
         case 'getRankResSendBtn':
             getRank().then(res => {
                 apiResDiv.textContent = JSON.stringify(res.data);
-
             });
             break;
 

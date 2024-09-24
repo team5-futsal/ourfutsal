@@ -119,7 +119,6 @@ export const playGame = (player1, player2) => {
                     ball.draw(spBarX, y);
                 }
             }
-
             logDiv.innerHTML += `<p>${JSON.stringify(gameLog[turn].result.result)}</p>`;
 
             turn++;

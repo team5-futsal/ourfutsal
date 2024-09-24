@@ -276,26 +276,32 @@ export async function updatePlayerInfo(playerName, body) {
     }
 }
 
-export async function matchGame(body = null) {
-    const res = await fetchAPI('POST', '/api/custom', body, true);
+export async function matchCustomGame(body = null) {
+    const res = await fetchAPI('POST', '/api/match/custom', body, true);
     return res.json();
 }
 
-export async function runCustomGame(body) {
-    const res = await fetchAPI('POST', '/api/match/team', body, true);
+export async function matchRankGame() {
+    const res = await fetchAPI('GET', 'api/match/rank', null, true);
+    if(res.status === 200) {
+        return res.json()
+    }
+    else return false;
+}
+
+export async function runGame(body) {
+    const res = await fetchAPI('POST', '/api/match/game', body, true);
     if (res.status === 200) {
         return res.json();
     } else return false;
 }
-
 
 export async function calculatorMmr(body) {
-    const res = await fetchAPI('PUT', '/api/match', JSON.parse(body), true);
+    const res = await fetchAPI('PUT', '/api/match', body, true);
     if (res.status === 200) {
         return res.json();
     } else return false;
 }
-
 
 /** 랭크 조회 */
 export async function getRank() {

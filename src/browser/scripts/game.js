@@ -217,7 +217,7 @@ export function game(player1Roster, player2Roster) {
     }
 
     let turn = 0;
-    gameLog.push({ players: JSON.parse(JSON.stringify(players)), act: 'ready', result: '경기 시작' })
+    gameLog.push({ players: JSON.parse(JSON.stringify(players)), act: 'ready', result: {result:'경기 시작'}  })
     while (turn < 45) {
         //턴 진행
         //공 소지자 찾기
