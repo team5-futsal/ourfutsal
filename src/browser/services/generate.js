@@ -11,6 +11,9 @@ export async function refreshAccessToken(accessToken) {
         return res.json();
     })
     .then(res => {
+        if(res.errorMessage) {
+            throw new Error(res.errorMessage);
+        }
         if(res.isCreate) {
             console.log('새로 생성됨');
             return res.newAccessToken;
@@ -19,13 +22,10 @@ export async function refreshAccessToken(accessToken) {
             console.log('토큰 유효함');
             return false;
         }
-        else {
-            throw new Error('새로운 Access Token을 받지 못했습니다.');
-        }
     })
     .catch(error => {
-        console.error('Access Token 재발급 실패:', error);
+        alert(error);
         // 재로그인 필요 (Refresh Token도 만료되었을 때)
         window.location.href = '/api';
-    });
+    })
 }
