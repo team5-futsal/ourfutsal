@@ -1,7 +1,7 @@
 /** API 호출 이후 UI에 관련된 함수 모음입니다.
  * 혹은 UI 관련 로직을 수행합니다.
  */
-import { handleApiButtonClick } from './utils.js';
+import { doDisplay, handleApiButtonClick } from './utils.js';
 import {
     getAccountAll,
     getAccountInfo,
@@ -15,6 +15,8 @@ import {
     updateTeam,
     getPlayerDetail,
     getPlayers,
+    runCustomGame,
+    matchGame,
 } from './api.js';
 
 // 카테고리 html이 로드되고 js가 로드되었을 때 실행하도록 함.
@@ -54,7 +56,6 @@ function handleSendRequest(event) {
 
     const params = document.getElementById('reqParams').value;
     const body = document.getElementById('reqBody').value;
-    const fineBody = JSON.parse(body);
 
     // 버튼 ID에 따라 API 요청을 구분
     switch (sendRequestBtn.id) {
@@ -74,7 +75,7 @@ function handleSendRequest(event) {
             break;
 
         case 'updateAccountResSendBtn':
-            updateAccount(fineBody).then(res => {
+            updateAccount(JSON.parse(body)).then(res => {
                 if (res) {
                     alert(`접속한 유저의 비밀번호가 수정되었습니다. 로그인 화면으로 이동합니다.`);
                     window.location.href = 'http://localhost:3333/api';
@@ -97,6 +98,7 @@ function handleSendRequest(event) {
             });
             break;
 
+            sessionStorage.setItem('');
         case 'deleteAccountResSendBtn':
             deleteAccount().then(res => {
                 const userId = res.data.userId;
@@ -184,8 +186,8 @@ function handleSendRequest(event) {
                     apiResDiv.textContent = res.message;
                 });
             }
-
             break;
+
         case 'getPlayersResSendBtn':
             getPlayers().then(res => {
                 const apiResDiv = document.querySelector('.apiRes');
@@ -220,7 +222,38 @@ function handleSendRequest(event) {
                 `;
                 apiResDiv.appendChild(resContext);
             });
-        // 다른 API 요청을 추가로 처리할 수 있음
+            break;
+
+        case 'runCustomGameResSendBtn':
+            // 매칭 성공 여부 확인하고... 성공했으면 게임에 필요한 데이터를 불러와야한다..
+            const matchBody = { accountId: body };
+            const runCustomBody = { targetAccountId: body };
+            matchGame(matchBody)
+                .then(res => {
+                    if (res.errorMessage) {
+                        resContext.innerHTML += `<p>${res.errorMessage}</p>`;
+                        apiResDiv.appendChild(resContext);
+                    } else {
+                        runCustomGame(runCustomBody).then(async res => {
+                            if (res) {
+                                doDisplay(false);
+                                const data = [res.myTeamInfo, res.targetInfo, res.enhanceInfo].map(info => {
+                                    if (typeof info === 'object') {
+                                        return JSON.stringify(info);
+                                    }
+                                    return info;
+                                });
+
+                                for (let i in data) {
+                                    resContext.innerHTML += `<p>${data[i]}</p>`;
+                                }
+                                apiResDiv.appendChild(resContext);
+                            } else if (!res) alert('매칭 데이터를 불러오는 중 실패하였습니다. 매칭을 취소합니다.');
+                        });
+                    }
+                })
+            break;
+
         default:
             console.log('이 버튼에 해당하는 API 기능이 없습니다');
     }
