@@ -3,8 +3,8 @@
 /** api 버튼을 누르면 Request 창이 토글형식으로 작동하도록 하는 함수 */
 export function handleApiButtonClick(event) {
     event.preventDefault(); // 기본 동작 방지
+    doDisplay(true); // 이게 다시 입력을 안받음.. 왜이런거지....
     const apiRequestDiv = document.querySelector('.apiRequestBtn');
-
     // apiRequest 클래스 하단에 버튼이 있는지 확인한다.
     // 버튼이 있다면 삭제
     if (apiRequestDiv.children[0]) {
@@ -19,4 +19,19 @@ export function handleApiButtonClick(event) {
     sendRequestBtn.textContent = 'Send Request';
     sendRequestBtn.type = 'apiButton';
     apiRequestDiv.appendChild(sendRequestBtn);
+}
+
+export function doDisplay(isDisplay) {
+    // const reqResContainer = document.getElementsByClassName('reqResContainer');
+    // if (isDisplay) 
+    //     reqResContainer.style['display'] = 'flex';
+    // else reqResContainer.style['display'] = 'none';
+    const reqResContainer = document.getElementById('reqResContainer');
+    if (isDisplay) {
+        console.log('보여지게 함')
+        reqResContainer.style.display = 'flex';}
+    else {
+        console.log('안보여지게 함')
+        reqResContainer.style.display = 'none'
+    };
 }
