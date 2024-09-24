@@ -111,12 +111,15 @@ const halfHeightUnit = heightUnit/2<<0
 const yPosition = [halfHeightUnit, halfHeightUnit+heightUnit*2, halfHeightUnit+heightUnit]
 const radius = heightUnit/4<<0
 const color = ['blue', 'red']
+let turn = 0;
 
 
-
-for(const t of gameLog){
+const playGame = () => {
+    requestAnimationFrame(playGame)
     const cwu = canvas.width/100 // canvas width Unit
-    for(const p of t.players){
+    const log = gameLog[turn]
+
+    for(const p of log.players){
         const x = p.position*cwu<<0
         const y = yPosition[p.pNum]
 
@@ -131,10 +134,33 @@ for(const t of gameLog){
         }
     }
     
+    turn++;
     console.log(t)
     console.log(t.result)
-    break;
 }
+playGame()
+
+// for(const t of gameLog){
+//     const cwu = canvas.width/100 // canvas width Unit
+//     for(const p of t.players){
+//         const x = p.position*cwu<<0
+//         const y = yPosition[p.pNum]
+
+//         const pX = x + radius * (p.team-1 ? -1 : 1)
+//         drawPlayers.draw(pX, y, radius, color[p.team-1], p.name)
+        
+//         const spBarX = p.team-1 ? x - radius*2 : x
+//         drawPlayers.drawSp(spBarX, y, radius, p.maxSp, p.curSp)
+
+//         if(p.hasBall){
+//             ball.draw(spBarX, y)
+//         }
+//     }
+    
+//     console.log(t)
+//     console.log(t.result)
+//     break;
+// }
 
 
 //Reference
