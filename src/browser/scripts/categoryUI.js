@@ -23,6 +23,7 @@ import {
     buyGacha,
     runCustomGame,
     matchGame,
+    getRank
 } from './api.js';
 
 // 카테고리 html이 로드되고 js가 로드되었을 때 실행하도록 함.
@@ -377,6 +378,14 @@ function handleSendRequest(event) {
                     apiResDiv.innerHTML = res.message;
                     apiResDiv.appendChild(resContext);
                 })
+                break;
+
+            // Rank 조회
+            case 'getRankResSendBtn':
+                getRank().then(res => {
+                    apiResDiv.textContent = res.message;
+                });
+                break;
 
         // 다른 API 요청을 추가로 처리할 수 있음
         default:
