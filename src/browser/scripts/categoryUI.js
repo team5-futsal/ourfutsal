@@ -70,7 +70,7 @@ function handleSendRequest(event) {
 
     const params = document.getElementById('reqParams').value;
     const body = document.getElementById('reqBody').value;
-
+    
     // 버튼 ID에 따라 API 요청을 구분
     switch (sendRequestBtn.id) {
         case 'getAccountsResSendBtn':
