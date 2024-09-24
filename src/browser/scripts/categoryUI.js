@@ -27,7 +27,9 @@ import {
     makeProduct,
     buyProduct,
     buyCash,
+    getRank
 } from './api.js';
+import { playGame } from './play.js';
 
 // 카테고리 html이 로드되고 js가 로드되었을 때 실행하도록 함.
 // 1. 생성된 accessToken을 받아오기 위해 선언함.
@@ -361,17 +363,18 @@ function handleSendRequest(event) {
                         runCustomGame(runCustomBody).then(async res => {
                             if (res) {
                                 doDisplay(false);
-                                const data = [res.myTeamInfo, res.targetInfo, res.enhanceInfo].map(info => {
-                                    if (typeof info === 'object') {
-                                        return JSON.stringify(info);
-                                    }
-                                    return info;
-                                });
+                                playGame();
+                                // const data = [res.myTeamInfo, res.targetInfo, res.enhanceInfo].map(info => {
+                                //     if (typeof info === 'object') {
+                                //         return JSON.stringify(info);
+                                //     }
+                                //     return info;
+                                // });
 
-                                for (let i in data) {
-                                    resContext.innerHTML += `<p>${data[i]}</p>`;
-                                }
-                                apiResDiv.appendChild(resContext);
+                                // for (let i in data) {
+                                //     resContext.innerHTML += `<p>${data[i]}</p>`;
+                                // }
+                                // apiResDiv.appendChild(resContext);
                             } else if (!res) alert('매칭 데이터를 불러오는 중 실패하였습니다. 매칭을 취소합니다.');
                         });
                     }
@@ -397,12 +400,20 @@ function handleSendRequest(event) {
             });
             break;
             
-            // 선수 상세 정보 수정
-            case 'updatePlayerInfoResSendBtn':
-                updatePlayerInfo(params, body).then(res => {
-                    apiResDiv.innerHTML = res.message;
-                    apiResDiv.appendChild(resContext);
-                })
+        // 선수 상세 정보 수정
+        case 'updatePlayerInfoResSendBtn':
+            updatePlayerInfo(params, body).then(res => {
+                apiResDiv.innerHTML = res.message;
+                apiResDiv.appendChild(resContext);
+            })
+            break;
+
+        // Rank 조회
+        case 'getRankResSendBtn':
+            getRank().then(res => {
+                apiResDiv.textContent = JSON.stringify(res.data);
+            });
+            break;
 
         // 다른 API 요청을 추가로 처리할 수 있음
         default:

@@ -1,8 +1,8 @@
-body {
+.container {
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     height: 100vh;
     background-color: rgb(253, 253, 253);
     background-image: '';
@@ -100,7 +100,7 @@ div[type='apiReqRes'] {
     justify-content: center;
 }
 
-.cover {
+.gameDiv {
     margin: 10px 20px 0px 20px;
     padding: 10px;
     border: 1px solid #ccc;

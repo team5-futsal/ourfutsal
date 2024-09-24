@@ -26,12 +26,18 @@ export function doDisplay(isDisplay) {
     // if (isDisplay) 
     //     reqResContainer.style['display'] = 'flex';
     // else reqResContainer.style['display'] = 'none';
-    const reqResContainer = document.getElementById('reqResContainer');
+    const apiReqRes = document.getElementsByName('apiReqRes');
+    // const reqResContainer = document.getElementById('reqResContainer');
     if (isDisplay) {
         console.log('보여지게 함')
-        reqResContainer.style.display = 'flex';}
+        apiReqRes[0].style.display = '';
+        apiReqRes[1].style.display = '';
+        
+    }
     else {
         console.log('안보여지게 함')
-        reqResContainer.style.display = 'none'
+        apiReqRes[0].style.display = 'none';
+        apiReqRes[1].style.display = 'none';
+        // reqResContainer.style.display = 'none'
     };
 }

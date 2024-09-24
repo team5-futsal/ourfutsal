@@ -284,3 +284,9 @@ export async function runCustomGame(body) {
     } else return false;
 }
 
+/** 랭크 조회 */
+export async function getRank() {
+    const res = await fetchAPI('GET', '/api/rank', null, false);
+    if (res.status === 200) return res.json();
+    else return alert(res.messasge);
+}

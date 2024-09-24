@@ -10,6 +10,7 @@ router.get('/rank', async (req, res, next) => {
     try {
         // 유저 정보 조회
         const sortedMMR = await prisma.account.findMany({
+            take: 5,
             select: {
                 userId: true,
                 accountId: true,
@@ -36,7 +37,7 @@ router.get('/rank', async (req, res, next) => {
                     result: 1,
                 },
             });
-            // 판수가 0일 경우 승률:0
+            // gamas:판수, wins: 이긴 횟수 -> 판수가 0일 경우 승률:0
             accountInfo['winRate'] = games ? Math.floor(wins / games, 2) : 0;
         }
 
@@ -93,9 +94,9 @@ router.post('/custom', authMiddleware, async (req, res, next) => {
             return res.status(412).json({ errorMessage: '상대 유저의 선출 인원이 부족합니다.' });
         }
 
-        const matchResult = await nojam(myUserInfo.accountId, +userId);
+        // const matchResult = await nojam(myUserInfo.accountId, +userId);
 
-        return res.status(200).json({ user: isExistUser, message: matchResult });
+        return res.status(200).json({ user: isExistUser /*message: matchResult*/ });
     } catch (error) {
         next(error);
     }
