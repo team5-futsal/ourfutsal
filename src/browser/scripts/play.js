@@ -1,57 +1,5 @@
 import { game } from './game.js'
 
-// const player1Roster = [
-//     {
-//         "playerId": 4,
-//         "playerName": "ddd +2",
-//         "enhanceCount": 2,
-//         "playerStrength": "10+20",
-//         "PlayerDefense": "10+20",
-//         "playerStamina": "10+20"
-//     },
-//     {
-//         "playerId": 6,
-//         "playerName": "웨인루니 +1",
-//         "enhanceCount": 1,
-//         "playerStrength": "50+10",
-//         "PlayerDefense": "20+10",
-//         "playerStamina": "30+10"
-//     },
-//     {
-//         "playerId": 5,
-//         "playerName": "기성용 +1",
-//         "enhanceCount": 1,
-//         "playerStrength": "88+10",
-//         "PlayerDefense": "85+10",
-//         "playerStamina": "74+10"
-//     }]
-
-// const player2Roster = [
-//     {
-//         "playerId": 5,
-//         "playerName": "기성용 +0",
-//         "enhanceCount": 0,
-//         "playerStrength": "88+0",
-//         "PlayerDefense": "85+0",
-//         "playerStamina": "74+0"
-//     },
-//     {
-//         "playerId": 7,
-//         "playerName": "박지성 +0",
-//         "enhanceCount": 0,
-//         "playerStrength": "40+0",
-//         "PlayerDefense": "15+0",
-//         "playerStamina": "40+0"
-//     },
-//     {
-//         "playerId": 6,
-//         "playerName": "웨인루니 +0",
-//         "enhanceCount": 0,
-//         "playerStrength": "50+0",
-//         "PlayerDefense": "20+0",
-//         "playerStamina": "30+0"
-//     }]
-
 export const playGame = (player1, player2) => {
     const gameLog = game(player1, player2);
 
@@ -128,10 +76,15 @@ export const playGame = (player1, player2) => {
     const interval = 50;
     let timer = interval - 1;
     let turn = 0;
+    let animationFame;
+    const end = gameLog.length - 2;
 
     const gameStart = () => {
-        requestAnimationFrame(gameStart)
+        animationFame = requestAnimationFrame(gameStart)
         timer++;
+        if(turn > end){
+            cancelAnimationFrame(animationFame);
+        }
         if(timer%interval == 0){
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             const cwu = canvas.width/100 // canvas width Unit
