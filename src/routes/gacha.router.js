@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
 import gacha from '../utils/service/onegacha.js';
 import doGacha from '../utils/service/gacha.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
+import { Prisma } from '@prisma/client';
 
 const router = express.Router();
 
@@ -50,6 +51,7 @@ router.post('/gacha/buy/:gachaTry', authMiddleware, async (req, res, next) => {
         }
 
         //랜덤 선수 로또
+
         const gachaTransaction = await prisma.$transaction(
             async tx => {
                 const resultGacha = await gacha(gachaTry, accountId);
