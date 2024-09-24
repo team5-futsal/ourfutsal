@@ -138,9 +138,7 @@ export function game(player1Roster, player2Roster) {
                 shoot.host.curSp -= spConsume.shoot //스테미나 소모
             }
             utils.lostBall() // 공 초기화
-            if (players.find(p => p.hasBall))
-                utils.positionReset() // 포지션 초기화
-
+            utils.positionReset() // 포지션 초기화
             if (Math.random() < shoot.prob) { // 성공 판정
                 score[shoot.host.team - 1] += 1
                 players.filter(p => p.team != shoot.host.team)[0].hasBall = true

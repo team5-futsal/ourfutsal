@@ -91,12 +91,15 @@ export const playGame = (/*player1Roster, player2Roster*/) => {
             const spUnit = radius*2/maxSp<<0;
             let spBar = radius*2;
             curSp == maxSp ? spBar = radius*2 : spBar = spUnit*curSp
-
+            
+            // 스테미나 바
+            this.ctx.fillStyle = 'rgb(255 255 0)';
+            this.ctx.fillRect(x, y+radius, radius*2, 10);
+            // 바 테두리
             this.ctx.strokeStype = 'rgb(0 0 0)';
             this.ctx.lineWidth = 10;
             this.ctx.strokeRect(x, y+radius, spBar, 10);
-            this.ctx.fillStyle = 'rgb(255 255 0)';
-            this.ctx.fillRect(x, y+radius, radius*2, 10);
+            
         }
     }
 
@@ -121,33 +124,37 @@ export const playGame = (/*player1Roster, player2Roster*/) => {
     const yPosition = [halfHeightUnit, halfHeightUnit+heightUnit*2, halfHeightUnit+heightUnit]
     const radius = heightUnit/4<<0
     const color = ['blue', 'red']
+    const interval = 50;
+    let timer = interval - 1;
     let turn = 0;
-
-
 
     const gameStart = () => {
         requestAnimationFrame(gameStart)
-        const cwu = canvas.width/100 // canvas width Unit
-        const log = gameLog[turn]
+        timer++;
+        if(timer%interval == 0){
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const cwu = canvas.width/100 // canvas width Unit
+            const log = gameLog[turn]
 
-        for(const p of log.players){
-            const x = p.position*cwu<<0
-            const y = yPosition[p.pNum]
+            for(const p of log.players){
+                const x = p.position*cwu<<0
+                const y = yPosition[p.pNum]
 
-            const pX = x + radius * (p.team-1 ? -1 : 1)
-            drawPlayers.draw(pX, y, radius, color[p.team-1], p.name)
-            
-            const spBarX = p.team-1 ? x - radius*2 : x
-            drawPlayers.drawSp(spBarX, y, radius, p.maxSp, p.curSp)
+                const pX = x + radius * (p.team-1 ? -1 : 1)
+                drawPlayers.draw(pX, y, radius, color[p.team-1], p.name)
+                
+                const spBarX = p.team-1 ? x - radius*2 : x
+                drawPlayers.drawSp(spBarX, y, radius, p.maxSp, p.curSp)
 
-            if(p.hasBall){
-                ball.draw(spBarX, y)
+                if(p.hasBall){
+                    ball.draw(spBarX, y)
+                }
             }
+            
+            turn++;
+            console.log(t)
+            console.log(t.result)
         }
-        
-        turn++;
-        console.log(t)
-        console.log(t.result)
     }
     gameStart()
 
