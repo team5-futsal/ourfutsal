@@ -9,7 +9,7 @@
 </head>
 
 <body>
-    <div class="apiContainer">
+    <div class="apiContainer" id="apiContainer">
         <div type="apiForm" class="accountApi">
             <h2>계정 API</h2>
             <div class="apiButtons">
@@ -28,6 +28,8 @@
                 <div>
                     <button type="apiButton" id="getPlayers">선수 목록 조회</button>
                     <button type="apiButton" id="getPlayerDetail">선수 상세 정보 조회</button>
+                    <button type="apiButton" id="createPlayer">선수 생성</button>
+                    <button type="apiButton" id="updatePlayerInfo">선수 정보 수정</button>
                 </div>
             </div>
         </div>
@@ -68,8 +70,8 @@
             </div>
         </div>
     </div>
-    <div class="reqResContainer">
-        <div type="apiReqRes" class="apiRequest hidden">
+    <div class="reqResContainer" id="reqResContainer">
+        <div type="apiReqRes" class="apiRequest">
             <h2>Request</h2>
             <div class="inputApi">
                 <input type="reqInput" id="reqParams" placeholder="Params를 입력해주세요." />
@@ -86,8 +88,18 @@
                 </div>
             </div>
         </div>
+        <!-- <div class="cover">
+            <canvas id="canvas" width="854" height="480"></canvas>
+        </div> -->
     </div>
+    <img
+        id="source"
+        src="../asset/ball.png"
+        width="30"
+        height="30"
+        style="display: none;" />
     <script src='../scripts/categoryUI.js' type="module"></script>
     <script src="../services/values.js"></script>
+    <!-- <script src="../scripts/play.js" type="module"></script> -->
 </body>
 </html>

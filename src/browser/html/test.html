@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+    <script type="module">
+        document
+            .getElementById("canvas")
+            .addEventListener("click", () => {
+                // document.querySelector(".button-container").style.display = "none"; // 첫번째 element 반환
+                document.getElementById("canvas").style.display = "block";
+                import("../scripts/play.js")
+            });
+    </script>
+</body>
+
+</html>

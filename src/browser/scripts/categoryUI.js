@@ -1,7 +1,7 @@
 /** API 호출 이후 UI에 관련된 함수 모음입니다.
  * 혹은 UI 관련 로직을 수행합니다.
  */
-import { handleApiButtonClick } from './utils.js';
+import { doDisplay, handleApiButtonClick } from './utils.js';
 import {
     getAccountAll,
     getAccountInfo,
@@ -18,7 +18,11 @@ import {
     sellMyPlayer,
     enhancePlayer,
     searchTeam,
+    createPlayer,
+    updatePlayerInfo,
     buyGacha,
+    runCustomGame,
+    matchGame,
 } from './api.js';
 
 // 카테고리 html이 로드되고 js가 로드되었을 때 실행하도록 함.
@@ -77,10 +81,10 @@ function handleSendRequest(event) {
             break;
 
         case 'updateAccountResSendBtn':
-            updateAccount(fineBody).then(res => {
+            updateAccount(JSON.parse(body)).then(res => {
                 if (res) {
                     alert(`접속한 유저의 비밀번호가 수정되었습니다. 로그인 화면으로 이동합니다.`);
-                    window.location.href = 'http://localhost:3333/api';
+                    window.location.href = 'http://localhost:3333/';
                     window.localStorage.clear();
                 } else {
                     alert('500 SERVER ERROR');
@@ -100,12 +104,13 @@ function handleSendRequest(event) {
             });
             break;
 
+            sessionStorage.setItem('');
         case 'deleteAccountResSendBtn':
             deleteAccount().then(res => {
                 const userId = res.data.userId;
                 alert(`접속한 ${userId}가 정상적으로 삭제되었습니다. 로그인 화면으로 이동합니다.`);
                 // 삭제가 되었으니 페이지를 기본 홈으로 이동
-                window.location.href = 'http://localhost:3333/api';
+                window.location.href = 'http://localhost:3333/';
             });
             break;
 
@@ -113,7 +118,7 @@ function handleSendRequest(event) {
             logoutAccount().then(res => {
                 if (res) {
                     alert('로그아웃 되었습니다. 로그인 화면으로 이동합니다.');
-                    window.location.href = 'http://localhost:3333/api';
+                    window.location.href = 'http://localhost:3333/';
                 }
             });
             break;
@@ -197,8 +202,8 @@ function handleSendRequest(event) {
                     apiResDiv.innerHTML = `${res.data.player.playerName} 선수를 편성에 추가했습니다. `;
                 });
             }
-
             break;
+
         case 'getPlayersResSendBtn':
             getPlayers().then(res => {
                 const apiResDiv = document.querySelector('.apiRes');
@@ -271,7 +276,7 @@ function handleSendRequest(event) {
                 });
             }
             break;
-
+        // 선수 강화
         case 'enhancePlayerResSendBtn':
             if (confirm(`rosterId = ${body} 선수를 강화합니까? `)) {
                 enhancePlayer(body).then(res => {
@@ -279,6 +284,7 @@ function handleSendRequest(event) {
                 });
             }
             break;
+
 
         // 선수 구매 가차
         case 'buyGachaResSendBtn':
@@ -296,13 +302,15 @@ function handleSendRequest(event) {
             }
             break;
 
+
+        // 선수 상세 조회
         case 'getPlayerDetailResSendBtn':
             getPlayerDetail(params).then(res => {
                 const player = res.data;
                 const playerName = res.data.playerName;
                 const positionId = res.data.positionId;
                 const playerStrength = res.data.playerStrength;
-                const playerDefense = res.data.PlayerDefense;
+                const playerDefense = res.data.playerDefense;
                 const playerStamina = res.data.playerStamina;
                 const apiResDiv = document.querySelector('.apiRes');
                 const resContext = document.createElement('div');
@@ -312,6 +320,63 @@ function handleSendRequest(event) {
                 `;
                 apiResDiv.appendChild(resContext);
             });
+            break;
+
+        case 'runCustomGameResSendBtn':
+            // 매칭 성공 여부 확인하고... 성공했으면 게임에 필요한 데이터를 불러와야한다..
+            const matchBody = { accountId: body };
+            const runCustomBody = { targetAccountId: body };
+            matchGame(matchBody)
+                .then(res => {
+                    if (res.errorMessage) {
+                        resContext.innerHTML += `<p>${res.errorMessage}</p>`;
+                        apiResDiv.appendChild(resContext);
+                    } else {
+                        runCustomGame(runCustomBody).then(async res => {
+                            if (res) {
+                                doDisplay(false);
+                                const data = [res.myTeamInfo, res.targetInfo, res.enhanceInfo].map(info => {
+                                    if (typeof info === 'object') {
+                                        return JSON.stringify(info);
+                                    }
+                                    return info;
+                                });
+
+                                for (let i in data) {
+                                    resContext.innerHTML += `<p>${data[i]}</p>`;
+                                }
+                                apiResDiv.appendChild(resContext);
+                            } else if (!res) alert('매칭 데이터를 불러오는 중 실패하였습니다. 매칭을 취소합니다.');
+                        });
+                    }
+                })
+            break;
+
+            // 선수 생성
+        case  'createPlayerResSendBtn':
+            createPlayer(body).then(res => {
+                const playerName = res.data.playerName;
+                const positionId = res.data.positionId;
+                const playerStrength = res.data.playerStrength;
+                const playerDefense = res.data.playerDefense;
+                const playerStamina = res.data.playerStamina;
+
+                const apiResDiv = document.querySelector('.apiRes');
+                const resContext = document.createElement('div');
+
+                resContext.innerHTML = `
+                <p class="users">선수명 : ${playerName} <br> 포지션 아이디 : ${positionId} <br> 공격력 : ${playerStrength} <br> 수비력 : ${playerDefense} <br> 스테미나 : ${playerStamina}</p>
+                `;
+                apiResDiv.appendChild(resContext);
+            });
+            break;
+            
+            // 선수 상세 정보 수정
+            case 'updatePlayerInfoResSendBtn':
+                updatePlayerInfo(params, body).then(res => {
+                    apiResDiv.innerHTML = res.message;
+                    apiResDiv.appendChild(resContext);
+                })
 
         // 다른 API 요청을 추가로 처리할 수 있음
         default:
