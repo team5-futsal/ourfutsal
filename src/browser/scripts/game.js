@@ -57,7 +57,6 @@ export function game(player1Roster, player2Roster) {
     const initPosion = players.map(p => p.position)
     const gameLog = []
 
-    // 선수들의 능력치에 비례해서 패스, 수비, 슈팅 성공률 가중치를 저장
     const spConsume = {
         pass: 5,
         dribble: 10,

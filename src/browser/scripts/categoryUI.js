@@ -27,7 +27,7 @@ import {
     makeProduct,
     buyProduct,
     buyCash,
-    getRank
+    getRank,
 } from './api.js';
 import { playGame } from './play.js';
 
@@ -329,7 +329,6 @@ function handleSendRequest(event) {
             }
             break;
 
-
         // 선수 상세 조회
         case 'getPlayerDetailResSendBtn':
             getPlayerDetail(params).then(res => {
@@ -353,26 +352,25 @@ function handleSendRequest(event) {
             // 매칭 성공 여부 확인하고... 성공했으면 게임에 필요한 데이터를 불러와야한다..
             const matchBody = { accountId: body };
             const runCustomBody = { targetAccountId: body };
-            matchGame(matchBody)
-                .then(res => {
-                    if (res.errorMessage) {
-                        resContext.innerHTML += `<p>${res.errorMessage}</p>`;
-                        apiResDiv.appendChild(resContext);
-                    } else {
-                        runCustomGame(runCustomBody).then(async res => {
-                            if (res) {
-                                doDisplay(false);
-                                // 가져온 res 데이터로 인게임에서 사용
-                                const reuslt = playGame(res.player1, res.player2);
-                                console.log(reuslt)
-                            } else if (!res) alert('매칭 데이터를 불러오는 중 실패하였습니다. 매칭을 취소합니다.');
-                        });
-                    }
-                })
+            matchGame(matchBody).then(res => {
+                if (res.errorMessage) {
+                    resContext.innerHTML += `<p>${res.errorMessage}</p>`;
+                    apiResDiv.appendChild(resContext);
+                } else {
+                    runCustomGame(runCustomBody).then(async res => {
+                        if (res) {
+                            doDisplay(false);
+                            // 가져온 res 데이터로 인게임에서 사용
+                            playGame(res.player1, res.player2);
+                            
+                        } else if (!res) alert('매칭 데이터를 불러오는 중 실패하였습니다. 매칭을 취소합니다.');
+                    });
+                }
+            });
             break;
 
-            // 선수 생성
-        case  'createPlayerResSendBtn':
+        // 선수 생성
+        case 'createPlayerResSendBtn':
             createPlayer(body).then(res => {
                 const playerName = res.data.playerName;
                 const positionId = res.data.positionId;
@@ -389,13 +387,13 @@ function handleSendRequest(event) {
                 apiResDiv.appendChild(resContext);
             });
             break;
-            
+
         // 선수 상세 정보 수정
         case 'updatePlayerInfoResSendBtn':
             updatePlayerInfo(params, body).then(res => {
                 apiResDiv.innerHTML = res.message;
                 apiResDiv.appendChild(resContext);
-            })
+            });
             break;
 
         // Rank 조회
