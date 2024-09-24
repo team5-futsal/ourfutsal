@@ -6,8 +6,8 @@ import { Prisma } from '@prisma/client';
 const router = express.Router();
 
 // 캐시 구매
-router.put('/account/:accountId', authMiddleware, async (req, res, next) => {
-    const { accountId } = req.params;
+router.put('/account/cash', authMiddleware, async (req, res, next) => {
+    const { accountId } = req.user;
     const { cash } = req.body;
 
     // 캐시 구매할 어카운트가 있는지부터 검증
@@ -23,7 +23,7 @@ router.put('/account/:accountId', authMiddleware, async (req, res, next) => {
             const chargeCash = await tx.account.update({
                 where: { accountId: +accountId },
                 data: {
-                    cash: findAccount.cash + cash,
+                    cash: +(findAccount.cash + cash),
                 },
             });
             const purchaseHistory = await tx.purchaseHistory.create({
@@ -39,7 +39,7 @@ router.put('/account/:accountId', authMiddleware, async (req, res, next) => {
         },
     );
 
-    return res.status(200).json({ message: '잔액 충전 성공', cash: cashTransaction[0].cash });
+    return res.status(200).json({ message: `잔액 충전 성공, ${cashTransaction[0].cash}` });
 });
 
 // 상품 생성
@@ -126,8 +126,9 @@ router.post('/product/:productId', authMiddleware, async (req, res, next) => {
             });
             const makePurchaseHistory = await tx.purchaseHistory.create({
                 data: {
-                    purchaseQuantity: count,
+                    purchaseQuantity: +count,
                     changedCash: -findProduct.price * count,
+                    accountId : +accountId
                 },
             });
             return [changeBalance, makePurchaseHistory];
