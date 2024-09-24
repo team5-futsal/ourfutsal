@@ -166,7 +166,7 @@ router.get('/account/all', async (req, res, next) => {
 });
 
 /** 사용자 수정 API */
-router.put('/account', authMiddleware, async (req, res, next) => {
+router.put('/account', authMiddleware,  async (req, res, next) => {
     try {
         const { password } = req.body;
         const user = await prisma.account.findUnique({

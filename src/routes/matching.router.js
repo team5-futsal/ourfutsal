@@ -1,8 +1,6 @@
 import express from 'express';
 import { prisma } from '../utils/prisma/index.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
-import validSchema from '../utils/joi/valid.schema.js';
-import errors from '../utils/errors/error.constructor.js';
 import nojam from '../utils/service/nojamgame.js';
 
 const router = express.Router();
@@ -52,9 +50,13 @@ router.get('/rank', async (req, res, next) => {
 router.post('/custom', authMiddleware, async (req, res, next) => {
     try {
         const myUserInfo = req.user;
-        const { userId } = req.body;
+        const { accountId } = req.body;
 
-        if (myUserInfo.accountId === +userId) return res.status(412).json({ message: '자신은 입력할 수 없습니다.' });
+        if(!+accountId) {
+            return res.status(404).json({ errorMessage: '유저를 선택해주세요.' });
+        }
+
+        if (myUserInfo.accountId === +accountId) return res.status(412).json({ errorMessage: '자신은 입력할 수 없습니다.' });
 
         const myActivePlayers = await prisma.roster.count({
             where: {
@@ -64,14 +66,13 @@ router.post('/custom', authMiddleware, async (req, res, next) => {
         });
         // 선출 3명보다 적으면 안됨.
         if (myActivePlayers < 3) {
-            return res.status(412).json({ message: '선출 인원이 부족합니다.' });
+            return res.status(412).json({ errorMessage: '선출 인원이 부족합니다.' });
         }
 
         // 유저 정보 조회
         const isExistUser = await prisma.account.findFirst({
             where: {
-                accountId: +userId,
-            },
+                accountId: +accountId            },
             select: {
                 accountId: true,
                 userId: true,
@@ -79,7 +80,7 @@ router.post('/custom', authMiddleware, async (req, res, next) => {
             },
         });
         if (!isExistUser) {
-            return res.status(404).json({ message: '유저 정보가 없습니다.' });
+            return res.status(404).json({ errorMessage: '유저 정보가 없습니다.' });
         }
 
         const activePlayers = await prisma.roster.count({
@@ -89,7 +90,7 @@ router.post('/custom', authMiddleware, async (req, res, next) => {
             },
         });
         if (activePlayers < 3) {
-            return res.status(412).json({ message: '상대 유저의 선출 인원이 부족합니다.' });
+            return res.status(412).json({ errorMessage: '상대 유저의 선출 인원이 부족합니다.' });
         }
 
         const matchResult = await nojam(myUserInfo.accountId, +userId);
@@ -97,6 +98,42 @@ router.post('/custom', authMiddleware, async (req, res, next) => {
         return res.status(200).json({ user: isExistUser, message: matchResult });
     } catch (error) {
         next(error);
+    }
+});
+
+// 사용자게임 매칭 성공 이후 이 미들웨어를 실행시켜서 각 유저의 팀 정보에 대한 것을 가져올 예정
+// 가져올 데이터는 최대한 join 하여 게임에 필요한 모든 데이터가 나올수 있게 한다.
+router.post('/match/team', authMiddleware, async (req, res, next) => {
+    try {
+        console.log(req.body);
+        const { targetAccountId } = req.body;
+        const myAccountId = req.user.accountId;
+
+        const myTeamInfo = await prisma.$queryRaw`
+            SELECT a.accountId, rosterId, r.playerId, p.positionId, enhanceCount, playerName, playerStrength, playerDefense, playerStamina
+            FROM account a 
+            inner join roster r on a.accountId=r.accountId 
+            inner join player p on r.playerId=p.playerId
+            where a.accountId=${myAccountId} and r.isPicked=1`;
+
+        const targetInfo = await prisma.$queryRaw`
+            SELECT a.accountId, rosterId, r.playerId, p.positionId, enhanceCount, playerName, playerStrength, playerDefense, playerStamina
+            FROM account a 
+            inner join roster r on a.accountId=r.accountId 
+            inner join player p on r.playerId=p.playerId
+            where a.accountId=${targetAccountId} and r.isPicked=1`;
+
+        const enhanceInfo = await prisma.$queryRaw`
+            select increaseValue
+            from enhances`;
+
+        if (!myTeamInfo || !targetInfo) {
+            throw new Error('참가 유저데이터를 불러오는 중 오류가 발생했습니다.');
+        }
+
+        return res.status(200).json({myTeamInfo, targetInfo, enhanceInfo});
+    } catch {
+        return res.status(404).json({ errorMessage:'참가 유저데이터를 불러오는 중 오류가 발생했습니다.' });
     }
 });
 
