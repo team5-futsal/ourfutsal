@@ -10,6 +10,7 @@ router.get('/rank', async (req, res, next) => {
     try {
         // 유저 정보 조회
         const sortedMMR = await prisma.account.findMany({
+            take: 5,
             select: {
                 userId: true,
                 accountId: true,
