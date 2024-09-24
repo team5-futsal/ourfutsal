@@ -35,10 +35,7 @@ const fetchAPI = (method, url, body = null, isAuthorization = false) => {
                     return fetch(url, reqObj);
                 })
                 .then(res => resolve(res))
-                .catch(error => {
-                    console.log(error);
-                    reject(error);
-                });
+                .catch(error => reject(error));
         } else {
             if (body !== null) {
                 reqObj['body'] = JSON.stringify(body);
@@ -248,3 +245,16 @@ export async function updatePlayerInfo(playerName, body) {
         return alert('500 Server Error');
     }
 }
+
+export async function matchGame(body = null) {
+    const res = await fetchAPI('POST', '/api/custom', body, true);
+    return res.json();
+}
+
+export async function runCustomGame(body) {
+    const res = await fetchAPI('POST', '/api/match/team', body, true);
+    if (res.status === 200) {
+        return res.json();
+    } else return false;
+}
+
