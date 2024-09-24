@@ -36,9 +36,9 @@ router.get('/roster', authMiddleware, async (req, res) => {
         return res.status(404).json({ message: '보유한 선수가 없습니다.' });
     }
 
-    const enhanceValue = await prisma.enhances.findFirst({
-        where: {
-            enhanceId: 1,
+    const findEnhance = await prisma.enhances.findMany({
+        select: {
+            increaseValue: true,
         },
     });
 
@@ -47,11 +47,10 @@ router.get('/roster', authMiddleware, async (req, res) => {
         rosterId: asc.rosterId,
         playerId: asc.playerId,
         playerName: asc.playerName + ` +${asc.enhanceCount}`,
-        enhanceCount: asc.enhanceCount,
         isPicked: Boolean(asc.isPicked),
-        playerStrength: asc.playerStrength + ` +(${enhanceValue.increaseValue * asc.enhanceCount})`,
-        playerDefense: asc.playerDefense + ` +(${enhanceValue.increaseValue * asc.enhanceCount})`,
-        playerStamina: asc.playerStamina + ` +(${enhanceValue.increaseValue * asc.enhanceCount})`,
+        playerStrength: asc.playerStrength + ` +(${findEnhance[asc.enhanceCount].increaseValue})`,
+        playerDefense: asc.playerDefense + ` +(${findEnhance[asc.enhanceCount].increaseValue})`,
+        playerStamina: asc.playerStamina + ` +(${findEnhance[asc.enhanceCount].increaseValue})`,
     }));
 
     return res.status(200).json({ data: result });
@@ -122,13 +121,7 @@ router.put('/roster/enhance', authMiddleware, async (req, res, next) => {
     const { rosterId } = req.body;
     const { accountId } = req.user;
 
-    // 인핸스 코스트도 enhance 테이블에 있어야할것 같습니다
-    const enhanceCost = 1000;
     try {
-        const enhanceTry = await prisma.enhances.findFirst({
-            where: { enhanceId: 1 },
-        });
-
         const findPlayer = await prisma.roster.findFirst({
             where: {
                 rosterId: +rosterId,
@@ -150,8 +143,18 @@ router.put('/roster/enhance', authMiddleware, async (req, res, next) => {
             return res.status(404).json({ message: ' 보유중인 선수가 아닙니다. ' });
         }
 
-        if (req.user.cash < 1000) {
-            return res.status(409).json({ message: ' Cash 가 부족합니다. ' });
+        if (findPlayer.enhanceCount >= 5) {
+            return res.status(404).json({ message: ' 더 이상 강화할 수 없습니다. ' });
+        }
+
+        const enhanceTry = await prisma.enhances.findFirst({
+            where: { enhanceId: findPlayer.enhanceCount + 2 },
+        });
+
+        const enhanceCost = 1000 * (findPlayer.enhanceCount + 1);
+
+        if (req.user.cash < enhanceCost) {
+            return res.status(409).json({ message: ` Cash 가 부족합니다. 강화비용 : ${enhanceCost} ` });
         }
 
         // 재료 선정
@@ -195,7 +198,7 @@ router.put('/roster/enhance', authMiddleware, async (req, res, next) => {
                     },
                 });
 
-                if (randomGoGo > enhanceTry.successRate) {
+                if (randomGoGo < enhanceTry.successRate) {
                     const goEnhance = await tx.roster.update({
                         data: {
                             enhanceCount: findPlayer.enhanceCount + 1,
