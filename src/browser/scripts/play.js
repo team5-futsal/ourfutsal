@@ -1,59 +1,7 @@
 import { game } from './game.js'
 
-const player1Roster = [
-    {
-        "playerId": 4,
-        "playerName": "ddd +2",
-        "enhanceCount": 2,
-        "playerStrength": "10+20",
-        "PlayerDefense": "10+20",
-        "playerStamina": "10+20"
-    },
-    {
-        "playerId": 6,
-        "playerName": "웨인루니 +1",
-        "enhanceCount": 1,
-        "playerStrength": "50+10",
-        "PlayerDefense": "20+10",
-        "playerStamina": "30+10"
-    },
-    {
-        "playerId": 5,
-        "playerName": "기성용 +1",
-        "enhanceCount": 1,
-        "playerStrength": "88+10",
-        "PlayerDefense": "85+10",
-        "playerStamina": "74+10"
-    }]
-
-const player2Roster = [
-    {
-        "playerId": 5,
-        "playerName": "기성용 +0",
-        "enhanceCount": 0,
-        "playerStrength": "88+0",
-        "PlayerDefense": "85+0",
-        "playerStamina": "74+0"
-    },
-    {
-        "playerId": 7,
-        "playerName": "박지성 +0",
-        "enhanceCount": 0,
-        "playerStrength": "40+0",
-        "PlayerDefense": "15+0",
-        "playerStamina": "40+0"
-    },
-    {
-        "playerId": 6,
-        "playerName": "웨인루니 +0",
-        "enhanceCount": 0,
-        "playerStrength": "50+0",
-        "PlayerDefense": "20+0",
-        "playerStamina": "30+0"
-    }]
-
-export const playGame = (/*player1Roster, player2Roster*/) => {
-    const gameLog = game(player1Roster, player2Roster)
+export const playGame = (player1, player2) => {
+    const gameLog = game(player1, player2);
 
     const container = document.getElementsByClassName('reqResContainer')
     const canvas = document.createElement('canvas');
@@ -61,6 +9,8 @@ export const playGame = (/*player1Roster, player2Roster*/) => {
     gameDiv.className = 'gameDiv';
     gameDiv.id = 'gameDiv';
     canvas.id='canvas';
+    canvas.width="840";
+    canvas.height="480";
 
     container[0].append(gameDiv);
     gameDiv.appendChild(canvas);
@@ -95,10 +45,10 @@ export const playGame = (/*player1Roster, player2Roster*/) => {
             // 바 테두리
             this.ctx.strokeStype = 'rgb(0 0 0)';
             this.ctx.lineWidth = 10;
-            this.ctx.strokeRect(x, y+radius, spBar, 10);
+            this.ctx.strokeRect(x, y+radius, radius*2, 10);
             // 스테미나 바
             this.ctx.fillStyle = 'rgb(255 255 0)';
-            this.ctx.fillRect(x, y+radius, radius*2, 10);
+            this.ctx.fillRect(x, y+radius, spBar, 10);
         }
     }
 
@@ -126,10 +76,15 @@ export const playGame = (/*player1Roster, player2Roster*/) => {
     const interval = 50;
     let timer = interval - 1;
     let turn = 0;
+    let animationFame;
+    const end = gameLog.length - 2;
 
     const gameStart = () => {
-        requestAnimationFrame(gameStart)
+        animationFame = requestAnimationFrame(gameStart)
         timer++;
+        if(turn > end){
+            cancelAnimationFrame(animationFame);
+        }
         if(timer%interval == 0){
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             const cwu = canvas.width/100 // canvas width Unit
@@ -151,29 +106,11 @@ export const playGame = (/*player1Roster, player2Roster*/) => {
             }
             
             turn++;
-            console.log(t)
-            console.log(t.result)
+            // console.log(t)
+            // console.log(t.result)
         }
     }
     gameStart()
-
-    // const cwu = canvas.width/100 // canvas width Unit
-    // const log = gameLog[turn]
-
-    // for(const p of log.players){
-    //     const x = p.position*cwu<<0
-    //     const y = yPosition[p.pNum]
-
-    //     const pX = x + radius * (p.team-1 ? -1 : 1)
-    //     drawPlayers.draw(pX, y, radius, color[p.team-1], p.name)
-        
-    //     const spBarX = p.team-1 ? x - radius*2 : x
-    //     drawPlayers.drawSp(spBarX, y, radius, p.maxSp, p.curSp)
-
-    //     if(p.hasBall){
-    //         ball.draw(spBarX, y)
-    //     }
-    // }
 }
 
 //Reference
@@ -181,5 +118,3 @@ export const playGame = (/*player1Roster, player2Roster*/) => {
 //https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/stroke
 //https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D
 //https://developer.mozilla.org/ko/docs/Web/API/Window/requestAnimationFrame
-//https://developer.mozilla.org/ko/docs/Web/API/Window/requestAnimationFrame
-//https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D

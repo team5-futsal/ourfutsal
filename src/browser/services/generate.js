@@ -31,6 +31,6 @@ export async function refreshAccessToken(accessToken) {
         alert(error);
         alert('Access Token 재발급 실패, 다시 로그인해주세요')
         // 재로그인 필요 (Refresh Token도 만료되었을 때)
-        window.location.href = '/api';
+        window.location.href = '/';
     })
 }

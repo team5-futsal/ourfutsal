@@ -23,23 +23,24 @@ router.put('/account/cash', authMiddleware, async (req, res, next) => {
             const chargeCash = await tx.account.update({
                 where: { accountId: +accountId },
                 data: {
-                    cash: +(findAccount.cash + cash),
+                    cash: findAccount.cash + parseInt(cash),
                 },
             });
-            const purchaseHistory = await tx.purchaseHistory.create({
+            await tx.purchaseHistory.create({
                 data: {
                     accountId: +accountId,
                     changedCash: +cash,
                 },
             });
-            return [chargeCash, purchaseHistory];
+            return chargeCash;
         },
         {
             isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
         },
     );
+    console.log('cashTransaction은: ', cashTransaction)
 
-    return res.status(200).json({ message: `잔액 충전 성공, ${cashTransaction[0].cash}` });
+    return res.status(200).json({ message: `잔액 충전 성공, ${cashTransaction.cash}` });
 });
 
 // 상품 생성

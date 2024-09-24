@@ -132,7 +132,6 @@ function handleSendRequest(event) {
         // 내 팀 편성 조회
         case 'getTeamResSendBtn':
             const showMyTeam = function (res) {
-                console.log(res);
                 if (res.message) {
                     resContext.innerHTML = res.message;
                 } else {
@@ -363,19 +362,8 @@ function handleSendRequest(event) {
                         runCustomGame(runCustomBody).then(async res => {
                             if (res) {
                                 doDisplay(false);
-
-                                playGame();
-                                // const data = [res.myTeamInfo, res.targetInfo, res.enhanceInfo].map(info => {
-                                //     if (typeof info === 'object') {
-                                //         return JSON.stringify(info);
-                                //     }
-                                //     return info;
-                                // });
-
-                                // for (let i in data) {
-                                //     resContext.innerHTML += `<p>${data[i]}</p>`;
-                                // }
-                                // apiResDiv.appendChild(resContext);
+                                // 가져온 res 데이터로 인게임에서 사용
+                                playGame(res.player1, res.player2);
                             } else if (!res) alert('매칭 데이터를 불러오는 중 실패하였습니다. 매칭을 취소합니다.');
                         });
                     }

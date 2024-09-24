@@ -22,9 +22,9 @@ export function game(player1Roster, player2Roster) {
             1,
             player1Roster[i].playerName,
             i,
-            player1Roster[i].playerStrength.split('+').reduce((acc, cur) => (+acc) + (+cur)),
-            player1Roster[i].PlayerDefense.split('+').reduce((acc, cur) => (+acc) + (+cur)),
-            player1Roster[i].playerStamina.split('+').reduce((acc, cur) => (+acc) + (+cur)),
+            player1Roster[i].playerStrength,
+            player1Roster[i].playerDefense,
+            player1Roster[i].playerStamina,
             i * 16
         )
     }
@@ -35,28 +35,30 @@ export function game(player1Roster, player2Roster) {
             2,
             player2Roster[i].playerName,
             i,
-            player2Roster[i].playerStrength.split('+').reduce((acc, cur) => (+acc) + (+cur)),
-            player2Roster[i].PlayerDefense.split('+').reduce((acc, cur) => (+acc) + (+cur)),
-            player2Roster[i].playerStamina.split('+').reduce((acc, cur) => (+acc) + (+cur)),
+            player2Roster[i].playerStrength,
+            player2Roster[i].playerDefense,
+            player2Roster[i].playerStamina,
             100 - i * 16
         )
     }
 
-        //코인 토스
+    //코인 토스
     //선수에게 공 지급
     if (Math.random() < 0.5) {
-        player1[2].hasBall = true;
+        player1[1].hasBall = true;
     } else {
-        player2[2].hasBall = true;
+        player2[1].hasBall = true;
     }
 
     //init
     const players = [...player1, ...player2]
+    console.log(players);
     const fieldSize = 100;
     const score = [0, 0];
     const initPosion = players.map(p => p.position)
     const gameLog = []
 
+    // 선수들의 능력치에 비례해서 패스, 수비, 슈팅 성공률 가중치를 저장
     const spConsume = {
         pass: 5,
         dribble: 10,
@@ -72,9 +74,9 @@ export function game(player1Roster, player2Roster) {
             return { prob: 0, defender: false }
 
         let defChance = 70 - defender.distance
-        defChance = defChance <= 0 ? 0 : defChance / 100
+        defChance = defChance <= 0 ? 0 : defChance / 100 /** 100 말고 가중치 */
 
-        return { prob: defChance + defender.def / 1000, defender: defender }
+        return { prob: defChance + defender.def / 1000/** 수비 가중치를 넣어서 유기적으로 관리가 필요 */, defender: defender }
     }
 
     const shoot = (host) => {
@@ -94,22 +96,22 @@ export function game(player1Roster, player2Roster) {
         const teamMember = teamMembers.find(d => d.distance <= nearest)
 
         if (teamMember.curSp < spConsume.pass)
-            return { prob: 0, host: false, defebder: false }
+            return { prob: 0, host: false, defender: false }
 
         let passChance = 130 - teamMember.distance
         passChance = passChance <= 0 ? 0 : passChance / 100
         const def = defence(teamMember);
 
-        return { prob: passChance - def.prob, host: host, teamMember: teamMember, defebder: def.defender }
+        return { prob: passChance - def.prob, host: host, teamMember: teamMember, defender: def.defender }
     }
 
     const dribble = (host) => {
         if (host.curSp < spConsume.dribble)
-            return { prob: 0, host: false, defebder: false }
+            return { prob: 0, host: false, defender: false }
 
         const def = defence(host);
 
-        return { prob: 1 - def.prob, host: host, defebder: def.defender }
+        return { prob: 1 - def.prob, host: host, defender: def.defender }
     }
 
     const utils = {
@@ -229,11 +231,22 @@ export function game(player1Roster, player2Roster) {
         })
 
         // 각 행동의 확률 계산
+        // => 현재 choices
         const choices = { shoot: shoot(host), pass: pass(host), dribble: dribble(host) }
         const probs = []
-        const decide = { act: "shoot", prob: 0 }
+
+        // choices 
+        const decide = { act: 'shoot', prob: 0 }
+
+        //1. 슛 2. 스탯에 따른 행동 선택
+
 
         // 가장 확률이 높은 행동을 선택
+        // => 스탯이 과하게 치중된 선수는 특정 행동만 할 확률이 높음.
+        // => 차라리 슛 드리블 패스 중 하나를 랜덤으로 선택하고,
+        // => 선택하는 과정에서 선수의 스탯을 확인하여 제일 높은 행동을 하지만 이것도 확률로 한다.
+        // => 이러면 행동이 최종 선택될때까지 무한루프가 될 수 있으니
+        // => 0~1 숫자 중 랜덤으로 뽑고 가장 높은 숫자의 행동이 선택되게끔 만들면 좋을 것 같음
         for (const [key, value] of Object.entries(choices)) {
             probs.push(`${key}:${value.prob.toFixed(3)}`)
             if (decide.prob < value.prob) {
@@ -261,5 +274,6 @@ export function game(player1Roster, player2Roster) {
         gameLog.push({ win: -1, lose: -1, mmr: 0 }) //MMR 점수 지급
     }
 
+    console.log(gameLog);
     return gameLog
 }
