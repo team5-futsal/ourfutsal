@@ -8,7 +8,7 @@ window.addEventListener('DOMContentLoaded', function () {
     document.getElementById('backBtn').addEventListener('click', function (event) {
         event.preventDefault();
 
-        window.location.href = 'http://localhost:3333/';
+        window.location.href = 'http://soobin.store:3333/';
     });
 
     /** 회원가입 확인 */
@@ -30,7 +30,7 @@ window.addEventListener('DOMContentLoaded', function () {
             if (!res) {
                 return;
             }
-            window.location.href = 'http://localhost:3333/';
+            window.location.href = 'http://soobin.store:3333/';
         });
     });
 });

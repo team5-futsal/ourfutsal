@@ -20,14 +20,16 @@ import {
     searchTeam,
     createPlayer,
     updatePlayerInfo,
-    runCustomGame,
-    matchGame,
+    runGame,
+    matchCustomGame,
+    matchRankGame,
     makeGacha,
     buyGacha,
     makeProduct,
     buyProduct,
     buyCash,
-    getRank
+    getRank,
+    calculatorMmr,
 } from './api.js';
 import { playGame } from './play.js';
 
@@ -68,7 +70,7 @@ function handleSendRequest(event) {
 
     const params = document.getElementById('reqParams').value;
     const body = document.getElementById('reqBody').value;
-
+    
     // 버튼 ID에 따라 API 요청을 구분
     switch (sendRequestBtn.id) {
         case 'getAccountsResSendBtn':
@@ -132,7 +134,6 @@ function handleSendRequest(event) {
         // 내 팀 편성 조회
         case 'getTeamResSendBtn':
             const showMyTeam = function (res) {
-                console.log(res);
                 if (res.message) {
                     resContext.innerHTML = res.message;
                 } else {
@@ -330,7 +331,6 @@ function handleSendRequest(event) {
             }
             break;
 
-
         // 선수 상세 조회
         case 'getPlayerDetailResSendBtn':
             getPlayerDetail(params).then(res => {
@@ -354,36 +354,62 @@ function handleSendRequest(event) {
             // 매칭 성공 여부 확인하고... 성공했으면 게임에 필요한 데이터를 불러와야한다..
             const matchBody = { accountId: body };
             const runCustomBody = { targetAccountId: body };
-            matchGame(matchBody)
-                .then(res => {
-                    if (res.errorMessage) {
-                        resContext.innerHTML += `<p>${res.errorMessage}</p>`;
-                        apiResDiv.appendChild(resContext);
-                    } else {
-                        runCustomGame(runCustomBody).then(async res => {
-                            if (res) {
-                                doDisplay(false);
+            matchCustomGame(matchBody).then(res => {
+                if (res.errorMessage) {
+                    resContext.innerHTML += `<p>${res.errorMessage}</p>`;
+                    apiResDiv.appendChild(resContext);
+                } else {
+                    runGame(runCustomBody).then(res => {
+                        if (res) {
+                            doDisplay(false);
+                            // 가져온 res 데이터로 인게임에서 사용
+                            const result = playGame(res.player1, res.player2);
 
-                                playGame();
-                                // const data = [res.myTeamInfo, res.targetInfo, res.enhanceInfo].map(info => {
-                                //     if (typeof info === 'object') {
-                                //         return JSON.stringify(info);
-                                //     }
-                                //     return info;
-                                // });
-
-                                // for (let i in data) {
-                                //     resContext.innerHTML += `<p>${data[i]}</p>`;
-                                // }
-                                // apiResDiv.appendChild(resContext);
-                            } else if (!res) alert('매칭 데이터를 불러오는 중 실패하였습니다. 매칭을 취소합니다.');
-                        });
-                    }
-                })
+                            // 승부를 한 유저의 아이디를 저장한다.
+                            const winner = result.win;
+                            if (winner === 0) {
+                                console.log('Player1 승!')
+                            } else if (winner === 1) {
+                                console.log('Player2 승!')
+                            } else console.log('무승부입니다!');
+                        } else if (!res) alert('매칭 데이터를 불러오는 중 실패하였습니다. 매칭을 취소합니다.');
+                    });
+                }
+            });
             break;
 
-            // 선수 생성
-        case  'createPlayerResSendBtn':
+        case 'runRankGameResSendBtn':
+            // 매칭 성공 여부 확인하고... 성공했으면 게임에 필요한 데이터를 불러와야한다..
+            matchRankGame().then(res => {
+                if (res.errorMessage) {
+                    resContext.innerHTML += `<p>${res.errorMessage}</p>`;
+                    apiResDiv.appendChild(resContext);
+                } else {
+                    const runRankBody = { targetAccountId: `${res.nearestMMRUser[0].accountId}` };
+                    runGame(runRankBody).then(res => {
+                        if (res) {
+                            doDisplay(false);
+                            // 가져온 res 데이터로 인게임에서 사용
+                            const result = playGame(res.player1, res.player2);
+
+                            // 승부를 한 유저의 아이디를 저장한다.
+                            const player2 = res.matchUsers.targetUserId;
+                            const winner = result.win;
+                            const jsonData = { opponentId: player2, outcome: winner };
+                            console.log(winner);
+                            if (winner === 0) {
+                                calculatorMmr(jsonData);
+                            } else if (winner === 1) {
+                                calculatorMmr(jsonData);
+                            } else console.log('무승부입니다!');
+                        } else if (!res) alert('매칭 데이터를 불러오는 중 실패하였습니다. 매칭을 취소합니다.');
+                    });
+                }
+            });
+            break;
+
+        // 선수 생성
+        case 'createPlayerResSendBtn':
             createPlayer(body).then(res => {
                 const playerName = res.data.playerName;
                 const positionId = res.data.positionId;
@@ -400,13 +426,21 @@ function handleSendRequest(event) {
                 apiResDiv.appendChild(resContext);
             });
             break;
-            
+
         // 선수 상세 정보 수정
         case 'updatePlayerInfoResSendBtn':
             updatePlayerInfo(params, body).then(res => {
                 apiResDiv.innerHTML = res.message;
                 apiResDiv.appendChild(resContext);
-            })
+            });
+            break;
+
+        // mmr 계산
+        case 'calculatorMmrResSendBtn':
+            calculatorMmr(body).then(res => {
+                apiResDiv.innerHTML += res.message;
+                apiResDiv.appendChild(resContext);
+            });
             break;
 
         // Rank 조회

@@ -3,7 +3,6 @@ import { prisma } from '../utils/prisma/index.js';
 import bcrypt from 'bcrypt';
 import authMiddleware from '../middlewares/auth.middleware.js';
 import { createAccessToken, createRefreshToken, validateToken, getExistRefreshToken } from '../utils/tokens/tokens.js';
-import { getUser } from '../utils/service/validation.js';
 import validSchema from '../utils/joi/valid.schema.js';
 
 const router = express.Router();
@@ -134,11 +133,19 @@ router.get('/account', authMiddleware, async (req, res, next) => {
     try {
         const user = await prisma.account.findUnique({
             where: { accountId: req.user.accountId },
+            select: {
+                userId:true,
+                cash: true,
+                mmr: true,
+                createdAt: true
+            }
         });
 
         if (!user) {
             return res.status(404).json({ errorMessage: '유저를 찾을 수 없습니다.' });
         }
+
+        // 사용자 승률 / 구단가치 추가해야함
 
         return res.status(200).json({ user });
     } catch (err) {

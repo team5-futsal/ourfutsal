@@ -2,6 +2,8 @@ import express from 'express';
 import { prisma } from '../utils/prisma/index.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
 import nojam from '../utils/service/nojamgame.js';
+import { calculateElo } from '../utils/elo/eloCalculator.js';
+import { Prisma } from '@prisma/client';
 
 const router = express.Router();
 
@@ -48,7 +50,7 @@ router.get('/rank', async (req, res, next) => {
 });
 
 /** 사용자 게임 가능 확인 API **/
-router.post('/custom', authMiddleware, async (req, res, next) => {
+router.post('/match/custom', authMiddleware, async (req, res, next) => {
     try {
         const myUserInfo = req.user;
         const { accountId } = req.body;
@@ -96,7 +98,6 @@ router.post('/custom', authMiddleware, async (req, res, next) => {
             return res.status(412).json({ errorMessage: '상대 유저의 선출 인원이 부족합니다.' });
         }
 
-
         // const matchResult = await nojam(myUserInfo.accountId, +userId);
 
         return res.status(200).json({ user: isExistUser /*message: matchResult*/ });
@@ -107,7 +108,7 @@ router.post('/custom', authMiddleware, async (req, res, next) => {
 
 // 사용자게임 매칭 성공 이후 이 미들웨어를 실행시켜서 각 유저의 팀 정보에 대한 것을 가져올 예정
 // 가져올 데이터는 최대한 join 하여 게임에 필요한 모든 데이터가 나올수 있게 한다.
-router.post('/match/team', authMiddleware, async (req, res, next) => {
+router.post('/match/game', authMiddleware, async (req, res, next) => {
     try {
         const { targetAccountId } = req.body;
         const myAccountId = req.user.accountId;
@@ -124,7 +125,7 @@ router.post('/match/team', authMiddleware, async (req, res, next) => {
             where  r.isPicked=1 and (a.accountId=${myAccountId} or a.accountId = ${targetAccountId})
             order by field(a.accountId, ${myAccountId}) desc, p.playerStrength asc
             `;
-        
+
         const player1 = [];
         const player2 = [];
 
@@ -137,23 +138,28 @@ router.post('/match/team', authMiddleware, async (req, res, next) => {
                 playerDefense: extract.playerDefense + enhanceInfo[extract.enhanceCount].increaseValue,
                 playerStamina: extract.playerStamina + enhanceInfo[extract.enhanceCount].increaseValue,
             };
-            if(index > 2){
+            if (index > 2) {
                 player1.push(jsonData);
-            }
-            else {
+            } else {
                 player2.push(jsonData);
             }
-            
         });
 
-        return res.status(200).json({player1, player2});
+        return res.status(200).json({
+            player1,
+            player2,
+            matchUsers: {
+                authUserId: +myAccountId,
+                targetUserId: +targetAccountId,
+            },
+        });
     } catch {
         return res.status(404).json({ errorMessage: '참가 유저데이터를 불러오는 중 오류가 발생했습니다.' });
     }
 });
 
 /** 경쟁전 매칭 API **/
-router.get('/match', authMiddleware, async (req, res, next) => {
+router.get('/match/rank', authMiddleware, async (req, res, next) => {
     try {
         const myUserInfo = req.user;
 
@@ -175,33 +181,101 @@ router.get('/match', authMiddleware, async (req, res, next) => {
                 mmr: true,
             },
         });
-
+        
         // 가장 근접한 MMR 확인
         // 근접한 유저를 찾는데 많은 컴퓨팅 파워가 소모됨. 방법을 고려할 필요가 있음.
 
         // 나의 MMR과 다른 유저의 유클리드 거리를 계산
-        const nearestMMR =
-            await prisma.$queryRaw`SELECT abs(${myInfo.mmr} - mmr, 2) as distance, accountId, userId, mmr FROM account ORDER BY 1`;
+        let nearestMMRUser = await prisma.$queryRaw`
+        SELECT a.accountId, userId, mmr
+        FROM account a
+        inner join roster r on a.accountId=r.accountId
+        where mmr <= (select mmr
+        from account
+        where accountId = ${myUserInfo.accountId}) and
+        a.accountId <> ${myUserInfo.accountId}
+        group by accountId, isPicked
+        having sum(isPicked)>=3
+        ORDER BY mmr desc
+        LIMIT 1
+        `;
 
-        for (const user of nearestMMR) {
-            const activePlayers = await prisma.roster.count({
-                where: {
-                    accountId: +user.accountId,
-                    isPicked: true, // 출전하는 경우
-                },
-            });
-            if (activePlayers < 3) {
-                continue;
-            }
-            return res.status(200).json({ data: user, message: '매칭 성공' });
+        // 나보다 낮은 유저가 없는 경우 위에 있는 유저 탐색
+        // 원래는 MMR 구간별 DB가 따로 있어야 함..
+        if (!nearestMMRUser) {
+            nearestMMRUser = await prisma.$queryRaw`
+            SELECT a.accountId, userId, mmr
+            FROM account a
+            inner join roster r on a.accountId=r.accountId
+            where mmr >= (select mmr
+            from account
+            where accountId = ${myUserInfo.accountId}) and
+            a.accountId <> ${myUserInfo.accountId}
+            group by accountId, isPicked
+            having sum(isPicked)>=3
+            ORDER BY mmr asc
+            LIMIT 1
+            `;
         }
+        console.log(nearestMMRUser);
 
-        return res.status(404).json({ message: '적합한 유저가 존재하지 않습니다.' });
+        if(nearestMMRUser.length <= 0) {
+            return res.status(404).json({ errorMessage: '적합한 유저가 존재하지 않습니다.' });
+        }
+        return res.status(200).json({ nearestMMRUser, message: '매칭 성공' });
     } catch (error) {
         next(error);
     }
 });
 
-//mmr 정산 API
+// mmr 계산 api
+router.put('/match', authMiddleware, async (req, res, next) => {
+    try {
+        const myUserInfo = req.user;
+        // 요청 본문에서 데이터를 가져옴 (플레이어 A와 B의 레이팅, 경기 결과)
+        const { opponentId, outcome } = req.body;
+
+        const opponentUser = await prisma.account.findUnique({
+            where: { accountId: +opponentId },
+        });
+
+        // K값 설정 (경기의 중요도에 따라 조정 가능)
+        const K = 40;
+
+        // ELO 계산
+        const { updatedRa, updatedRb } = calculateElo(myUserInfo.mmr, opponentUser.mmr, K, outcome);
+
+        await prisma.$transaction(
+            async tx => {
+                await tx.account.update({
+                    data: {
+                        mmr: updatedRb,
+                    },
+                    where: { accountId: +myUserInfo.accountId },
+                });
+
+                await tx.account.update({
+                    data: {
+                        mmr: updatedRa,
+                    },
+                    where: { accountId: +opponentId },
+                });
+            },
+            {
+                isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
+            },
+        );
+
+        // 새로운 레이팅 값을 DB에 저장하거나 필요한 처리를 추가
+        // 예시로는 응답으로 반환
+        return res.status(200).json({
+            message: 'ELO ratings updated successfully',
+            player1Mmr: updatedRb,
+            player2Mmr: updatedRa,
+        });
+    } catch (error) {
+        next(error); // 에러 핸들링
+    }
+});
 
 export default router;

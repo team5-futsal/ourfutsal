@@ -23,21 +23,25 @@ export function handleApiButtonClick(event) {
 
 export function doDisplay(isDisplay) {
     // const reqResContainer = document.getElementsByClassName('reqResContainer');
-    // if (isDisplay) 
+    // if (isDisplay)
     //     reqResContainer.style['display'] = 'flex';
     // else reqResContainer.style['display'] = 'none';
     const apiReqRes = document.getElementsByName('apiReqRes');
+    const gameDiv = document.getElementById('gameDiv');
+    const gameLog = document.getElementById('gameLog');
     // const reqResContainer = document.getElementById('reqResContainer');
     if (isDisplay) {
-        console.log('보여지게 함')
+        console.log('보여지게 함');
         apiReqRes[0].style.display = '';
         apiReqRes[1].style.display = '';
-        
-    }
-    else {
-        console.log('안보여지게 함')
+    } else {
+        console.log('안보여지게 함');
         apiReqRes[0].style.display = 'none';
         apiReqRes[1].style.display = 'none';
         // reqResContainer.style.display = 'none'
-    };
+    }
+    if (gameDiv || gameLog) {
+        gameDiv.remove();
+        gameLog.remove();
+    }
 }
