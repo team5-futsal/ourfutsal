@@ -192,7 +192,7 @@ export async function enhancePlayer(bodydata) {
 }
 
 // 가챠상품 생성
-export async function buyGacha(bodydata) {
+export async function makeGacha(bodydata) {
     const body = { }
     const res = await fetchAPI('POST', `/api/gacha/`, null, true);
     if (res.status === 201) return res.json();
@@ -200,14 +200,15 @@ export async function buyGacha(bodydata) {
 }
 
 // 선수 가챠 구매
-export async function buyGacha(gacha) {
-    const res = await fetchAPI('POST', `/api/gacha/buy/${gacha}`, null, true);
+export async function buyGacha(gachaTry, bodydata) {
+    const body = { contains : bodydata }
+    const res = await fetchAPI('POST', `/api/gacha/buy/${gachaTry}`, body, true);
     if (res.status === 201) return res.json();
     else return alert('500 Server Error');
 }
 
 // 상점상품 생성
-export async function buyProduct(productId, bodydata) {
+export async function makeProduct(productId, bodydata) {
     const body = { count: bodydata };
     const res = await fetchAPI('POST', `/api/product/${productId}`, body, true);
     if (res.status === 200) return res.json();
