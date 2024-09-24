@@ -28,6 +28,7 @@ import {
     buyProduct,
     buyCash,
     getRank,
+    calculatorMmr,
 } from './api.js';
 import { playGame } from './play.js';
 
@@ -44,7 +45,7 @@ window.addEventListener('DOMContentLoaded', () => {
         button.addEventListener('click', handleApiButtonClick);
     });
 
-    document.body.addEventListener('click', function (event) {
+    document.body.addEventListener('click', function(event) {
         // 클릭된 요소의 ID가 'ResSendBtn'으로 끝나는지 확인
         if (event.target && event.target.id.endsWith('ResSendBtn')) {
             const apiResDiv = document.getElementById('apiRes');
@@ -229,10 +230,11 @@ function handleSendRequest(event) {
 
         // 내 보유 선수 조회
         case 'getMyPlayerResSendBtn':
-            async function myPlayers(res) {
-                resContext.innerHTML = '';
-                res.data.forEach(player => {
-                    resContext.innerHTML += `
+
+        async function myPlayers(res) {
+            resContext.innerHTML = '';
+            res.data.forEach(player => {
+                resContext.innerHTML += `
                         ${player.isPicked === true ? '▼' : ''}
                         선수명 [${player.playerName}]
                         ${player.isPicked === true ? `[편성중]` : `보유 수량 : [${player.playerQuantity}]`}
@@ -241,8 +243,8 @@ function handleSendRequest(event) {
                         <button onclick="enhancePlayer('${player.rosterId}')">선수 강화</button>
                         <br><br>
                         `;
-                });
-            }
+            });
+        }
 
             window.excludePlayer = async playerId => {
                 await excludeTeam(playerId);
@@ -396,10 +398,20 @@ function handleSendRequest(event) {
             });
             break;
 
+        // mmr 계산
+        case 'calculatorMmrResSendBtn':
+            calculatorMmr(body).then(res => {
+                apiResDiv.innerHTML += res.message;
+                apiResDiv.appendChild(resContext);
+
+            })
+            break;
+
         // Rank 조회
         case 'getRankResSendBtn':
             getRank().then(res => {
                 apiResDiv.textContent = JSON.stringify(res.data);
+
             });
             break;
 

@@ -2,6 +2,7 @@ import express from 'express';
 import { prisma } from '../utils/prisma/index.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
 import nojam from '../utils/service/nojamgame.js';
+import { calculateElo} from '../utils/elo/eloCalculator.js';
 
 const router = express.Router();
 
@@ -203,6 +204,47 @@ router.get('/match', authMiddleware, async (req, res, next) => {
     }
 });
 
-//mmr 정산 API
+// mmr 계산 api
+router.put('/match', authMiddleware, async (req, res, next) => {
+    try {
+
+        const myUserInfo = req.user;
+        console.log(myUserInfo);
+        // 요청 본문에서 데이터를 가져옴 (플레이어 A와 B의 레이팅, 경기 결과)
+        const {opponentId, playerARating, playerBRating, outcome } = req.body;
+
+        // K값 설정 (경기의 중요도에 따라 조정 가능)
+        const K = 40;
+
+        // ELO 계산
+        const { updatedRa, updatedRb } = calculateElo(playerARating, playerBRating, K, outcome);
+
+        const updatePlayer1 = await prisma.account.update({
+            data : {
+              mmr : updatedRa,
+            },
+            where : {accountId: +myUserInfo.accountId},
+
+        });
+
+        const updatePlayer2 = await prisma.account.update({
+            data : {
+                mmr : updatedRb
+            },
+            where : {accountId: +opponentId},
+        })
+
+        // 새로운 레이팅 값을 DB에 저장하거나 필요한 처리를 추가
+        // 예시로는 응답으로 반환
+        return res.status(200).json({
+            message: 'ELO ratings updated successfully',
+            player1Mmr: updatedRa,
+            player2Mmr: updatedRb,
+        });
+
+    } catch (error) {
+        next(error); // 에러 핸들링
+    }
+});
 
 export default router;
