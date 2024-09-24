@@ -11,6 +11,7 @@ router.get('/rank', async (req, res, next) => {
     try {
         // 유저 정보 조회
         const sortedMMR = await prisma.account.findMany({
+            take: 5,
             select: {
                 userId: true,
                 accountId: true,
@@ -37,7 +38,7 @@ router.get('/rank', async (req, res, next) => {
                     result: 1,
                 },
             });
-            // 판수가 0일 경우 승률:0
+            // gamas:판수, wins: 이긴 횟수 -> 판수가 0일 경우 승률:0
             accountInfo['winRate'] = games ? Math.floor(wins / games, 2) : 0;
         }
 
@@ -53,11 +54,12 @@ router.post('/custom', authMiddleware, async (req, res, next) => {
         const myUserInfo = req.user;
         const { accountId } = req.body;
 
-        if(!+accountId) {
+        if (!+accountId) {
             return res.status(404).json({ errorMessage: '유저를 선택해주세요.' });
         }
 
-        if (myUserInfo.accountId === +accountId) return res.status(412).json({ errorMessage: '자신은 입력할 수 없습니다.' });
+        if (myUserInfo.accountId === +accountId)
+            return res.status(412).json({ errorMessage: '자신은 입력할 수 없습니다.' });
 
         const myActivePlayers = await prisma.roster.count({
             where: {
@@ -73,7 +75,8 @@ router.post('/custom', authMiddleware, async (req, res, next) => {
         // 유저 정보 조회
         const isExistUser = await prisma.account.findFirst({
             where: {
-                accountId: +accountId            },
+                accountId: +accountId,
+            },
             select: {
                 accountId: true,
                 userId: true,
@@ -94,9 +97,10 @@ router.post('/custom', authMiddleware, async (req, res, next) => {
             return res.status(412).json({ errorMessage: '상대 유저의 선출 인원이 부족합니다.' });
         }
 
-        const matchResult = await nojam(myUserInfo.accountId, +userId);
 
-        return res.status(200).json({ user: isExistUser, message: matchResult });
+        // const matchResult = await nojam(myUserInfo.accountId, +userId);
+
+        return res.status(200).json({ user: isExistUser /*message: matchResult*/ });
     } catch (error) {
         next(error);
     }
@@ -106,35 +110,47 @@ router.post('/custom', authMiddleware, async (req, res, next) => {
 // 가져올 데이터는 최대한 join 하여 게임에 필요한 모든 데이터가 나올수 있게 한다.
 router.post('/match/team', authMiddleware, async (req, res, next) => {
     try {
-        console.log(req.body);
         const { targetAccountId } = req.body;
         const myAccountId = req.user.accountId;
-
-        const myTeamInfo = await prisma.$queryRaw`
-            SELECT a.accountId, rosterId, r.playerId, p.positionId, enhanceCount, playerName, playerStrength, playerDefense, playerStamina
-            FROM account a 
-            inner join roster r on a.accountId=r.accountId 
-            inner join player p on r.playerId=p.playerId
-            where a.accountId=${myAccountId} and r.isPicked=1`;
-
-        const targetInfo = await prisma.$queryRaw`
-            SELECT a.accountId, rosterId, r.playerId, p.positionId, enhanceCount, playerName, playerStrength, playerDefense, playerStamina
-            FROM account a 
-            inner join roster r on a.accountId=r.accountId 
-            inner join player p on r.playerId=p.playerId
-            where a.accountId=${targetAccountId} and r.isPicked=1`;
 
         const enhanceInfo = await prisma.$queryRaw`
             select increaseValue
             from enhances`;
 
-        if (!myTeamInfo || !targetInfo) {
-            throw new Error('참가 유저데이터를 불러오는 중 오류가 발생했습니다.');
-        }
+        const entrySearch = await prisma.$queryRaw`
+            SELECT a.accountId, rosterId, r.playerId, p.positionId, enhanceCount, playerName, playerStrength, playerDefense, playerStamina
+            FROM account a
+            inner join roster r on a.accountId=r.accountId
+            inner join player p on r.playerId=p.playerId
+            where  r.isPicked=1 and (a.accountId=${myAccountId} or a.accountId = ${targetAccountId})
+            order by field(a.accountId, ${myAccountId}) desc, p.playerStrength asc
+            `;
+        
+        const player1 = [];
+        const player2 = [];
 
-        return res.status(200).json({myTeamInfo, targetInfo, enhanceInfo});
+        entrySearch.map((extract, index) => {
+            const jsonData = {
+                playerId: extract.playerId,
+                playerName: extract.playerName,
+                positionId: extract.positionId,
+                playerStrength: extract.playerStrength + enhanceInfo[extract.enhanceCount].increaseValue,
+                playerDefense: extract.playerDefense + enhanceInfo[extract.enhanceCount].increaseValue,
+                playerStamina: extract.playerStamina + enhanceInfo[extract.enhanceCount].increaseValue,
+            };
+            if(index > 2){
+                player1.push(jsonData);
+            }
+            else {
+                player2.push(jsonData);
+            }
+        });
+
+        
+
+        return res.status(200).json({player1, player2});
     } catch {
-        return res.status(404).json({ errorMessage:'참가 유저데이터를 불러오는 중 오류가 발생했습니다.' });
+        return res.status(404).json({ errorMessage: '참가 유저데이터를 불러오는 중 오류가 발생했습니다.' });
     }
 });
 
@@ -166,8 +182,9 @@ router.get('/match', authMiddleware, async (req, res, next) => {
         // 근접한 유저를 찾는데 많은 컴퓨팅 파워가 소모됨. 방법을 고려할 필요가 있음.
 
         // 나의 MMR과 다른 유저의 유클리드 거리를 계산
-        const nearestMMR = await prisma.$queryRaw`SELECT abs(${myInfo.mmr} - mmr, 2) as distance, accountId, userId, mmr FROM account ORDER BY 1`;
-      
+        const nearestMMR =
+            await prisma.$queryRaw`SELECT abs(${myInfo.mmr} - mmr, 2) as distance, accountId, userId, mmr FROM account ORDER BY 1`;
+
         for (const user of nearestMMR) {
             const activePlayers = await prisma.roster.count({
                 where: {

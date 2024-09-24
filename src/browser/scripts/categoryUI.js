@@ -20,10 +20,17 @@ import {
     searchTeam,
     createPlayer,
     updatePlayerInfo,
-    buyGacha,
     runCustomGame,
-    matchGame, calculatorMmr,
+    matchGame,
+    makeGacha,
+    buyGacha,
+    makeProduct,
+    buyProduct,
+    buyCash,
+    getRank,
+    calculatorMmr,
 } from './api.js';
+import { playGame } from './play.js';
 
 // 카테고리 html이 로드되고 js가 로드되었을 때 실행하도록 함.
 // 1. 생성된 accessToken을 받아오기 위해 선언함.
@@ -125,8 +132,7 @@ function handleSendRequest(event) {
 
         // 내 팀 편성 조회
         case 'getTeamResSendBtn':
-            const showMyTeam = function(res) {
-                console.log(res);
+            const showMyTeam = function (res) {
                 if (res.message) {
                     resContext.innerHTML = res.message;
                 } else {
@@ -286,13 +292,35 @@ function handleSendRequest(event) {
             }
             break;
 
-
-        // 선수 구매 가차
-        case 'buyGachaResSendBtn':
-            buyGacha(params).then(res => {
+        //가챠상품 생성
+        case 'makeGachaResSendBtn':
+            makeGacha(body).then(res => {
                 apiResDiv.innerHTML = res.message;
             });
-
+            break;
+        // 선수 가챠
+        case 'buyGachaResSendBtn':
+            buyGacha(params, body).then(res => {
+                apiResDiv.innerHTML = res.message;
+            });
+            break;
+        // 상점상품 생성
+        case 'makeProductResSendBtn':
+            makeProduct(body).then(res => {
+                apiResDiv.innerHTML = res.message;
+            });
+            break;
+        // 상점상품 구매
+        case 'buyProductResSendBtn':
+            buyProduct(params, body).then(res => {
+                apiResDiv.innerHTML = res.message;
+            });
+            break;
+        // 캐시 충전
+        case 'buyCashResSendBtn':
+            buyCash(body).then(res => {
+                apiResDiv.innerHTML = res.message;
+            });
             break;
 
         case 'enhancePlayerResSendBtn':
@@ -336,17 +364,9 @@ function handleSendRequest(event) {
                         runCustomGame(runCustomBody).then(async res => {
                             if (res) {
                                 doDisplay(false);
-                                const data = [res.myTeamInfo, res.targetInfo, res.enhanceInfo].map(info => {
-                                    if (typeof info === 'object') {
-                                        return JSON.stringify(info);
-                                    }
-                                    return info;
-                                });
-
-                                for (let i in data) {
-                                    resContext.innerHTML += `<p>${data[i]}</p>`;
-                                }
-                                apiResDiv.appendChild(resContext);
+                                // 가져온 res 데이터로 인게임에서 사용
+                                const reuslt = playGame(res.player1, res.player2);
+                                console.log(reuslt)
                             } else if (!res) alert('매칭 데이터를 불러오는 중 실패하였습니다. 매칭을 취소합니다.');
                         });
                     }
@@ -377,6 +397,7 @@ function handleSendRequest(event) {
             updatePlayerInfo(params, body).then(res => {
                 apiResDiv.innerHTML = res.message;
                 apiResDiv.appendChild(resContext);
+
             });
             break;
 
@@ -385,6 +406,15 @@ function handleSendRequest(event) {
             calculatorMmr(body).then(res => {
                 apiResDiv.innerHTML += res.message;
                 apiResDiv.appendChild(resContext);
+
+            })
+            break;
+
+        // Rank 조회
+        case 'getRankResSendBtn':
+            getRank().then(res => {
+                apiResDiv.textContent = JSON.stringify(res.data);
+
             });
             break;
 

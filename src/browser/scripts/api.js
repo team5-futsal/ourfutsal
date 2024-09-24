@@ -37,7 +37,8 @@ const fetchAPI = (method, url, body = null, isAuthorization = false) => {
                 .then(res => resolve(res))
                 .catch(error => {
                     console.log(error);
-                    reject(error)});
+                    reject(error);
+                });
         } else {
             if (body !== null) {
                 reqObj['body'] = JSON.stringify(body);
@@ -191,17 +192,44 @@ export async function enhancePlayer(bodydata) {
     else return alert('500 Server Error');
 }
 
-// 선수 가챠 구매
-export async function buyGacha(gacha) {
-    const res = await fetchAPI('POST', `/api/gacha/buy/${gacha}`, null, true);
+// 가챠상품 생성
+export async function makeGacha(bodydata) {
+    const res = await fetchAPI('POST', `/api/gacha/`, JSON.parse(bodydata), true);
     if (res.status === 201) return res.json();
     else return alert('500 Server Error');
 }
 
-// 캐쉬 충전하기 미완성미완성미완성미완성미완성미완성미완성미완성미완성
-export async function buyCash(money) {
-    const res = await fetchAPI('PUT', `/api/account/${money}`, null, true);
+// 선수 가챠 구매
+export async function buyGacha(gachaTry, bodydata) {
+    const body = { contains: bodydata };
+    const res = await fetchAPI('POST', `/api/gacha/buy/${gachaTry}`, body, true);
+    if (res.status === 200) return res.json();
+    else return alert('500 Server Error');
+}
+
+// 상점상품 생성
+export async function makeProduct(bodydata) {
+    const res = await fetchAPI('POST', `/api/product`, JSON.parse(bodydata), true);
     if (res.status === 201) return res.json();
+    else return alert('500 Server Error');
+}
+
+// 상품 구매
+export async function buyProduct(productId, bodydata) {
+    const body = { count: bodydata };
+    const res = await fetchAPI('POST', `/api/product/${productId}`, body, true);
+    if (res.status === 200) {
+        return res.json();
+    } else if (res.status === 400) {
+        return alert('소지금이 부족합니다');
+    } else return alert('500 Server Error');
+}
+
+// 캐쉬 충전
+export async function buyCash(bodydata) {
+    const body = { cash: bodydata };
+    const res = await fetchAPI('PUT', `/api/account/cash`, body, true);
+    if (res.status === 200) return res.json();
     else return alert('500 Server Error');
 }
 
@@ -227,11 +255,11 @@ export async function getPlayerDetail(playerName) {
 /** 선수 생성 API 호출 **/
 export async function createPlayer(body) {
     const res = await fetchAPI('POST', '/api/players', JSON.parse(body), false);
-    if(res.status === 201) {
+    if (res.status === 201) {
         return res.json();
-    }else if(res.status === 409) {
+    } else if (res.status === 409) {
         return alert('이미 존재하는 선수입니다.');
-    }else {
+    } else {
         return alert('500 Server Error');
     }
 }
@@ -241,9 +269,9 @@ export async function updatePlayerInfo(playerName, body) {
     const res = await fetchAPI('PUT', `/api/players/${playerName}`, JSON.parse(body), false);
     if (res.status === 200) {
         return res.json();
-    }else if(res.status === 404) {
+    } else if (res.status === 404) {
         return alert('존재하지 않는 선수 입니다.');
-    }else{
+    } else {
         return alert('500 Server Error');
     }
 }
@@ -260,10 +288,19 @@ export async function runCustomGame(body) {
     } else return false;
 }
 
+
 export async function calculatorMmr(body) {
     const res = await fetchAPI('PUT', '/api/match', JSON.parse(body), true);
     if (res.status === 200) {
         return res.json();
     } else return false;
+}
+
+
+/** 랭크 조회 */
+export async function getRank() {
+    const res = await fetchAPI('GET', '/api/rank', null, false);
+    if (res.status === 200) return res.json();
+    else return alert(res.messasge);
 }
 
