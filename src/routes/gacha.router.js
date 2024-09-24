@@ -108,9 +108,9 @@ router.post('/gacha/buy', authMiddleware, async (req, res, next) => {
             async tx => {
                 const updatedCash = await tx.account.update({
                     where: { accountId: +accountId },
-                    data: { cash: cash - gachaInfo.gachaPrice * gachaTry },
+                    data: { cash: cash - (gachaInfo.gachaPrice * gachaTry) },
                 });
-                const purchaseHistory = await tx.purchaseHistory.create({
+                await tx.purchaseHistory.create({
                     data: {
                         accountId: +accountId,
                         purchaseQuantity: +gachaTry,
@@ -126,16 +126,15 @@ router.post('/gacha/buy', authMiddleware, async (req, res, next) => {
         );
 
         const resultGacha = await doGacha(accountId, gachaTry);
-
-        // const createManyPlayer = await prisma.roster.createMany({
-        //     data: resultGacha,
-        // });
+        const createManyPlayer = await prisma.roster.createMany({
+            data: resultGacha,
+        });
 
         console.log('gachaTransaction:', gachaTransaction);
         console.log('resultGacha', resultGacha);
 
         return res.status(201).json({
-            message: `${resultGacha[0].playerName} 선수를 획득했습니다. 남은 Cash : ${gachaTransaction[0].cash}`,
+            message: `${resultGacha[0].playerName} 선수를 획득했습니다. 남은 Cash : ${gachaTransaction.cash}`,
         });
     } catch (error) {
         switch (error.message) {
