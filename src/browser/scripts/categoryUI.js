@@ -284,7 +284,7 @@ function handleSendRequest(event) {
 
         //가챠상품 생성
         case 'makeGachaResSendBtn':
-            buyGacha(params).then(res => {
+            buyGacha().then(res => {
                 apiResDiv.innerHTML = res.message;
             });
             break;
