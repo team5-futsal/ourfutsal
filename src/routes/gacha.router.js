@@ -2,6 +2,7 @@ import express from 'express';
 import { prisma } from '../utils/prisma/index.js';
 import gacha from '../utils/service/onegacha.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
+import { Prisma } from '@prisma/client';
 
 const router = express.Router();
 
@@ -52,28 +53,36 @@ router.post('/gacha/buy/:gachaTry', authMiddleware, async (req, res, next) => {
             throw new Error('notEnoughMoney');
         }
 
-        const cashGo = await prisma.account.update({
-            data: {
-                cash: req.user.cash - gachaPrice,
-            },
-            where: {
-                accountId: +accountId,
-            },
-        });
-
         //랜덤 선수 로또
-        const resultGacha = await gacha(gachaTry, accountId);
 
-        const createGacha = resultGacha.map(({ playerName, ...rest }) => rest);
-        const findName = resultGacha.map(({ playerName }) => playerName);
-        console.log(findName);
+        const transactionGacha = await prisma.$transaction(
+            async tx => {
+                const resultGacha = await gacha(gachaTry, accountId);
+                const createGacha = resultGacha.map(({ playerName, ...rest }) => rest);
+                const findName = resultGacha.map(({ playerName }) => playerName);
 
-        // 위에서 뽑은 결과로 createMany
-        await prisma.roster.createMany({
-            data: createGacha,
-        });
+                const cashGo = await tx.account.update({
+                    data: {
+                        cash: req.user.cash - gachaPrice,
+                    },
+                    where: {
+                        accountId: +accountId,
+                    },
+                });
 
-        return res.status(201).json({ message: `${findName} 선수를 획득했습니다. 남은 Cash : ${cashGo.cash}` });
+                // 위에서 뽑은 결과로 createMany
+                await tx.roster.createMany({
+                    data: createGacha,
+                });
+                return [cashGo, findName];
+            },
+            {
+                isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
+            },
+        );
+        return res
+            .status(201)
+            .json({ message: `${transactionGacha[1]} 선수를 획득했습니다. 남은 Cash : ${transactionGacha[0].cash}` });
     } catch (error) {
         switch (error.message) {
             case 'notEnoughMoney':
