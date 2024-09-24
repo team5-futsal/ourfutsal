@@ -140,6 +140,8 @@ router.get('/account', authMiddleware, async (req, res, next) => {
             return res.status(404).json({ errorMessage: '유저를 찾을 수 없습니다.' });
         }
 
+        // 사용자 승률 / 구단가치 추가해야함
+
         return res.status(200).json({ user });
     } catch (err) {
         next(err);
