@@ -117,7 +117,15 @@ export function game(player1Roster, player2Roster) {
         positionReset: () => { players.forEach((p, i) => p.position = initPosion[i]) },
         foward: (host, long) => {
             const direction = host.team == 1 ? 1 : -1
-            host.position += long * direction
+            const position = host.position + long * direction
+            if(position > fieldSize){
+                host.position = 100;
+            } else if(position < 0){
+                host.position = 0;
+            } else{
+                host.position += long * direction
+            }
+            
             // players.filter(p=>p.team == host.team).position += long * direction
         },
         Random: (n) => { return Math.floor(Math.random() * n) }
@@ -205,8 +213,7 @@ export function game(player1Roster, player2Roster) {
     }
 
     let turn = 0;
-    let deeplayers = JSON.parse(JSON.stringify(players));
-    gameLog.push({ players: deeplayers, act: 'ready', result: '경기 시작' })
+    gameLog.push({ players: JSON.parse(JSON.stringify(players)), act: 'ready', result: '경기 시작' })
     while (turn < 45) {
         //턴 진행
         //공 소지자 찾기
@@ -234,8 +241,7 @@ export function game(player1Roster, player2Roster) {
         // console.log(probs) // 확률 확인
         const result = action[decide.act](choices[decide.act])
         // console.log(players.map(p=>`${p.team}${p.name} p:${p.position} sp:${p.curSp}`)) // 선수 상태 확인
-        deeplayers = JSON.parse(JSON.stringify(players));
-        gameLog.push({ players: deeplayers, act: decide.act, result: result })
+        gameLog.push({ players: JSON.parse(JSON.stringify(players)), act: decide.act, result: result })
         turn++;
     }
     //턴 끝
