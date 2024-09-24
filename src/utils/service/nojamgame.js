@@ -31,19 +31,20 @@ export default async function (pp, op) {
     });
 
     const enhanceValue = await prisma.enhances.findFirst({
-        where: {
-            enhanceId: 1,
+        select: {
+            increaseValue: true,
         },
     });
 
+    console.log(playerEntry);
     const playerPower = await prisma.$queryRaw`
-SELECT SUM(playerStrength+playerDefense+playerStamina+(enhanceCount*${enhanceValue.increaseValue})) as playerSum
+SELECT SUM(playerStrength+playerDefense+playerStamina) as playerSum
 FROM roster as rs inner join  player as pl on rs.playerId = pl.playerId  
 where rs.accountId = ${pp} and rs.isPicked = 1;
 `;
 
     const opponentPower = await prisma.$queryRaw`
-SELECT SUM(playerStrength+playerDefense+playerStamina+(enhanceCount*${enhanceValue.increaseValue})) as opponentSum
+SELECT SUM(playerStrength+playerDefense+playerStamina) as opponentSum
 FROM roster as rs inner join  player as pl on rs.playerId = pl.playerId  
 where rs.accountId = ${op} and rs.isPicked = 1
 `;
