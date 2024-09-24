@@ -291,7 +291,7 @@ function handleSendRequest(event) {
 
         //가챠상품 생성
         case 'makeGachaResSendBtn':
-            makeGacha().then(res => {
+            makeGacha(body).then(res => {
                 apiResDiv.innerHTML = res.message;
             });
             break;
@@ -303,7 +303,7 @@ function handleSendRequest(event) {
             break;
         // 상점상품 생성
         case 'makeProductResSendBtn':
-            makeProduct(params, body).then(res => {
+            makeProduct(body).then(res => {
                 apiResDiv.innerHTML = res.message;
             });
             break;
