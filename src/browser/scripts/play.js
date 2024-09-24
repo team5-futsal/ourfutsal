@@ -111,6 +111,8 @@ export const playGame = (player1, player2) => {
         }
     }
     gameStart()
+
+    return gameLog[gameLog.length - 1]
 }
 
 //Reference

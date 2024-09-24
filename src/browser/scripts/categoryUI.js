@@ -363,7 +363,8 @@ function handleSendRequest(event) {
                             if (res) {
                                 doDisplay(false);
                                 // 가져온 res 데이터로 인게임에서 사용
-                                playGame(res.player1, res.player2);
+                                const reuslt = playGame(res.player1, res.player2);
+                                console.log(reuslt)
                             } else if (!res) alert('매칭 데이터를 불러오는 중 실패하였습니다. 매칭을 취소합니다.');
                         });
                     }
