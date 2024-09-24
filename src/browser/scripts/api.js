@@ -260,3 +260,10 @@ export async function runCustomGame(body) {
     } else return false;
 }
 
+export async function calculatorMmr(body) {
+    const res = await fetchAPI('PUT', '/api/match', JSON.parse(body), true);
+    if (res.status === 200) {
+        return res.json();
+    } else return false;
+}
+
