@@ -25,17 +25,17 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'browser')));
 
 // 로그인 페이지
-app.get('/api', (req, res) => {
+app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'browser/html/index.html'));
 });
 
 // API 카테고리 페이지
-app.get('/api/category', (req, res) => {
+app.get('/category', (req, res) => {
     res.sendFile(path.join(__dirname, 'browser/html/category.html'));
 });
 
 // 회원가입 페이지
-app.get('/api/join', (req, res) => {
+app.get('/join', (req, res) => {
     res.sendFile(path.join(__dirname, 'browser/html/join.html'));
 });
 
