@@ -2,11 +2,24 @@ import { prisma } from '../prisma/index.js';
 
 // 가차를 돌리자
 
-export default function (gachaTry, playerId, accountId) {
+export default async function (gachaTry, accountId) {
     const answer = [];
+
+    // 선수 목록 조회
+    const players = await prisma.player.findMany({
+        select: {
+            playerId: true,
+            playerName: true,
+        },
+    });
+
     for (let i = 0; i < gachaTry; i++) {
-        let randomPlayer = Math.round(Math.random() * (playerId - 1)) + 1;
-        answer.push({ playerId: randomPlayer, accountId: +accountId });
+        let randomPlayer = Math.floor(Math.random() * players.length - 1) + 1;
+        answer.push({
+            playerId: players[randomPlayer].playerId,
+            playerName: players[randomPlayer].playerName,
+            accountId: +accountId,
+        });
     }
 
     return answer;

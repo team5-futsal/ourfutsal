@@ -1,8 +1,7 @@
 import express from 'express';
 import { prisma } from '../utils/prisma/index.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
-import validSchema from '../utils/joi/valid.schema.js';
-import errors from '../utils/errors/error.constructor.js';
+import nojam from '../utils/service/nojamgame.js';
 
 const router = express.Router();
 
@@ -61,7 +60,7 @@ router.post('/custom', authMiddleware, async (req, res, next) => {
 
         const myActivePlayers = await prisma.roster.count({
             where: {
-                accountId: +myUserInfo.accountId,
+                accountId: myUserInfo.accountId,
                 isPicked: true, // 출전하는 경우
             },
         });
@@ -73,8 +72,7 @@ router.post('/custom', authMiddleware, async (req, res, next) => {
         // 유저 정보 조회
         const isExistUser = await prisma.account.findFirst({
             where: {
-                accountId: +accountId,
-            },
+                accountId: +accountId            },
             select: {
                 accountId: true,
                 userId: true,
@@ -95,7 +93,9 @@ router.post('/custom', authMiddleware, async (req, res, next) => {
             return res.status(412).json({ errorMessage: '상대 유저의 선출 인원이 부족합니다.' });
         }
 
-        return res.status(200).json({ user: isExistUser, message: '매칭 성공' });
+        const matchResult = await nojam(myUserInfo.accountId, +userId);
+
+        return res.status(200).json({ user: isExistUser, message: matchResult });
     } catch (error) {
         next(error);
     }
@@ -165,9 +165,8 @@ router.get('/match', authMiddleware, async (req, res, next) => {
         // 근접한 유저를 찾는데 많은 컴퓨팅 파워가 소모됨. 방법을 고려할 필요가 있음.
 
         // 나의 MMR과 다른 유저의 유클리드 거리를 계산
-        const nearestMMR =
-            await prisma.$queryRaw`SELECT power(${myInfo.mmr} - mmr, 2) as distance, accountId, userId, mmr FROM account ORDER BY 1`;
-
+        const nearestMMR = await prisma.$queryRaw`SELECT abs(${myInfo.mmr} - mmr, 2) as distance, accountId, userId, mmr FROM account ORDER BY 1`;
+      
         for (const user of nearestMMR) {
             const activePlayers = await prisma.roster.count({
                 where: {
