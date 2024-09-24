@@ -191,17 +191,41 @@ export async function enhancePlayer(bodydata) {
     else return alert('500 Server Error');
 }
 
-// 선수 가챠 구매
-export async function buyGacha(gacha) {
-    const res = await fetchAPI('POST', `/api/gacha/buy/${gacha}`, null, true);
+// 가챠상품 생성
+export async function makeGacha(bodydata) {
+    const res = await fetchAPI('POST', `/api/gacha/`, JSON.parse(bodydata), true);
     if (res.status === 201) return res.json();
     else return alert('500 Server Error');
 }
 
-// 캐쉬 충전하기 미완성미완성미완성미완성미완성미완성미완성미완성미완성
-export async function buyCash(money) {
-    const res = await fetchAPI('PUT', `/api/account/${money}`, null, true);
+// 선수 가챠 구매
+export async function buyGacha(gachaTry, bodydata) {
+    const body = { contains : bodydata }
+    const res = await fetchAPI('POST', `/api/gacha/buy/${gachaTry}`, body, true);
+    if (res.status === 200) return res.json();
+    else return alert('500 Server Error');
+}
+
+// 상점상품 생성
+export async function makeProduct(bodydata) {
+    const res = await fetchAPI('POST', `/api/product`, JSON.parse(bodydata), true);
     if (res.status === 201) return res.json();
+    else return alert('500 Server Error');
+}
+
+// 상품 구매
+export async function buyProduct(productId, bodydata) {
+    const body = { count: bodydata };
+    const res = await fetchAPI('POST', `/api/product/${productId}`, body, true);
+    if (res.status === 200) return res.json();
+    else return alert('500 Server Error');
+}
+
+// 캐쉬 충전
+export async function buyCash(bodydata) {
+    const body = { cash: bodydata };
+    const res = await fetchAPI('PUT', `/api/account/cash`, body, true);
+    if (res.status === 200) return res.json();
     else return alert('500 Server Error');
 }
 

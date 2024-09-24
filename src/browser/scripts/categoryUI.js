@@ -20,9 +20,13 @@ import {
     searchTeam,
     createPlayer,
     updatePlayerInfo,
-    buyGacha,
     runCustomGame,
     matchGame,
+    makeGacha,
+    buyGacha,
+    makeProduct,
+    buyProduct,
+    buyCash,
     getRank
 } from './api.js';
 import { playGame } from './play.js';
@@ -287,13 +291,35 @@ function handleSendRequest(event) {
             }
             break;
 
-
-        // 선수 구매 가차
-        case 'buyGachaResSendBtn':
-            buyGacha(params).then(res => {
+        //가챠상품 생성
+        case 'makeGachaResSendBtn':
+            makeGacha(body).then(res => {
                 apiResDiv.innerHTML = res.message;
             });
-
+            break;
+        // 선수 가챠
+        case 'buyGachaResSendBtn':
+            buyGacha(params, body).then(res => {
+                apiResDiv.innerHTML = res.message;
+            });
+            break;
+        // 상점상품 생성
+        case 'makeProductResSendBtn':
+            makeProduct(body).then(res => {
+                apiResDiv.innerHTML = res.message;
+            });
+            break;
+        // 상점상품 구매
+        case 'buyProductResSendBtn':
+            buyProduct(params, body).then(res => {
+                apiResDiv.innerHTML = res.message;
+            });
+            break;
+        // 캐시 충전
+        case 'buyCashResSendBtn':
+            buyCash(body).then(res => {
+                apiResDiv.innerHTML = res.message;
+            });
             break;
 
         case 'enhancePlayerResSendBtn':
