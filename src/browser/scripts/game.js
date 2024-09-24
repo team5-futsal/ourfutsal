@@ -119,7 +119,7 @@ export function game(player1Roster, player2Roster) {
             const direction = host.team == 1 ? 1 : -1
             const position = host.position + long * direction
             if(position > fieldSize){
-                host.position = 100;
+                host.position = fieldSize;
             } else if(position < 0){
                 host.position = 0;
             } else{

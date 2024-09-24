@@ -77,10 +77,14 @@ class drawPlayer {
         this.ctx.fillText(name, x-radius, y, 500)
     }
 
-    drawSp(x,y,radius){
+    drawSp(x,y,radius, maxSp, curSp){
+        const spUnit = radius*2/maxSp<<0;
+        let spBar = radius*2;
+        curSp == maxSp ? spBar = radius*2 : spBar = spUnit*curSp
+
         this.ctx.strokeStype = 'rgb(0 0 0)';
         this.ctx.lineWidth = 10;
-        this.ctx.strokeRect(x, y+radius, radius*2, 10);
+        this.ctx.strokeRect(x, y+radius, spBar, 10);
         this.ctx.fillStyle = 'rgb(255 255 0)';
         this.ctx.fillRect(x, y+radius, radius*2, 10);
     }
@@ -120,7 +124,7 @@ for(const t of gameLog){
         drawPlayers.draw(pX, y, radius, color[p.team-1], p.name)
         
         const spBarX = p.team-1 ? x - radius*2 : x
-        drawPlayers.drawSp(spBarX, y, radius)
+        drawPlayers.drawSp(spBarX, y, radius, p.maxSp, p.curSp)
 
         if(p.hasBall){
             ball.draw(spBarX, y)
