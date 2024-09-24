@@ -93,9 +93,9 @@ router.post('/custom', authMiddleware, async (req, res, next) => {
             return res.status(412).json({ errorMessage: '상대 유저의 선출 인원이 부족합니다.' });
         }
 
-        const matchResult = await nojam(myUserInfo.accountId, +userId);
+        // const matchResult = await nojam(myUserInfo.accountId, +userId);
 
-        return res.status(200).json({ user: isExistUser, message: matchResult });
+        return res.status(200).json({ user: isExistUser /*message: matchResult*/ });
     } catch (error) {
         next(error);
     }

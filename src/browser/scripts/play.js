@@ -52,10 +52,19 @@ const player2Roster = [
         "playerStamina": "30+0"
     }]
 
-export function playGame(player1Roster, player2Roster){
-    const gameLog = game(player1Roster, player2Roster)
+export const playGame = (/*player1Roster, player2Roster*/) => {
+    // const gameLog = game(player1Roster, player2Roster)
 
-    const canvas = document.getElementById('canvas');
+    const container = document.getElementsByClassName('reqResContainer')
+    const canvas = document.createElement('canvas');
+    const gameDiv = document.createElement('div');
+    gameDiv.className = 'gameDiv';
+    gameDiv.id = 'gameDiv';
+    canvas.id='canvas';
+
+    container[0].append(gameDiv);
+    gameDiv.appendChild(canvas);
+
     let ctx = canvas.getContext('2d');
     const ballImage = document.getElementById("source");
 
@@ -115,31 +124,31 @@ export function playGame(player1Roster, player2Roster){
     let turn = 0;
 
 
-    const playGame = () => {
-        requestAnimationFrame(playGame)
-        const cwu = canvas.width/100 // canvas width Unit
-        const log = gameLog[turn]
+    // const playGame = () => {
+    //     requestAnimationFrame(playGame)
+    //     const cwu = canvas.width/100 // canvas width Unit
+    //     const log = gameLog[turn]
 
-        for(const p of log.players){
-            const x = p.position*cwu<<0
-            const y = yPosition[p.pNum]
+    //     for(const p of log.players){
+    //         const x = p.position*cwu<<0
+    //         const y = yPosition[p.pNum]
 
-            const pX = x + radius * (p.team-1 ? -1 : 1)
-            drawPlayers.draw(pX, y, radius, color[p.team-1], p.name)
+    //         const pX = x + radius * (p.team-1 ? -1 : 1)
+    //         drawPlayers.draw(pX, y, radius, color[p.team-1], p.name)
             
-            const spBarX = p.team-1 ? x - radius*2 : x
-            drawPlayers.drawSp(spBarX, y, radius, p.maxSp, p.curSp)
+    //         const spBarX = p.team-1 ? x - radius*2 : x
+    //         drawPlayers.drawSp(spBarX, y, radius, p.maxSp, p.curSp)
 
-            if(p.hasBall){
-                ball.draw(spBarX, y)
-            }
-        }
+    //         if(p.hasBall){
+    //             ball.draw(spBarX, y)
+    //         }
+    //     }
         
-        turn++;
-        console.log(t)
-        console.log(t.result)
-    }
-    playGame()
+    //     turn++;
+    //     console.log(t)
+    //     console.log(t.result)
+    // }
+    // playGame()
 }
 
 //Reference
