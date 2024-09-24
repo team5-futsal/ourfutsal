@@ -55,15 +55,26 @@ import { game } from './game.js'
 export const playGame = (player1, player2) => {
     const gameLog = game(player1, player2);
 
+    // 게임 / 로그 화면을 추가할 부모 찾기
     const container = document.getElementsByClassName('reqResContainer')
+
+    // 게임 진행 영역 추가
     const canvas = document.createElement('canvas');
     const gameDiv = document.createElement('div');
     gameDiv.className = 'gameDiv';
     gameDiv.id = 'gameDiv';
     canvas.id='canvas';
+    canvas.width='840';
+    canvas.height='480';
 
-    container[0].append(gameDiv);
+    container[0].appendChild(gameDiv);
     gameDiv.appendChild(canvas);
+
+    // 게임 로그 영역 추가
+    const logDiv = document.createElement('div');
+    logDiv.className = 'gameLog';
+    logDiv.id = 'gameLog';
+    container[0].appendChild(logDiv);
 
     let ctx = canvas.getContext('2d');
     const ballImage = document.getElementById("source");
@@ -123,7 +134,7 @@ export const playGame = (player1, player2) => {
     const yPosition = [halfHeightUnit, halfHeightUnit+heightUnit*2, halfHeightUnit+heightUnit]
     const radius = heightUnit/4<<0
     const color = ['blue', 'red']
-    const interval = 50;
+    const interval = 100;
     let timer = interval - 1;
     let turn = 0;
 
@@ -149,12 +160,15 @@ export const playGame = (player1, player2) => {
                     ball.draw(spBarX, y)
                 }
             }
-            
+
+            logDiv.innerHTML += `<p>${JSON.stringify(gameLog[turn].result)}</p>`;
+
             turn++;
             // console.log(t)
             // console.log(t.result)
         }
     }
+    
     gameStart()
 
     // const cwu = canvas.width/100 // canvas width Unit

@@ -52,7 +52,6 @@ export function game(player1Roster, player2Roster) {
 
     //init
     const players = [...player1, ...player2]
-    console.log(players);
     const fieldSize = 100;
     const score = [0, 0];
     const initPosion = players.map(p => p.position)
@@ -273,7 +272,5 @@ export function game(player1Roster, player2Roster) {
         // console.log(`team${win + 1} 무승부 score-${score[0]}:${score[1]}`)
         gameLog.push({ win: -1, lose: -1, mmr: 0 }) //MMR 점수 지급
     }
-
-    console.log(gameLog);
     return gameLog
 }
