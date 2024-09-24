@@ -53,7 +53,7 @@ const player2Roster = [
     }]
 
 export const playGame = (/*player1Roster, player2Roster*/) => {
-    // const gameLog = game(player1Roster, player2Roster)
+    const gameLog = game(player1Roster, player2Roster)
 
     const container = document.getElementsByClassName('reqResContainer')
     const canvas = document.createElement('canvas');
@@ -124,31 +124,50 @@ export const playGame = (/*player1Roster, player2Roster*/) => {
     let turn = 0;
 
 
-    // const playGame = () => {
-    //     requestAnimationFrame(playGame)
-    //     const cwu = canvas.width/100 // canvas width Unit
-    //     const log = gameLog[turn]
 
-    //     for(const p of log.players){
-    //         const x = p.position*cwu<<0
-    //         const y = yPosition[p.pNum]
+    const gameStart = () => {
+        requestAnimationFrame(gameStart)
+        const cwu = canvas.width/100 // canvas width Unit
+        const log = gameLog[turn]
 
-    //         const pX = x + radius * (p.team-1 ? -1 : 1)
-    //         drawPlayers.draw(pX, y, radius, color[p.team-1], p.name)
+        for(const p of log.players){
+            const x = p.position*cwu<<0
+            const y = yPosition[p.pNum]
+
+            const pX = x + radius * (p.team-1 ? -1 : 1)
+            drawPlayers.draw(pX, y, radius, color[p.team-1], p.name)
             
-    //         const spBarX = p.team-1 ? x - radius*2 : x
-    //         drawPlayers.drawSp(spBarX, y, radius, p.maxSp, p.curSp)
+            const spBarX = p.team-1 ? x - radius*2 : x
+            drawPlayers.drawSp(spBarX, y, radius, p.maxSp, p.curSp)
 
-    //         if(p.hasBall){
-    //             ball.draw(spBarX, y)
-    //         }
-    //     }
+            if(p.hasBall){
+                ball.draw(spBarX, y)
+            }
+        }
         
-    //     turn++;
-    //     console.log(t)
-    //     console.log(t.result)
+        turn++;
+        console.log(t)
+        console.log(t.result)
+    }
+    gameStart()
+
+    // const cwu = canvas.width/100 // canvas width Unit
+    // const log = gameLog[turn]
+
+    // for(const p of log.players){
+    //     const x = p.position*cwu<<0
+    //     const y = yPosition[p.pNum]
+
+    //     const pX = x + radius * (p.team-1 ? -1 : 1)
+    //     drawPlayers.draw(pX, y, radius, color[p.team-1], p.name)
+        
+    //     const spBarX = p.team-1 ? x - radius*2 : x
+    //     drawPlayers.drawSp(spBarX, y, radius, p.maxSp, p.curSp)
+
+    //     if(p.hasBall){
+    //         ball.draw(spBarX, y)
+    //     }
     // }
-    // playGame()
 }
 
 //Reference
