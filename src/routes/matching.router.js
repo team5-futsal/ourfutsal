@@ -126,7 +126,7 @@ router.get('/match', authMiddleware, async (req, res, next) => {
         // 근접한 유저를 찾는데 많은 컴퓨팅 파워가 소모됨. 방법을 고려할 필요가 있음.
 
         // 나의 MMR과 다른 유저의 유클리드 거리를 계산
-        const nearestMMR = await prisma.$queryRaw`SELECT power(${myInfo.mmr} - mmr, 2) as distance, accountId, userId, mmr FROM account ORDER BY 1`;
+        const nearestMMR = await prisma.$queryRaw`SELECT abs(${myInfo.mmr} - mmr, 2) as distance, accountId, userId, mmr FROM account ORDER BY 1`;
 
         for(const user of nearestMMR){
             const activePlayers = await prisma.roster.count({

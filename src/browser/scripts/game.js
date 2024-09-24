@@ -248,7 +248,7 @@ export function game(player1Roster, player2Roster) {
     //후반전 반복
     //승패 판정
     const win = score.indexOf(Math.max(...score))
-    const lose = +!win
+    const lose = +!win // 0,1
     if (score[0] != score[1]) {
         // console.log(`team${win + 1} 승리 score-${score[0]}:${score[1]}`)
         gameLog.push({ win: win, lose: lose, mmr: 100 }) //MMR 점수 지급
