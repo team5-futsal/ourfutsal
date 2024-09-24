@@ -208,26 +208,43 @@ export async function buyCash(money) {
 
 /** 선수 목록 API 호출 */
 export async function getPlayers() {
-    return fetch('/api/players', {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    }).then(res => {
-        if (res.status === 200) return res.json();
-        else return alert('500 Server Error');
-    });
+    const res = await fetchAPI('GET', '/api/players', null, false);
+    if (res.status === 200) {
+        return res.json();
+    } else if (res.status === 404) {
+        return alert('선수가 없습니다.');
+    } else {
+        return alert('500 Server Error');
+    }
 }
 
 /** 선수 상세 정보 API 호출 */
 export async function getPlayerDetail(playerName) {
-    return fetch(`/api/players/${playerName}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    }).then(res => {
-        if (res.status === 200) return res.json();
-        else return alert('500 Server Error');
-    });
+    const res = await fetchAPI('GET', `/api/players/${playerName}`, null, false);
+    if (res.status === 200) return res.json();
+    else return alert('500 Server Error');
+}
+
+/** 선수 생성 API 호출 **/
+export async function createPlayer(body) {
+    const res = await fetchAPI('POST', '/api/players', JSON.parse(body), false);
+    if(res.status === 201) {
+        return res.json();
+    }else if(res.status === 409) {
+        return alert('이미 존재하는 선수입니다.');
+    }else {
+        return alert('500 Server Error');
+    }
+}
+
+/** 선수 정보 수정 API 호출 **/
+export async function updatePlayerInfo(playerName, body) {
+    const res = await fetchAPI('PUT', `/api/players/${playerName}`, JSON.parse(body), false);
+    if (res.status === 200) {
+        return res.json();
+    }else if(res.status === 404) {
+        return alert('존재하지 않는 선수 입니다.');
+    }else{
+        return alert('500 Server Error');
+    }
 }

@@ -28,6 +28,8 @@
                 <div>
                     <button type="apiButton" id="getPlayers">선수 목록 조회</button>
                     <button type="apiButton" id="getPlayerDetail">선수 상세 정보 조회</button>
+                    <button type="apiButton" id="createPlayer" style="display:none;">선수 생성</button>
+                    <button type="apiButton" id="updatePlayerInfo" style="display:none;">선수 정보 수정</button>
                 </div>
             </div>
         </div>
@@ -89,5 +91,12 @@
     </div>
     <script src='../scripts/categoryUI.js' type="module"></script>
     <script src="../services/values.js"></script>
+    <script>
+        const userId = 'admin';
+        if(userId === 'admin'){
+            document.getElementById('createPlayer').style.display = 'inline';
+            document.getElementById('updatePlayerInfo').style.display = 'inline';
+        }
+    </script>
 </body>
 </html>

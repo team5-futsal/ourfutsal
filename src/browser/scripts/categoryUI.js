@@ -18,6 +18,8 @@ import {
     sellMyPlayer,
     enhancePlayer,
     searchTeam,
+    createPlayer,
+    updatePlayerInfo,
     buyGacha,
 } from './api.js';
 
@@ -58,6 +60,8 @@ function handleSendRequest(event) {
 
     const params = document.getElementById('reqParams').value;
     const body = document.getElementById('reqBody').value;
+
+
 
     // 버튼 ID에 따라 API 요청을 구분
     switch (sendRequestBtn.id) {
@@ -271,7 +275,7 @@ function handleSendRequest(event) {
                 });
             }
             break;
-
+        // 선수 강화
         case 'enhancePlayerResSendBtn':
             if (confirm(`rosterId = ${body} 선수를 강화합니까? `)) {
                 enhancePlayer(body).then(res => {
@@ -279,6 +283,7 @@ function handleSendRequest(event) {
                 });
             }
             break;
+
 
         // 선수 구매 가차
         case 'buyGachaResSendBtn':
@@ -296,13 +301,15 @@ function handleSendRequest(event) {
             }
             break;
 
+
+        // 선수 상세 조회
         case 'getPlayerDetailResSendBtn':
             getPlayerDetail(params).then(res => {
                 const player = res.data;
                 const playerName = res.data.playerName;
                 const positionId = res.data.positionId;
                 const playerStrength = res.data.playerStrength;
-                const playerDefense = res.data.PlayerDefense;
+                const playerDefense = res.data.playerDefense;
                 const playerStamina = res.data.playerStamina;
                 const apiResDiv = document.querySelector('.apiRes');
                 const resContext = document.createElement('div');
@@ -312,6 +319,31 @@ function handleSendRequest(event) {
                 `;
                 apiResDiv.appendChild(resContext);
             });
+            break;
+            // 선수 생성
+        case  'createPlayerResSendBtn':
+            createPlayer(body).then(res => {
+                const playerName = res.data.playerName;
+                const positionId = res.data.positionId;
+                const playerStrength = res.data.playerStrength;
+                const playerDefense = res.data.playerDefense;
+                const playerStamina = res.data.playerStamina;
+
+                const apiResDiv = document.querySelector('.apiRes');
+                const resContext = document.createElement('div');
+
+                resContext.innerHTML = `
+                <p class="users">선수명 : ${playerName} <br> 포지션 아이디 : ${positionId} <br> 공격력 : ${playerStrength} <br> 수비력 : ${playerDefense} <br> 스테미나 : ${playerStamina}</p>
+                `;
+                apiResDiv.appendChild(resContext);
+            });
+            break;
+            // 선수 상세 정보 수정
+            case 'updatePlayerInfoResSendBtn':
+                updatePlayerInfo(params, body).then(res => {
+                    apiResDiv.innerHTML = res.message;
+                    apiResDiv.appendChild(resContext);
+                })
 
         // 다른 API 요청을 추가로 처리할 수 있음
         default:
