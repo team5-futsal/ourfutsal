@@ -373,12 +373,13 @@ function handleSendRequest(event) {
             });
             break;
             
-            // 선수 상세 정보 수정
-            case 'updatePlayerInfoResSendBtn':
-                updatePlayerInfo(params, body).then(res => {
-                    apiResDiv.innerHTML = res.message;
-                    apiResDiv.appendChild(resContext);
-                })
+        // 선수 상세 정보 수정
+        case 'updatePlayerInfoResSendBtn':
+            updatePlayerInfo(params, body).then(res => {
+                apiResDiv.innerHTML = res.message;
+                apiResDiv.appendChild(resContext);
+            })
+            break;
 
         // 다른 API 요청을 추가로 처리할 수 있음
         default:
