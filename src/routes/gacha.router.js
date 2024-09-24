@@ -4,7 +4,6 @@ import { Prisma } from '@prisma/client';
 import gacha from '../utils/service/onegacha.js';
 import doGacha from '../utils/service/gacha.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
-import { Prisma } from '@prisma/client';
 
 const router = express.Router();
 
@@ -78,7 +77,9 @@ router.post('/gacha/buy/:gachaTry', authMiddleware, async (req, res, next) => {
             },
         );
 
-        return res.status(201).json({ message: `${gachaTransaction[1]} 선수를 획득했습니다. 남은 Cash : ${gachaTransaction[0].cash}` });
+        return res
+            .status(201)
+            .json({ message: `${gachaTransaction[1]} 선수를 획득했습니다. 남은 Cash : ${gachaTransaction[0].cash}` });
     } catch (error) {
         switch (error.message) {
             case 'notEnoughMoney':
