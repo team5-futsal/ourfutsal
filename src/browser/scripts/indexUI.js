@@ -17,7 +17,7 @@ window.addEventListener('DOMContentLoaded', function () {
         loginAccount(body).then(data => {
             if (data.isLogin === true) {
                 localStorage.setItem('accessToken', data.accessToken);
-                window.location.href = `http://localhost:3333/api/category`;
+                window.location.href = `http://localhost:3333/category`;
                 
             } else {
                 location.reload(true);
@@ -28,6 +28,6 @@ window.addEventListener('DOMContentLoaded', function () {
     document.getElementById('registBtn').addEventListener('click', function (event) {
         event.preventDefault();
 
-        window.location.href = 'http://localhost:3333/api/join';
+        window.location.href = 'http://localhost:3333/join';
     });
 });
