@@ -3,7 +3,7 @@ import { prisma } from '../utils/prisma/index.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
 import validSchema from '../utils/joi/valid.schema.js';
 import errors from '../utils/errors/error.constructor.js';
-import nojam from '../../nojamgame.js';
+import nojam from '../utils/service/nojamgame.js';
 
 const router = express.Router();
 
