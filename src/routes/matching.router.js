@@ -38,7 +38,7 @@ router.get('/rank', async (req, res, next) => {
                     result: 1,
                 },
             });
-            // 판수가 0일 경우 승률:0
+            // gamas:판수, wins: 이긴 횟수 -> 판수가 0일 경우 승률:0
             accountInfo['winRate'] = games ? Math.floor(wins / games, 2) : 0;
         }
 
