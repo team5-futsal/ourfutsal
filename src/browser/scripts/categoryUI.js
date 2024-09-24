@@ -24,6 +24,7 @@ import {
     runCustomGame,
     matchGame,
 } from './api.js';
+import { playGame } from './play.js';
 
 // 카테고리 html이 로드되고 js가 로드되었을 때 실행하도록 함.
 // 1. 생성된 accessToken을 받아오기 위해 선언함.
@@ -335,17 +336,18 @@ function handleSendRequest(event) {
                         runCustomGame(runCustomBody).then(async res => {
                             if (res) {
                                 doDisplay(false);
-                                const data = [res.myTeamInfo, res.targetInfo, res.enhanceInfo].map(info => {
-                                    if (typeof info === 'object') {
-                                        return JSON.stringify(info);
-                                    }
-                                    return info;
-                                });
+                                playGame();
+                                // const data = [res.myTeamInfo, res.targetInfo, res.enhanceInfo].map(info => {
+                                //     if (typeof info === 'object') {
+                                //         return JSON.stringify(info);
+                                //     }
+                                //     return info;
+                                // });
 
-                                for (let i in data) {
-                                    resContext.innerHTML += `<p>${data[i]}</p>`;
-                                }
-                                apiResDiv.appendChild(resContext);
+                                // for (let i in data) {
+                                //     resContext.innerHTML += `<p>${data[i]}</p>`;
+                                // }
+                                // apiResDiv.appendChild(resContext);
                             } else if (!res) alert('매칭 데이터를 불러오는 중 실패하였습니다. 매칭을 취소합니다.');
                         });
                     }
