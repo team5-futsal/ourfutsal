@@ -61,6 +61,8 @@ export const playGame = (player1, player2) => {
     gameDiv.className = 'gameDiv';
     gameDiv.id = 'gameDiv';
     canvas.id='canvas';
+    canvas.width="840";
+    canvas.height="480";
 
     container[0].append(gameDiv);
     gameDiv.appendChild(canvas);
@@ -95,10 +97,10 @@ export const playGame = (player1, player2) => {
             // 바 테두리
             this.ctx.strokeStype = 'rgb(0 0 0)';
             this.ctx.lineWidth = 10;
-            this.ctx.strokeRect(x, y+radius, spBar, 10);
+            this.ctx.strokeRect(x, y+radius, radius*2, 10);
             // 스테미나 바
             this.ctx.fillStyle = 'rgb(255 255 0)';
-            this.ctx.fillRect(x, y+radius, radius*2, 10);
+            this.ctx.fillRect(x, y+radius, spBar, 10);
         }
     }
 
@@ -156,24 +158,6 @@ export const playGame = (player1, player2) => {
         }
     }
     gameStart()
-
-    // const cwu = canvas.width/100 // canvas width Unit
-    // const log = gameLog[turn]
-
-    // for(const p of log.players){
-    //     const x = p.position*cwu<<0
-    //     const y = yPosition[p.pNum]
-
-    //     const pX = x + radius * (p.team-1 ? -1 : 1)
-    //     drawPlayers.draw(pX, y, radius, color[p.team-1], p.name)
-        
-    //     const spBarX = p.team-1 ? x - radius*2 : x
-    //     drawPlayers.drawSp(spBarX, y, radius, p.maxSp, p.curSp)
-
-    //     if(p.hasBall){
-    //         ball.draw(spBarX, y)
-    //     }
-    // }
 }
 
 //Reference
@@ -181,5 +165,3 @@ export const playGame = (player1, player2) => {
 //https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/stroke
 //https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D
 //https://developer.mozilla.org/ko/docs/Web/API/Window/requestAnimationFrame
-//https://developer.mozilla.org/ko/docs/Web/API/Window/requestAnimationFrame
-//https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D
