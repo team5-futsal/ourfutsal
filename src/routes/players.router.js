@@ -4,14 +4,14 @@ import { prisma } from '../utils/prisma/index.js';
 const router = express.Router();
 
 /** 선수 생성 API **/
-router.post(
-    '/players',
-    /*미들웨어*/ async (req, res) => {
+router.post('/players', /*미들웨어*/ async (req, res, next) => {
         try {
             const { playerName, playerStrength, playerDefense, playerStamina, positionId } = req.body;
 
             // 플레이어 명 중복 확인
-            const isExistPlayer = checkPlayerExists(playerName);
+            const isExistPlayer = await prisma.player.findUnique({
+                where: { playerName },
+            });
 
             if (isExistPlayer) {
                 return res.status(409).json({ message: '이미 존재하는 선수 입니다.' });
@@ -35,7 +35,7 @@ router.post(
 );
 
 /** 전체 선수 조회 API **/
-router.get('/players', async (req, res) => {
+router.get('/players', async (req, res,next) => {
     try {
         const players = await prisma.player.findMany({
             select: {
@@ -59,7 +59,7 @@ router.get('/players', async (req, res) => {
 });
 
 /** 선수 상세 조회 API **/
-router.get('/players/:playerName', async (req, res) => {
+router.get('/players/:playerName', async (req, res,next) => {
     try {
         const { playerName } = req.params;
         console.log(playerName);
@@ -91,7 +91,7 @@ router.get('/players/:playerName', async (req, res) => {
 /** 선수 능력치 수정 API **/
 router.put(
     '/players/:playerName',
-    /*미들웨어*/ async (req, res) => {
+    /*미들웨어*/ async (req, res,next) => {
         try {
             const { playerName } = req.params;
             const { newPlayerName, newPlayerStrength, newPlayerDefense, newPlayerStamina, newPositionId } = req.body; // 업데이트할 데이터
