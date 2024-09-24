@@ -158,6 +158,12 @@ export function game(player1Roster, player2Roster) {
         pass: (pass) => {
             let result = 0;
             utils.lostBall()
+
+            // 패스 받는 사람과의 거리
+            players.forEach(p => {
+                p.distance = Math.abs(pass.teamMember.position - p.position)
+            })
+
             if (pass.teamMember)
                 pass.teamMember.curSp -= spConsume.pass //스테미나 소모
 
