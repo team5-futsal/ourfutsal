@@ -19,6 +19,8 @@ import {
     enhancePlayer,
     searchTeam,
     buyGacha,
+    buyProduct,
+    buyCash,
 } from './api.js';
 
 // 카테고리 html이 로드되고 js가 로드되었을 때 실행하도록 함.
@@ -280,12 +282,35 @@ function handleSendRequest(event) {
             }
             break;
 
-        // 선수 구매 가차
+        //가챠상품 생성
+        case 'makeGachaResSendBtn':
+            buyGacha(params).then(res => {
+                apiResDiv.innerHTML = res.message;
+            });
+            break;
+        // 선수 가챠
         case 'buyGachaResSendBtn':
             buyGacha(params).then(res => {
                 apiResDiv.innerHTML = res.message;
             });
-
+            break;
+        // 상점상품 생성
+        case 'makeProductResSendBtn':
+            buyProduct(body, params).then(res => {
+                apiResDiv.innerHTML = res.message;
+            });
+            break;
+        // 상점상품 구매
+        case 'buyProductResSendBtn':
+            buyProduct(body, params).then(res => {
+                apiResDiv.innerHTML = res.message;
+            });
+            break;
+        // 캐시 충전
+        case 'buyCashResSendBtn':
+            buyCash(body).then(res => {
+                apiResDiv.innerHTML = res.message;
+            });
             break;
 
         case 'enhancePlayerResSendBtn':
