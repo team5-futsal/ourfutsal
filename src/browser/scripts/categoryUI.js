@@ -374,20 +374,20 @@ function handleSendRequest(event) {
             });
             break;
             
-            // 선수 상세 정보 수정
-            case 'updatePlayerInfoResSendBtn':
-                updatePlayerInfo(params, body).then(res => {
-                    apiResDiv.innerHTML = res.message;
-                    apiResDiv.appendChild(resContext);
-                })
-                break;
+        // 선수 상세 정보 수정
+        case 'updatePlayerInfoResSendBtn':
+            updatePlayerInfo(params, body).then(res => {
+                apiResDiv.innerHTML = res.message;
+                apiResDiv.appendChild(resContext);
+            })
+            break;
 
-            // Rank 조회
-            case 'getRankResSendBtn':
-                getRank().then(res => {
-                    apiResDiv.textContent = res.message;
-                });
-                break;
+        // Rank 조회
+        case 'getRankResSendBtn':
+            getRank().then(res => {
+                apiResDiv.textContent = JSON.stringify(res.data);
+            });
+            break;
 
         // 다른 API 요청을 추가로 처리할 수 있음
         default:
