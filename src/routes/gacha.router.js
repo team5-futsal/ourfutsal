@@ -78,7 +78,7 @@ router.post('/gacha/buy/:gachaTry', authMiddleware, async (req, res, next) => {
         );
 
         return res
-            .status(201)
+            .status(200)
             .json({ message: `${gachaTransaction[1]} 선수를 획득했습니다. 남은 Cash : ${gachaTransaction[0].cash}` });
     } catch (error) {
         switch (error.message) {
