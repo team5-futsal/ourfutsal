@@ -191,7 +191,7 @@ router.get('/team/search/:accountId', authMiddleware, async (req, res, next) => 
     }));
 
     if (myTeamSearch === false) {
-        result = findTeam.map(({ playerStrength, playerDefense, playerStamina, ...res }) => res);
+        result = result.map(({ playerStrength, playerDefense, playerStamina, ...res }) => res);
     }
     return res.status(200).json(result);
 });
