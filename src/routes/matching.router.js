@@ -107,7 +107,6 @@ router.post('/custom', authMiddleware, async (req, res, next) => {
 // 가져올 데이터는 최대한 join 하여 게임에 필요한 모든 데이터가 나올수 있게 한다.
 router.post('/match/team', authMiddleware, async (req, res, next) => {
     try {
-        console.log(req.body);
         const { targetAccountId } = req.body;
         const myAccountId = req.user.accountId;
 
@@ -123,58 +122,29 @@ router.post('/match/team', authMiddleware, async (req, res, next) => {
             where  r.isPicked=1 and (a.accountId=${myAccountId} or a.accountId = ${targetAccountId})
             order by field(a.accountId, ${myAccountId}) desc, p.playerStrength asc
             `;
+        
+        const player1 = [];
+        const player2 = [];
 
-        const allMember = entrySearch.map(extract => ({
-            playerId: extract.playerId,
-            playerName: extract.playerName,
-            positionId: extract.positionId,
-            playerStrength: extract.playerStrength + enhanceInfo[extract.enhanceCount].increaseValue,
-            playerDefense: extract.playerDefense + enhanceInfo[extract.enhanceCount].increaseValue,
-            playerStamina: extract.playerStamina + enhanceInfo[extract.enhanceCount].increaseValue,
-        }));
+        entrySearch.map((extract, index) => {
+            const jsonData = {
+                playerId: extract.playerId,
+                playerName: extract.playerName,
+                positionId: extract.positionId,
+                playerStrength: extract.playerStrength + enhanceInfo[extract.enhanceCount].increaseValue,
+                playerDefense: extract.playerDefense + enhanceInfo[extract.enhanceCount].increaseValue,
+                playerStamina: extract.playerStamina + enhanceInfo[extract.enhanceCount].increaseValue,
+            };
+            if(index > 2){
+                player1.push(jsonData);
+            }
+            else {
+                player2.push(jsonData);
+            }
+            
+        });
 
-        // 경기에 참가한 6명의 데이터가 모두 담겨있고
-        // allMember[0~2] = 내 팀 ( playerStrength 가 낮은 순으로 0 1 2 )
-        // allMember[3~5] = 상대팀 ( playerStrength 가 낮은 순으로 3 4 5 )
-
-        //  최적화 이전 코드
-        // const myTeamInfo = await prisma.$queryRaw`;
-        //     SELECT a.accountId, rosterId, r.playerId, p.positionId, enhanceCount, playerName, playerStrength, playerDefense, playerStamina
-        //     FROM account a
-        //     inner join roster r on a.accountId=r.accountId
-        //     inner join player p on r.playerId=p.playerId
-        //     where a.accountId=${myAccountId} and r.isPicked=1`;
-
-        // const targetInfo = await prisma.$queryRaw`
-        //     SELECT a.accountId, rosterId, r.playerId, p.positionId, enhanceCount, playerName, playerStrength, playerDefense, playerStamina
-        //     FROM account a
-        //     inner join roster r on a.accountId=r.accountId
-        //     inner join player p on r.playerId=p.playerId
-        //     where a.accountId=${targetAccountId} and r.isPicked=1`;
-
-        // const playerMemver = myTeamInfo.map(extract => ({
-        //     playerId: extract.playerId,
-        //     playerName: extract.playerName,
-        //     positionId: extract.positionId,
-        //     playerStrength: extract.playerStrength + enhanceInfo[extract.enhanceCount].increaseValue,
-        //     playerDefense: extract.playerDefense + enhanceInfo[extract.enhanceCount].increaseValue,
-        //     playerStamina: extract.playerStamina + enhanceInfo[extract.enhanceCount].increaseValue,
-        // }));
-
-        // const targetMemver = targetInfo.map(extract => ({
-        //     playerId: extract.playerId,
-        //     playerName: extract.playerName,
-        //     positionId: extract.positionId,
-        //     playerStrength: extract.playerStrength + enhanceInfo[extract.enhanceCount].increaseValue,
-        //     playerDefense: extract.playerDefense + enhanceInfo[extract.enhanceCount].increaseValue,
-        //     playerStamina: extract.playerStamina + enhanceInfo[extract.enhanceCount].increaseValue,
-        // }));
-
-        // if (!myTeamInfo || !targetInfo) {
-        //     throw new Error('참가 유저데이터를 불러오는 중 오류가 발생했습니다.');
-        // }
-
-        return res.status(200).json({ allMember });
+        return res.status(200).json({player1, player2});
     } catch {
         return res.status(404).json({ errorMessage: '참가 유저데이터를 불러오는 중 오류가 발생했습니다.' });
     }

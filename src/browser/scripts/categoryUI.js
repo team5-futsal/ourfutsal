@@ -335,17 +335,24 @@ function handleSendRequest(event) {
                         runCustomGame(runCustomBody).then(async res => {
                             if (res) {
                                 doDisplay(false);
-                                const data = [res.myTeamInfo, res.targetInfo, res.enhanceInfo].map(info => {
-                                    if (typeof info === 'object') {
-                                        return JSON.stringify(info);
-                                    }
-                                    return info;
-                                });
 
-                                for (let i in data) {
-                                    resContext.innerHTML += `<p>${data[i]}</p>`;
-                                }
-                                apiResDiv.appendChild(resContext);
+                                // sessionStorage.setItem(res.player1, res.player2);
+
+                                // const player1 = JSON.stringify(res.player1);
+                                // const player2 = JSON.stringify(res.player2);
+                                
+                                // const data = [res.myTeamInfo, res.targetInfo, res.enhanceInfo].map(info => {
+                                //     if (typeof info === 'object') {
+                                //         return JSON.stringify(info);
+                                //     }
+                                //     return info;
+                                // });
+
+                                // for (let i in data) {
+                                //     resContext.innerHTML += `<p>${data[i]}</p>`;
+                                // }
+                                // resContext.innerHTML += `<p>${player1, player2}</p>`
+                                // apiResDiv.appendChild(resContext);
                             } else if (!res) alert('매칭 데이터를 불러오는 중 실패하였습니다. 매칭을 취소합니다.');
                         });
                     }
