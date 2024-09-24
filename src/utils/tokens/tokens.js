@@ -11,7 +11,7 @@ export function createAccessToken(id) {
     const accessToken = jwt.sign(
         { accountId: +id }, // JWT 데이터
         process.env.OUR_SECRET_ACCESS_KEY,
-        {expiresIn: '30m'}
+        {expiresIn: '10s'}
     );
 
     return accessToken;
